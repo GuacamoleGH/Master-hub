@@ -1,23 +1,18 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Gamepad2,
+  Trophy,
   Clock,
-  Award,
+  Layers,
+  Tv,
   Star,
   Brain,
-  Layers,
-  Sparkles,
   Loader2,
-  Tv,
-  Flame,
-  BarChart3,
-} from "lucide-react";
-import { GamerStats } from "@/types/game";
-import GamerLevelBar from "@/components/games/GamerLevelBar";
-import CriticVsYouChart from "@/components/games/CriticVsYouChart";
-import HotTakesTable from "@/components/games/HotTakesTable";
+  Bookmark,
+  Edit3,
+} from 'lucide-react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -26,29 +21,38 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-} from "recharts";
+} from 'recharts';
+import GamerLevelBar from '@/components/games/GamerLevelBar';
+import CriticVsYouChart from '@/components/games/CriticVsYouChart';
+import HotTakesTable from '@/components/games/HotTakesTable';
+import EditGamerProfileModal from '@/components/games/EditGamerProfileModal';
+import { GamerStats } from '@/types/game';
+
+interface ProfileResponse {
+  profile: {
+    id: string;
+    displayName: string;
+    avatarUrl: string | null;
+    bio: string | null;
+  };
+  stats: GamerStats;
+}
 
 export default function GamerProfilePage() {
-  const [profileData, setProfileData] = useState<{
-    profile: {
-      displayName: string;
-      bio: string | null;
-      avatarUrl: string | null;
-    };
-    stats: GamerStats;
-  } | null>(null);
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/games/profile");
+      const res = await fetch('/api/games/profile');
       if (res.ok) {
         const data = await res.json();
         setProfileData(data);
       }
     } catch (err) {
-      console.error("Error al cargar perfil gamer:", err);
+      console.error('Error al cargar perfil gamer:', err);
     } finally {
       setIsLoading(false);
     }
@@ -60,11 +64,9 @@ export default function GamerProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+      <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-        <p className="text-xs text-cine-400 font-mono">
-          Calculando telemetría de juego y Game Knowledge...
-        </p>
+        <span className="text-xs text-cine-400 font-mono">Calculando telemetría gamer...</span>
       </div>
     );
   }
@@ -91,15 +93,15 @@ export default function GamerProfilePage() {
               <img
                 src={profile.avatarUrl}
                 alt={profile.displayName}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-purple-900/60 border-2 border-purple-400/50 flex items-center justify-center text-purple-300">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-purple-900/60 border-2 border-purple-400/50 flex items-center justify-center text-purple-300 flex-shrink-0">
                 <Gamepad2 className="w-10 h-10" />
               </div>
             )}
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono uppercase tracking-widest text-purple-400 font-bold">
                   Perfil de Jugador
@@ -109,13 +111,20 @@ export default function GamerProfilePage() {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {profile.displayName}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  {profile.displayName}
+                </h1>
+                <button
+                  onClick={() => setIsEditOpen(true)}
+                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <Edit3 className="w-3.5 h-3.5" /> Editar Perfil
+                </button>
+              </div>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg">
-                {profile.bio ||
-                  "Jugador y analista del catálogo universal de videojuegos."}
+                {profile.bio || 'Jugador y analista del catálogo universal de videojuegos.'}
               </p>
             </div>
           </div>
@@ -138,101 +147,86 @@ export default function GamerProfilePage() {
             <span className="text-sm font-normal text-cyan-400"> h</span>
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
-            Tiempo de vida en videojuegos
+            Top consola/tienda: <strong className="text-cine-300">{stats.topPlatform || '—'}</strong>
           </div>
         </div>
 
-        {/* Campañas Completadas */}
+        {/* Completados */}
         <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Award className="w-4 h-4 text-purple-400" /> Completados
+            <Trophy className="w-4 h-4 text-amber-400" /> Títulos Terminados
           </div>
-          <div className="text-3xl font-black text-purple-300 font-mono">
+          <div className="text-3xl font-black text-white font-mono">
             {stats.totalCompleted}
+            <span className="text-xs font-normal text-cine-400"> juegos</span>
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
-            {stats.totalPlatinum > 0
-              ? `${stats.totalPlatinum} platinos al 100%`
-              : "Campañas finalizadas"}
+            {stats.totalPlatinum} trofeos Platino / 100%
           </div>
         </div>
 
-        {/* Game Knowledge Global */}
+        {/* Global Game Knowledge */}
         <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Brain className="w-4 h-4 text-cyan-400" /> Game Knowledge
-          </div>
-          <div className="text-3xl font-black text-cyan-400 font-mono">
-            {stats.globalGameKnowledge ? `${stats.globalGameKnowledge}%` : "—"}
-          </div>
-          <div className="text-[11px] text-cine-500 mt-1">
-            Afinidad global vs Metacritic
-          </div>
-        </div>
-
-        {/* Nota Media vs Crítica */}
-        <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
-          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota
-            Media
+            <Brain className="w-4 h-4 text-purple-400" /> Game Knowledge
           </div>
           <div className="text-3xl font-black text-purple-400 font-mono">
-            {stats.averageRating ? `${stats.averageRating}` : "—"}
-            <span className="text-xs font-normal text-cine-500 font-sans">
-              {" "}
-              / 10
-            </span>
+            {stats.globalGameKnowledge ? `${stats.globalGameKnowledge}%` : '—'}
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
-            Crítica promedio:{" "}
-            {stats.averageMetacritic ? `${stats.averageMetacritic}/10` : "—"}
+            Frente al consenso de Metacritic
+          </div>
+        </div>
+
+        {/* Nota Media vs Prensa */}
+        <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota Media
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.averageRating || '—'}
+            <span className="text-xs font-normal text-cine-400"> / 10</span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Prensa: <strong className="text-cyan-400">{stats.averageMetacritic || '—'}</strong> / 10
           </div>
         </div>
       </section>
 
-      {/* Gráfica Critic vs You */}
-      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/20 bg-cine-950 space-y-4">
+      {/* Critic vs You: Gráfica Comparativa con Metacritic */}
+      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-cine-950 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cine-800 pb-4">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-400" />
-            <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide">
-              Critic vs You (Metacritic vs Tu Veredicto)
-            </h2>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
+              <h2 className="text-lg font-bold text-white">
+                Critic vs You (Metacritic vs Tu Veredicto)
+              </h2>
+            </div>
+            <p className="text-xs text-cine-400 mt-0.5">
+              Comparativa directa entre tu criterio de juego y la media de los analistas especializados.
+            </p>
           </div>
-          <p className="text-xs text-cine-400">
-            Comparativa directa de calificaciones por título
-          </p>
+          <span className="text-[11px] font-mono text-cine-500">
+            {stats.criticVsYou.length} títulos contrastados
+          </span>
         </div>
 
         <CriticVsYouChart data={stats.criticVsYou} />
       </section>
 
-      {/* Tabla: Tus Hot Takes */}
-      <section className="glass-panel rounded-3xl border border-purple-500/20 overflow-hidden bg-cine-950 space-y-0">
-        <div className="p-6 border-b border-cine-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-rose-400 animate-pulse" />
-            <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide">
-              Tus Hot Takes 🔥
-            </h2>
-          </div>
-          <span className="text-xs text-cine-400">
-            Discrepancias y sintonías frente a la prensa
-          </span>
-        </div>
-
+      {/* Tabla de Hot Takes 🔥 */}
+      <section className="space-y-4">
         <HotTakesTable hotTakes={stats.hotTakes} />
       </section>
 
-      {/* Grid de 2 Columnas: Horas por Plataforma & Horas por Género */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Horas por Plataforma y Horas por Género */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Horas por Plataforma */}
         <section className="glass-panel p-6 rounded-3xl border border-purple-500/20 bg-cine-950 space-y-4">
           <div className="flex items-center gap-2 border-b border-cine-800 pb-3">
             <Tv className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-base font-bold text-white">
-              Horas por Plataforma
-            </h3>
+            <h3 className="text-base font-bold text-white">Horas por Plataforma</h3>
           </div>
 
           {stats.hoursByPlatform.length === 0 ? (
@@ -240,46 +234,33 @@ export default function GamerProfilePage() {
               Registra juegos con plataformas para ver tus horas.
             </div>
           ) : (
-            <div className="w-full h-56">
+            <div className="w-full h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={stats.hoursByPlatform}
                   layout="vertical"
-                  margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
+                  margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
                 >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#232635"
-                    horizontal={false}
-                  />
-                  <XAxis
-                    type="number"
-                    stroke="#71717A"
-                    fontSize={11}
-                    tickLine={false}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#232635" horizontal={false} />
+                  <XAxis type="number" stroke="#71717A" fontSize={11} tickLine={false} />
                   <YAxis
                     dataKey="platform"
                     type="category"
-                    stroke="#71717A"
+                    stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
+                    width={115}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#090A10",
-                      borderColor: "#8B5CF6",
-                      borderRadius: "12px",
-                      fontSize: "12px",
+                      backgroundColor: '#090A10',
+                      borderColor: '#8B5CF6',
+                      borderRadius: '12px',
+                      fontSize: '12px',
                     }}
-                    formatter={(val: any) => [`${val} horas`, "Tiempo"]}
+                    formatter={(val: any) => [`${val} horas`, 'Tiempo']}
                   />
-                  <Bar
-                    dataKey="hours"
-                    fill="#06B6D4"
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={22}
-                  />
+                  <Bar dataKey="hours" fill="#06B6D4" radius={[0, 4, 4, 0]} maxBarSize={22} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -298,52 +279,51 @@ export default function GamerProfilePage() {
               Sin datos de géneros registrados.
             </div>
           ) : (
-            <div className="w-full h-56">
+            <div className="w-full h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={stats.hoursByGenre.slice(0, 6)}
                   layout="vertical"
-                  margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
+                  margin={{ top: 5, right: 25, left: 10, bottom: 5 }}
                 >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#232635"
-                    horizontal={false}
-                  />
-                  <XAxis
-                    type="number"
-                    stroke="#71717A"
-                    fontSize={11}
-                    tickLine={false}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#232635" horizontal={false} />
+                  <XAxis type="number" stroke="#71717A" fontSize={11} tickLine={false} />
                   <YAxis
                     dataKey="genre"
                     type="category"
-                    stroke="#71717A"
+                    stroke="#94a3b8"
                     fontSize={11}
                     tickLine={false}
+                    width={100}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#090A10",
-                      borderColor: "#8B5CF6",
-                      borderRadius: "12px",
-                      fontSize: "12px",
+                      backgroundColor: '#090A10',
+                      borderColor: '#8B5CF6',
+                      borderRadius: '12px',
+                      fontSize: '12px',
                     }}
-                    formatter={(val: any) => [`${val} horas`, "Tiempo"]}
+                    formatter={(val: any) => [`${val} horas`, 'Tiempo']}
                   />
-                  <Bar
-                    dataKey="hours"
-                    fill="#8B5CF6"
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={22}
-                  />
+                  <Bar dataKey="hours" fill="#8B5CF6" radius={[0, 4, 4, 0]} maxBarSize={22} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
         </section>
       </div>
+
+      {/* Modal para Editar Perfil Gamer */}
+      <EditGamerProfileModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSaved={() => {
+          fetchProfile();
+        }}
+        initialName={profile.displayName}
+        initialBio={profile.bio}
+        initialAvatar={profile.avatarUrl}
+      />
     </div>
   );
 }

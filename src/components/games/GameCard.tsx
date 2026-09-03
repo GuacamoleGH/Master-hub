@@ -65,7 +65,7 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
         {/* Carátula con GamePoster */}
         <Link
           href={`/games/${game.rawgId}`}
-          className="block relative aspect-[16/10] overflow-hidden bg-cine-950"
+          className="block relative aspect-[4/3] overflow-hidden bg-cine-950"
         >
           <GamePoster
             src={game.backgroundImage}

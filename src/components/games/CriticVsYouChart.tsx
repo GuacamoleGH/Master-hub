@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -10,117 +10,104 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
-} from "recharts";
+} from 'recharts';
 
 interface CriticVsYouChartProps {
-  data: {
+  data: Array<{
     title: string;
     userRating: number;
     criticRating: number;
     gameKnowledge: number;
-  }[];
+  }>;
 }
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const item = payload[0].payload;
-    const diff = Number((item.userRating - item.criticRating).toFixed(1));
-
-    return (
-      <div className="glass-panel p-3 rounded-xl border border-purple-500/30 bg-cine-950/95 shadow-2xl text-xs space-y-1">
-        <div className="font-bold text-white text-sm line-clamp-1">
-          {item.title}
-        </div>
-        <div className="flex items-center justify-between gap-4 text-purple-300">
-          <span>Tu Nota:</span>
-          <strong className="font-mono">
-            {item.userRating.toFixed(1)} / 10
-          </strong>
-        </div>
-        <div className="flex items-center justify-between gap-4 text-cyan-300">
-          <span>Metacritic:</span>
-          <strong className="font-mono">
-            {item.criticRating.toFixed(1)} / 10
-          </strong>
-        </div>
-        <div className="pt-1 border-t border-cine-800 flex items-center justify-between gap-4 text-white font-mono">
-          <span>Game Knowledge:</span>
-          <strong className="text-purple-400">
-            {item.gameKnowledge.toFixed(1)}%
-          </strong>
-        </div>
-        <div className="text-[10px] text-cine-400 font-mono">
-          Diferencia: {diff > 0 ? `+${diff}` : diff} pts
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
 
 export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-xs text-cine-500 italic">
-        Completa y califica videojuegos para generar la comparativa con
-        Metacritic.
+      <div className="h-64 flex items-center justify-center text-cine-500 text-xs">
+        No hay suficientes juegos calificados para comparar con Metacritic.
       </div>
     );
   }
 
-  // Acortar títulos para el eje X
-  const formattedData = data.slice(0, 10).map((d) => ({
-    ...d,
-    shortTitle:
-      d.title.length > 14 ? `${d.title.substring(0, 12)}...` : d.title,
+  // Tomamos los juegos calificados más recientes
+  const chartData = data.slice(0, 10).map((d) => ({
+    name: d.title.length > 16 ? `${d.title.substring(0, 15)}…` : d.title,
+    fullName: d.title,
+    'Tu Nota': d.userRating,
+    'Metacritic (Crítica)': d.criticRating,
+    gk: d.gameKnowledge,
   }));
 
   return (
-    <div className="w-full h-72">
+    <div className="w-full h-80 pt-2">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={formattedData}
-          margin={{ top: 10, right: 10, left: -20, bottom: 25 }}
+          data={chartData}
+          margin={{ top: 15, right: 15, left: -15, bottom: 65 }}
         >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="#232635"
-            vertical={false}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
           <XAxis
-            dataKey="shortTitle"
-            stroke="#71717A"
+            dataKey="name"
+            stroke="#71717a"
             fontSize={11}
             tickLine={false}
             interval={0}
-            angle={-20}
+            angle={-32}
             textAnchor="end"
+            height={65}
+            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 500 }}
           />
           <YAxis
             domain={[0, 10]}
-            ticks={[0, 2, 4, 6, 8, 10]}
-            stroke="#71717A"
+            stroke="#71717a"
             fontSize={11}
             tickLine={false}
+            ticks={[0, 2, 4, 6, 8, 10]}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const item = payload[0].payload;
+                return (
+                  <div className="p-3 bg-cine-950/95 border border-purple-500/40 rounded-xl shadow-2xl backdrop-blur-md text-xs space-y-1.5 z-50">
+                    <p className="font-bold text-white max-w-[200px] border-b border-cine-800 pb-1">
+                      {item.fullName}
+                    </p>
+                    <div className="flex items-center justify-between gap-4 text-purple-300">
+                      <span>Tu Veredicto:</span>
+                      <strong className="font-mono text-sm">{item['Tu Nota']} / 10</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 text-cyan-300">
+                      <span>Metacritic:</span>
+                      <strong className="font-mono text-sm">{item['Metacritic (Crítica)']} / 10</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 text-cine-400 pt-1 border-t border-cine-800 font-mono">
+                      <span>Game Knowledge:</span>
+                      <strong className="text-white">{item.gk}%</strong>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
           <Legend
             verticalAlign="top"
             align="right"
-            wrapperStyle={{ paddingBottom: "10px", fontSize: "12px" }}
+            iconType="circle"
+            wrapperStyle={{ paddingBottom: '16px', fontSize: '12px' }}
           />
           <Bar
-            name="Tu Nota"
-            dataKey="userRating"
+            dataKey="Tu Nota"
             fill="#8B5CF6"
-            radius={[4, 4, 0, 0]}
+            radius={[6, 6, 0, 0]}
             maxBarSize={28}
           />
           <Bar
-            name="Metacritic (Crítica)"
-            dataKey="criticRating"
+            dataKey="Metacritic (Crítica)"
             fill="#06B6D4"
-            radius={[4, 4, 0, 0]}
+            radius={[6, 6, 0, 0]}
             maxBarSize={28}
           />
         </BarChart>
