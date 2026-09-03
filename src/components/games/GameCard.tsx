@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Clock, Star } from 'lucide-react';
-import GameKnowledgeBadge from './GameKnowledgeBadge';
-import GameReviewModal from './GameReviewModal';
-import GamePoster from './GamePoster';
-import PlatformBadge from './PlatformBadge';
+import React, { useState } from "react";
+import Link from "next/link";
+import { Clock, Star } from "lucide-react";
+import GameKnowledgeBadge from "./GameKnowledgeBadge";
+import GameReviewModal from "./GameReviewModal";
+import GamePoster from "./GamePoster";
+import PlatformBadge from "./PlatformBadge";
 
 interface GameCardProps {
   game: {
@@ -20,7 +20,7 @@ interface GameCardProps {
     platforms?: string[];
   };
   userGame?: {
-    status?: 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED';
+    status?: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
     userRating?: number | null;
     hoursPlayed?: number | null;
     platform?: string | null;
@@ -34,21 +34,39 @@ interface GameCardProps {
 export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
 
-  const releaseYear = game.released ? game.released.split('-')[0] : null;
+  const releaseYear = game.released ? game.released.split("-")[0] : null;
 
   const statusBadges = {
-    BACKLOG: { label: '📥 Backlog', class: 'bg-zinc-800 text-zinc-300 border-zinc-700' },
-    PLAYING: { label: '🕹️ Jugando', class: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' },
-    COMPLETED: { label: '🏆 Completado', class: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
-    PLATINUM: { label: '👑 Platino', class: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-    DROPPED: { label: '💀 Dropped', class: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
+    BACKLOG: {
+      label: "📥 Backlog",
+      class: "bg-zinc-800 text-zinc-300 border-zinc-700",
+    },
+    PLAYING: {
+      label: "🕹️ Jugando",
+      class: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+    },
+    COMPLETED: {
+      label: "🏆 Completado",
+      class: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+    },
+    PLATINUM: {
+      label: "👑 Platino",
+      class: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    },
+    DROPPED: {
+      label: "💀 Dropped",
+      class: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+    },
   };
 
   return (
     <>
       <div className="group relative flex flex-col rounded-2xl overflow-hidden glass-card border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1 bg-cine-900/80 shadow-lg">
         {/* Carátula con GamePoster */}
-        <Link href={`/games/${game.rawgId}`} className="block relative aspect-[16/10] overflow-hidden bg-cine-950">
+        <Link
+          href={`/games/${game.rawgId}`}
+          className="block relative aspect-[16/10] overflow-hidden bg-cine-950"
+        >
           <GamePoster
             src={game.backgroundImage}
             alt={game.title}
@@ -81,14 +99,16 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
           )}
 
           {/* Horas Jugadas */}
-          {userGame?.hoursPlayed !== null && userGame?.hoursPlayed !== undefined && userGame.hoursPlayed > 0 && (
-            <div className="absolute bottom-2.5 left-2.5">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-cine-950/80 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
-                <Clock className="w-2.5 h-2.5 text-cyan-400" />
-                {userGame.hoursPlayed}h
-              </span>
-            </div>
-          )}
+          {userGame?.hoursPlayed !== null &&
+            userGame?.hoursPlayed !== undefined &&
+            userGame.hoursPlayed > 0 && (
+              <div className="absolute bottom-2.5 left-2.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-cine-950/80 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
+                  <Clock className="w-2.5 h-2.5 text-cyan-400" />
+                  {userGame.hoursPlayed}h
+                </span>
+              </div>
+            )}
         </Link>
 
         {/* Contenido inferior */}
@@ -101,7 +121,7 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
             </Link>
 
             <div className="flex items-center justify-between text-xs text-cine-400 mt-1">
-              <span>{releaseYear || '—'}</span>
+              <span>{releaseYear || "—"}</span>
             </div>
 
             {/* Plataformas donde se jugó */}
@@ -113,7 +133,8 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
           </div>
 
           {/* Mi Puntuación y Game Knowledge */}
-          {userGame?.userRating !== null && userGame?.userRating !== undefined ? (
+          {userGame?.userRating !== null &&
+          userGame?.userRating !== undefined ? (
             <div className="pt-2 border-t border-cine-800/80 flex items-center justify-between gap-2">
               <div className="flex items-center gap-1 text-xs">
                 <Star className="w-3.5 h-3.5 text-purple-400 fill-purple-400" />
@@ -155,7 +176,7 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
           metacritic: game.metacritic,
           platforms: game.platforms,
         }}
-        initialStatus={userGame?.status || 'COMPLETED'}
+        initialStatus={userGame?.status || "COMPLETED"}
         initialRating={userGame?.userRating}
         initialHours={userGame?.hoursPlayed}
         initialPlatform={userGame?.platform}

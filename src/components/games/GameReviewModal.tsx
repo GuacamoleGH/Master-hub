@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { X, Star, Loader2, Clock, Gamepad2, Award, Check, Plus } from 'lucide-react';
-import { ALL_PLATFORMS, PlatformOption } from '@/lib/platforms';
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  Star,
+  Loader2,
+  Clock,
+  Gamepad2,
+  Award,
+  Check,
+  Plus,
+} from "lucide-react";
+import { ALL_PLATFORMS, PlatformOption } from "@/lib/platforms";
 
 const STATUS_OPTIONS = [
-  { value: 'BACKLOG', label: '📥 Backlog (Pendiente)' },
-  { value: 'PLAYING', label: '🕹️ Jugando Ahora' },
-  { value: 'COMPLETED', label: '🏆 Completado' },
-  { value: 'PLATINUM', label: '👑 100% Platino' },
-  { value: 'DROPPED', label: '💀 Abandonado' },
+  { value: "BACKLOG", label: "📥 Backlog (Pendiente)" },
+  { value: "PLAYING", label: "🕹️ Jugando Ahora" },
+  { value: "COMPLETED", label: "🏆 Completado" },
+  { value: "PLATINUM", label: "👑 100% Platino" },
+  { value: "DROPPED", label: "💀 Abandonado" },
 ];
 
 const PLATFORM_CATEGORIES = [
-  'PC & Tiendas',
-  'PlayStation',
-  'Xbox',
-  'Nintendo',
-  'Portátiles & Emulación',
+  "PC & Tiendas",
+  "PlayStation",
+  "Xbox",
+  "Nintendo",
+  "Portátiles & Emulación",
 ] as const;
 
 interface GameReviewModalProps {
@@ -32,7 +41,7 @@ interface GameReviewModalProps {
     metacritic?: number | null;
     platforms?: string[];
   };
-  initialStatus?: 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED';
+  initialStatus?: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
   initialRating?: number | null;
   initialHours?: number | null;
   initialPlatform?: string | null; // e.g. "PC (Steam), Xbox 360"
@@ -44,7 +53,7 @@ export default function GameReviewModal({
   onClose,
   onSaved,
   game,
-  initialStatus = 'COMPLETED',
+  initialStatus = "COMPLETED",
   initialRating,
   initialHours,
   initialPlatform,
@@ -52,12 +61,16 @@ export default function GameReviewModal({
 }: GameReviewModalProps) {
   const [status, setStatus] = useState(initialStatus);
   const [rating, setRating] = useState<number>(initialRating ?? 8.5);
-  const [hasRating, setHasRating] = useState<boolean>(initialRating !== null && initialRating !== undefined);
-  const [hours, setHours] = useState<string>(initialHours ? String(initialHours) : '');
+  const [hasRating, setHasRating] = useState<boolean>(
+    initialRating !== null && initialRating !== undefined,
+  );
+  const [hours, setHours] = useState<string>(
+    initialHours ? String(initialHours) : "",
+  );
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string>('PC & Tiendas');
-  const [customPlatform, setCustomPlatform] = useState('');
-  const [review, setReview] = useState<string>(initialReview || '');
+  const [activeCategory, setActiveCategory] = useState<string>("PC & Tiendas");
+  const [customPlatform, setCustomPlatform] = useState("");
+  const [review, setReview] = useState<string>(initialReview || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -65,21 +78,32 @@ export default function GameReviewModal({
       setStatus(initialStatus);
       setRating(initialRating ?? 8.5);
       setHasRating(initialRating !== null && initialRating !== undefined);
-      setHours(initialHours ? String(initialHours) : '');
+      setHours(initialHours ? String(initialHours) : "");
 
       // Parsear múltiples plataformas
       if (initialPlatform) {
-        const parsed = initialPlatform.split(',').map((p) => p.trim()).filter(Boolean);
+        const parsed = initialPlatform
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
         setSelectedPlatforms(parsed);
       } else if (game.platforms && game.platforms.length > 0) {
         setSelectedPlatforms([game.platforms[0]]);
       } else {
-        setSelectedPlatforms(['PC (Steam)']);
+        setSelectedPlatforms(["PC (Steam)"]);
       }
 
-      setReview(initialReview || '');
+      setReview(initialReview || "");
     }
-  }, [isOpen, initialStatus, initialRating, initialHours, initialPlatform, initialReview, game]);
+  }, [
+    isOpen,
+    initialStatus,
+    initialRating,
+    initialHours,
+    initialPlatform,
+    initialReview,
+    game,
+  ]);
 
   if (!isOpen) return null;
 
@@ -94,9 +118,12 @@ export default function GameReviewModal({
   };
 
   const addCustomPlatform = () => {
-    if (customPlatform.trim() && !selectedPlatforms.includes(customPlatform.trim())) {
+    if (
+      customPlatform.trim() &&
+      !selectedPlatforms.includes(customPlatform.trim())
+    ) {
       setSelectedPlatforms((prev) => [...prev, customPlatform.trim()]);
-      setCustomPlatform('');
+      setCustomPlatform("");
     }
   };
 
@@ -108,20 +135,27 @@ export default function GameReviewModal({
       const payload: any = {
         rawgId: game.rawgId,
         status,
-        platform: selectedPlatforms.length > 0 ? selectedPlatforms.join(', ') : null,
+        platform:
+          selectedPlatforms.length > 0 ? selectedPlatforms.join(", ") : null,
         review: review.trim() || null,
         hoursPlayed: hours.trim() ? parseFloat(hours) : null,
       };
 
-      if (hasRating && (status === 'COMPLETED' || status === 'PLATINUM' || status === 'DROPPED' || status === 'PLAYING')) {
+      if (
+        hasRating &&
+        (status === "COMPLETED" ||
+          status === "PLATINUM" ||
+          status === "DROPPED" ||
+          status === "PLAYING")
+      ) {
         payload.userRating = Number(rating.toFixed(1));
       } else {
         payload.userRating = null;
       }
 
-      const res = await fetch('/api/user-games', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/user-games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -130,7 +164,7 @@ export default function GameReviewModal({
         onClose();
       }
     } catch (err) {
-      console.error('Error al guardar juego:', err);
+      console.error("Error al guardar juego:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -182,8 +216,8 @@ export default function GameReviewModal({
                   onClick={() => setStatus(opt.value as any)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all text-left truncate ${
                     status === opt.value
-                      ? 'bg-purple-600/30 border-purple-400 text-white shadow-[0_0_12px_rgba(139,92,246,0.3)]'
-                      : 'bg-cine-900/60 border-cine-800 text-cine-400 hover:bg-cine-800'
+                      ? "bg-purple-600/30 border-purple-400 text-white shadow-[0_0_12px_rgba(139,92,246,0.3)]"
+                      : "bg-cine-900/60 border-cine-800 text-cine-400 hover:bg-cine-800"
                   }`}
                 >
                   {opt.label}
@@ -195,7 +229,8 @@ export default function GameReviewModal({
           {/* Horas Jugadas */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas Totales
+              <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
+              Totales
             </label>
             <div className="relative max-w-xs">
               <input
@@ -218,7 +253,8 @@ export default function GameReviewModal({
           <div className="space-y-3 pt-2 border-t border-cine-800/80">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Plataformas donde lo jugaste o completaste
+                <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Plataformas
+                donde lo jugaste o completaste
               </label>
               <span className="text-[11px] font-mono text-purple-300">
                 {selectedPlatforms.length} seleccionada(s)
@@ -256,8 +292,8 @@ export default function GameReviewModal({
                   onClick={() => setActiveCategory(cat)}
                   className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                     activeCategory === cat
-                      ? 'bg-cine-800 text-purple-300 border border-purple-500/30'
-                      : 'text-cine-400 hover:text-white'
+                      ? "bg-cine-800 text-purple-300 border border-purple-500/30"
+                      : "text-cine-400 hover:text-white"
                   }`}
                 >
                   {cat}
@@ -267,24 +303,28 @@ export default function GameReviewModal({
 
             {/* Grid de opciones de la categoría activa */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto p-1">
-              {ALL_PLATFORMS.filter((p) => p.category === activeCategory).map((plat) => {
-                const isSelected = selectedPlatforms.includes(plat.name);
-                return (
-                  <button
-                    type="button"
-                    key={plat.id}
-                    onClick={() => togglePlatform(plat.name)}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-mono text-left transition-all flex items-center justify-between border ${
-                      isSelected
-                        ? 'bg-purple-600/30 border-purple-400 text-white font-bold'
-                        : 'bg-cine-900 border-cine-800 text-cine-400 hover:border-cine-700 hover:text-cine-200'
-                    }`}
-                  >
-                    <span className="truncate">{plat.name}</span>
-                    {isSelected && <Check className="w-3 h-3 text-cyan-400 flex-shrink-0" />}
-                  </button>
-                );
-              })}
+              {ALL_PLATFORMS.filter((p) => p.category === activeCategory).map(
+                (plat) => {
+                  const isSelected = selectedPlatforms.includes(plat.name);
+                  return (
+                    <button
+                      type="button"
+                      key={plat.id}
+                      onClick={() => togglePlatform(plat.name)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-mono text-left transition-all flex items-center justify-between border ${
+                        isSelected
+                          ? "bg-purple-600/30 border-purple-400 text-white font-bold"
+                          : "bg-cine-900 border-cine-800 text-cine-400 hover:border-cine-700 hover:text-cine-200"
+                      }`}
+                    >
+                      <span className="truncate">{plat.name}</span>
+                      {isSelected && (
+                        <Check className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                      )}
+                    </button>
+                  );
+                },
+              )}
             </div>
 
             {/* Añadir plataforma personalizada si no está en la lista */}
@@ -294,7 +334,7 @@ export default function GameReviewModal({
                 value={customPlatform}
                 onChange={(e) => setCustomPlatform(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     addCustomPlatform();
                   }
@@ -316,7 +356,8 @@ export default function GameReviewModal({
           <div className="space-y-3 pt-2 border-t border-cine-800/80">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 text-purple-400 fill-purple-400" /> Tu Puntuación
+                <Star className="w-3.5 h-3.5 text-purple-400 fill-purple-400" />{" "}
+                Tu Puntuación
               </label>
 
               <div className="flex items-center gap-2">
@@ -327,7 +368,10 @@ export default function GameReviewModal({
                   onChange={(e) => setHasRating(e.target.checked)}
                   className="rounded border-cine-700 text-purple-600 focus:ring-purple-500"
                 />
-                <label htmlFor="enableRating" className="text-xs text-cine-400 cursor-pointer">
+                <label
+                  htmlFor="enableRating"
+                  className="text-xs text-cine-400 cursor-pointer"
+                >
                   Asignar nota
                 </label>
               </div>
@@ -339,7 +383,9 @@ export default function GameReviewModal({
                   <span className="text-3xl font-black text-purple-400 font-mono tracking-tight">
                     {rating.toFixed(1)}
                   </span>
-                  <span className="text-xs text-cine-400 font-mono">de 10.0</span>
+                  <span className="text-xs text-cine-400 font-mono">
+                    de 10.0
+                  </span>
                 </div>
 
                 <input

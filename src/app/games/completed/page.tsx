@@ -16,17 +16,17 @@ import { UserGameItem } from "@/types/game";
 import GameCard from "@/components/games/GameCard";
 
 const PLATFORM_OPTIONS = [
-  { value: 'all', label: 'Todas las plataformas' },
-  { value: 'Steam', label: 'PC (Steam)' },
-  { value: 'Epic', label: 'PC (Epic Games)' },
-  { value: 'Game Pass', label: 'PC (Game Pass)' },
-  { value: 'PlayStation 5', label: 'PlayStation 5' },
-  { value: 'PlayStation 4', label: 'PlayStation 4' },
-  { value: 'PlayStation 3', label: 'PlayStation 3 (Old Gen)' },
-  { value: 'Xbox 360', label: 'Xbox 360 (Old Gen)' },
-  { value: 'Xbox Series', label: 'Xbox Series S/X' },
-  { value: 'Nintendo Switch', label: 'Nintendo Switch' },
-  { value: 'Deck', label: 'Steam Deck' },
+  { value: "all", label: "Todas las plataformas" },
+  { value: "Steam", label: "PC (Steam)" },
+  { value: "Epic", label: "PC (Epic Games)" },
+  { value: "Game Pass", label: "PC (Game Pass)" },
+  { value: "PlayStation 5", label: "PlayStation 5" },
+  { value: "PlayStation 4", label: "PlayStation 4" },
+  { value: "PlayStation 3", label: "PlayStation 3 (Old Gen)" },
+  { value: "Xbox 360", label: "Xbox 360 (Old Gen)" },
+  { value: "Xbox Series", label: "Xbox Series S/X" },
+  { value: "Nintendo Switch", label: "Nintendo Switch" },
+  { value: "Deck", label: "Steam Deck" },
 ];
 
 export default function GamerCompletedPage() {

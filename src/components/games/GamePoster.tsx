@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Gamepad2 } from 'lucide-react';
+import React, { useState } from "react";
+import { Gamepad2 } from "lucide-react";
 
 interface GamePosterProps {
   src?: string | null;
@@ -12,7 +12,7 @@ interface GamePosterProps {
 export default function GamePoster({
   src,
   alt,
-  className = '',
+  className = "",
 }: GamePosterProps) {
   const [hasError, setHasError] = useState(false);
 

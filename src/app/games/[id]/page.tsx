@@ -21,8 +21,8 @@ import {
 import { GameDetail } from "@/types/game";
 import GameKnowledgeBadge from "@/components/games/GameKnowledgeBadge";
 import GameReviewModal from "@/components/games/GameReviewModal";
-import GamePoster from '@/components/games/GamePoster';
-import PlatformBadge from '@/components/games/PlatformBadge';
+import GamePoster from "@/components/games/GamePoster";
+import PlatformBadge from "@/components/games/PlatformBadge";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -349,7 +349,9 @@ export default function GameDetailPage() {
                 {game.userGame.platform ? (
                   <PlatformBadge platform={game.userGame.platform} size="sm" />
                 ) : (
-                  <span className="text-[11px] text-cine-500 italic">Sin plataforma</span>
+                  <span className="text-[11px] text-cine-500 italic">
+                    Sin plataforma
+                  </span>
                 )}
               </div>
             </div>

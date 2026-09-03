@@ -1,26 +1,29 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { getPlatformBadgeStyle } from '@/lib/platforms';
+import React from "react";
+import { getPlatformBadgeStyle } from "@/lib/platforms";
 
 interface PlatformBadgeProps {
   platform: string; // Puede ser 'PC (Steam)' o 'PC (Steam), PlayStation 5, Xbox 360'
-  size?: 'xs' | 'sm' | 'md';
+  size?: "xs" | "sm" | "md";
 }
 
-export default function PlatformBadge({ platform, size = 'xs' }: PlatformBadgeProps) {
+export default function PlatformBadge({
+  platform,
+  size = "xs",
+}: PlatformBadgeProps) {
   if (!platform) return null;
 
   // Dividir por comas para soportar múltiples plataformas completadas
   const platforms = platform
-    .split(',')
+    .split(",")
     .map((p) => p.trim())
     .filter(Boolean);
 
   const sizeClasses = {
-    xs: 'text-[9px] px-1.5 py-0.5 rounded',
-    sm: 'text-[11px] px-2 py-0.5 rounded-md font-medium',
-    md: 'text-xs px-2.5 py-1 rounded-lg font-semibold',
+    xs: "text-[9px] px-1.5 py-0.5 rounded",
+    sm: "text-[11px] px-2 py-0.5 rounded-md font-medium",
+    md: "text-xs px-2.5 py-1 rounded-lg font-semibold",
   }[size];
 
   return (
