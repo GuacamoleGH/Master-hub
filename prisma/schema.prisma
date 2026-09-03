@@ -8,6 +8,10 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// =======================
+// MODELOS DE CINE
+// =======================
+
 model Movie {
   id                 String     @id @default(cuid())
   tmdbId             Int        @unique
@@ -24,7 +28,7 @@ model Movie {
   directorImage      String?
   cast               String     // JSON array de { name, character, profilePath }
   imdbRating         Float?
-  streamingPlatforms String?    // JSON array de plataformas e.g. ["Netflix", "HBO Max"] o ["Pirata"]
+  streamingPlatforms String?    // JSON array de plataformas
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   userMovie          UserMovie?
@@ -50,6 +54,55 @@ model UserProfile {
   displayName String   @default("Cinéfilo")
   avatarUrl   String?
   bio         String?  @default("Explorador y analista del séptimo arte.")
+  totalXp     Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+// =======================
+// MODELOS DE VIDEOJUEGOS
+// =======================
+
+model Game {
+  id              String     @id @default(cuid())
+  rawgId          Int        @unique
+  title           String
+  released        String?
+  backgroundImage String?
+  metacritic      Int?       // 0 a 100 (ej. 92)
+  rating          Float?     // RAWG rating 0 a 5
+  genres          String     // JSON array
+  platforms       String     // JSON array de nombres (PC, PlayStation 5, Nintendo Switch, etc.)
+  developers      String?    // JSON array
+  publishers      String?    // JSON array
+  description     String?
+  screenshots     String?    // JSON array de URLs
+  trailerUrl      String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  userGame        UserGame?
+}
+
+model UserGame {
+  id            String    @id @default(cuid())
+  gameId        String    @unique
+  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  status        String    // "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED"
+  userRating    Float?    // 0.0 a 10.0
+  hoursPlayed   Float?    // Horas registradas (ej. 127)
+  platform      String?   // Plataforma donde lo jugó (ej. "PC", "PS5", "Switch")
+  review        String?
+  completedDate DateTime?
+  gameKnowledge Float?    // 0 a 100 percentage
+  difference    Float?    // userRating - (metacritic / 10)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model GamerProfile {
+  id          String   @id @default("gamer-default")
+  displayName String   @default("Gamer")
+  avatarUrl   String?
+  bio         String?  @default("Jugador y explorador de mundos virtuales.")
   totalXp     Int      @default(0)
   updatedAt   DateTime @updatedAt
 }

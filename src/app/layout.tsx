@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Header from "@/components/Header";
+import type { Metadata } from 'next';
+import './globals.css';
+import DynamicNavHeader from '@/components/DynamicNavHeader';
+import DynamicFooter from '@/components/DynamicFooter';
 
 export const metadata: Metadata = {
-  title: "Cinephile Hub | Ball Knowledge & Movie Tracker",
+  title: 'Entertainment Command Center | Cinephile & Gamer Hub',
   description:
-    "Plataforma personal de cine, estadísticas cinematográficas y sistema de puntuación Ball Knowledge.",
+    'Centro de mando personal para cine y videojuegos con Ball Knowledge y Game Knowledge.',
 };
 
 export default function RootLayout({
@@ -15,24 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className="dark">
-      <body className="bg-cine-950 text-cine-100 antialiased min-h-screen flex flex-col selection:bg-amber-500 selection:text-cine-950">
-        <Header />
+      <body className="bg-cine-950 text-cine-100 antialiased min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
+        <DynamicNavHeader />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}
         </main>
-        <footer className="border-t border-cine-800/80 bg-cine-950/60 py-6 text-center text-xs text-cine-500">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-cine-300">Cinephile Hub</span>
-              <span>•</span>
-              <span>Ball Knowledge Engine 🏀</span>
-            </div>
-            <p className="text-cine-500">
-              Datos impulsados por TMDB & OMDb. Diseñado para cinéfilos
-              exigentes.
-            </p>
-          </div>
-        </footer>
+        <DynamicFooter />
       </body>
     </html>
   );
