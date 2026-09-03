@@ -37,6 +37,7 @@ export default function MoviePoster({
       className={className}
       onError={() => setHasError(true)}
       loading="lazy"
+      referrerPolicy="no-referrer"
     />
   );
 }

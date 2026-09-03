@@ -36,6 +36,7 @@ export default function GamePoster({
       onError={() => setHasError(true)}
       className={className}
       loading="lazy"
+      referrerPolicy="no-referrer"
     />
   );
 }

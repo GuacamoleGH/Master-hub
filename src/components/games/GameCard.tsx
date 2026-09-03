@@ -130,14 +130,19 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
             </Link>
 
             <div className="flex items-center justify-between text-xs text-cine-400 mt-1">
-              <span title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}>
+              <span
+                title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}
+              >
                 {releaseYear || "—"}
               </span>
             </div>
 
             {/* Plataformas donde se jugó */}
             {userGame?.platform && (
-              <div className="mt-1.5" title={`Plataforma: ${userGame.platform}`}>
+              <div
+                className="mt-1.5"
+                title={`Plataforma: ${userGame.platform}`}
+              >
                 <PlatformBadge platform={userGame.platform} size="xs" />
               </div>
             )}

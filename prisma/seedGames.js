@@ -76,7 +76,7 @@ const CURATED_GAMES = [
     "rawgId": 41494,
     "title": "Cyberpunk 2077",
     "released": "2020-12-10",
-    "backgroundImage": "https://media.rawg.io/media/games/26d/26d4437715bee60138dab4a7c424de09.jpg",
+    "backgroundImage": "https://media.rawg.io/media/games/26d/26d4437715bee60138dab4a7c8c59c92.jpg",
     "metacritic": 86,
     "rating": 4.14,
     "genres": [
@@ -107,10 +107,10 @@ const CURATED_GAMES = [
     }
   },
   {
-    "rawgId": 324997,
+    "rawgId": 339958,
     "title": "Persona 5 Royal",
     "released": "2019-10-31",
-    "backgroundImage": "https://media.rawg.io/media/games/600/600da320f269a3048596669ff8910eb7.jpg",
+    "backgroundImage": "https://media.rawg.io/media/games/a9c/a9c789951de65da545d51f664b4f2ce0.jpg",
     "metacritic": 95,
     "rating": 4.54,
     "genres": [
@@ -209,10 +209,10 @@ const CURATED_GAMES = [
     }
   },
   {
-    "rawgId": 5563,
+    "rawgId": 3387,
     "title": "Bloodborne",
     "released": "2015-03-24",
-    "backgroundImage": "https://media.rawg.io/media/games/214/214341400e95c4794025132204c3d78c.jpg",
+    "backgroundImage": "https://media.rawg.io/media/games/214/214b29aeff13a0ae6a70fc4426e85991.jpg",
     "metacritic": 92,
     "rating": 4.42,
     "genres": [
@@ -241,10 +241,10 @@ const CURATED_GAMES = [
     }
   },
   {
-    "rawgId": 28589,
+    "rawgId": 22121,
     "title": "Celeste",
     "released": "2018-01-25",
-    "backgroundImage": "https://media.rawg.io/media/games/594/594978ae3562e182bd8516dbab8cf466.jpg",
+    "backgroundImage": "https://media.rawg.io/media/games/594/59487800889ebac294c7c2c070d02356.jpg",
     "metacritic": 92,
     "rating": 4.29,
     "genres": [
@@ -279,7 +279,7 @@ const CURATED_GAMES = [
     "rawgId": 58134,
     "title": "Marvel's Spider-Man",
     "released": "2018-09-07",
-    "backgroundImage": "https://media.rawg.io/media/games/9aa/9aa42d16d425fa6f170455123d4eb069.jpg",
+    "backgroundImage": "https://media.rawg.io/media/games/9aa/9aa42d16d425fa6f179fc9dc2f763647.jpg",
     "metacritic": 87,
     "rating": 4.28,
     "genres": [
@@ -309,10 +309,10 @@ const CURATED_GAMES = [
     }
   },
   {
-    "rawgId": 5538,
+    "rawgId": 51325,
     "title": "The Last of Us Part II",
     "released": "2020-06-19",
-    "backgroundImage": "https://media.rawg.io/media/games/909/9099768181a04b1263d9167389a9f5d6.jpg",
+    "backgroundImage": "https://media.rawg.io/media/games/909/909974d1c7863c2027241e265fe7011f.jpg",
     "metacritic": 93,
     "rating": 3.99,
     "genres": [

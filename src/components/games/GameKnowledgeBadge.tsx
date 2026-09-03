@@ -80,7 +80,9 @@ export default function GameKnowledgeBadge({
       className={`inline-flex items-center font-mono font-bold rounded-xl border cursor-help ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.text} ${sizeClasses} shadow-sm backdrop-blur-md whitespace-nowrap flex-nowrap`}
     >
       {badgeStyle.icon}
-      <span className="whitespace-nowrap">{score.toFixed(size === "sm" ? 0 : 1)}% GK</span>
+      <span className="whitespace-nowrap">
+        {score.toFixed(size === "sm" ? 0 : 1)}% GK
+      </span>
 
       {showDiff && difference !== null && difference !== undefined && (
         <span

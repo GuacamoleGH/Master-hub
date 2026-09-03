@@ -134,6 +134,7 @@ export default function GameDetailPage() {
               src={game.backgroundImage}
               alt={game.title}
               className="w-full h-full object-cover object-center opacity-30 filter blur-[1px]"
+              referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-cine-950/80 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-cine-950 via-cine-950/70 to-transparent" />
@@ -421,6 +422,7 @@ export default function GameDetailPage() {
                   src={imgUrl}
                   alt={`${game.title} screenshot ${idx + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
                 />
               </div>
             ))}
