@@ -1,25 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Star, Loader2, Clock, Gamepad2, Award } from 'lucide-react';
+import { X, Star, Loader2, Clock, Gamepad2, Award, Check, Plus } from 'lucide-react';
+import { ALL_PLATFORMS, PlatformOption } from '@/lib/platforms';
 
 const STATUS_OPTIONS = [
-  { value: 'BACKLOG', label: '📥 Backlog (Pendiente)', color: 'border-zinc-600 text-zinc-300' },
-  { value: 'PLAYING', label: '🕹️ Jugando Ahora', color: 'border-cyan-500/50 text-cyan-300' },
-  { value: 'COMPLETED', label: '🏆 Completado', color: 'border-purple-500/50 text-purple-300' },
-  { value: 'PLATINUM', label: '👑 100% Platino', color: 'border-amber-500/50 text-amber-300' },
-  { value: 'DROPPED', label: '💀 Abandonado', color: 'border-rose-500/50 text-rose-300' },
+  { value: 'BACKLOG', label: '📥 Backlog (Pendiente)' },
+  { value: 'PLAYING', label: '🕹️ Jugando Ahora' },
+  { value: 'COMPLETED', label: '🏆 Completado' },
+  { value: 'PLATINUM', label: '👑 100% Platino' },
+  { value: 'DROPPED', label: '💀 Abandonado' },
 ];
 
-const PLATFORM_PRESETS = [
-  'PC',
-  'PlayStation 5',
-  'PlayStation 4',
-  'Nintendo Switch',
-  'Xbox Series S/X',
-  'Steam Deck',
-  'Emulador',
-];
+const PLATFORM_CATEGORIES = [
+  'PC & Tiendas',
+  'PlayStation',
+  'Xbox',
+  'Nintendo',
+  'Portátiles & Emulación',
+] as const;
 
 interface GameReviewModalProps {
   isOpen: boolean;
@@ -36,7 +35,7 @@ interface GameReviewModalProps {
   initialStatus?: 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED';
   initialRating?: number | null;
   initialHours?: number | null;
-  initialPlatform?: string | null;
+  initialPlatform?: string | null; // e.g. "PC (Steam), Xbox 360"
   initialReview?: string | null;
 }
 
@@ -55,7 +54,9 @@ export default function GameReviewModal({
   const [rating, setRating] = useState<number>(initialRating ?? 8.5);
   const [hasRating, setHasRating] = useState<boolean>(initialRating !== null && initialRating !== undefined);
   const [hours, setHours] = useState<string>(initialHours ? String(initialHours) : '');
-  const [selectedPlatform, setSelectedPlatform] = useState<string>(initialPlatform || '');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>('PC & Tiendas');
+  const [customPlatform, setCustomPlatform] = useState('');
   const [review, setReview] = useState<string>(initialReview || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,12 +66,39 @@ export default function GameReviewModal({
       setRating(initialRating ?? 8.5);
       setHasRating(initialRating !== null && initialRating !== undefined);
       setHours(initialHours ? String(initialHours) : '');
-      setSelectedPlatform(initialPlatform || (game.platforms && game.platforms[0]) || 'PC');
+
+      // Parsear múltiples plataformas
+      if (initialPlatform) {
+        const parsed = initialPlatform.split(',').map((p) => p.trim()).filter(Boolean);
+        setSelectedPlatforms(parsed);
+      } else if (game.platforms && game.platforms.length > 0) {
+        setSelectedPlatforms([game.platforms[0]]);
+      } else {
+        setSelectedPlatforms(['PC (Steam)']);
+      }
+
       setReview(initialReview || '');
     }
   }, [isOpen, initialStatus, initialRating, initialHours, initialPlatform, initialReview, game]);
 
   if (!isOpen) return null;
+
+  const togglePlatform = (name: string) => {
+    setSelectedPlatforms((prev) => {
+      if (prev.includes(name)) {
+        return prev.filter((p) => p !== name);
+      } else {
+        return [...prev, name];
+      }
+    });
+  };
+
+  const addCustomPlatform = () => {
+    if (customPlatform.trim() && !selectedPlatforms.includes(customPlatform.trim())) {
+      setSelectedPlatforms((prev) => [...prev, customPlatform.trim()]);
+      setCustomPlatform('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +108,7 @@ export default function GameReviewModal({
       const payload: any = {
         rawgId: game.rawgId,
         status,
-        platform: selectedPlatform || null,
+        platform: selectedPlatforms.length > 0 ? selectedPlatforms.join(', ') : null,
         review: review.trim() || null,
         hoursPlayed: hours.trim() ? parseFloat(hours) : null,
       };
@@ -108,26 +136,22 @@ export default function GameReviewModal({
     }
   };
 
-  const platformsList = Array.from(
-    new Set([...PLATFORM_PRESETS, ...(game.platforms || [])])
-  );
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="glass-panel w-full max-w-lg rounded-3xl border border-purple-500/30 overflow-hidden shadow-2xl bg-cine-950/95 flex flex-col max-h-[90vh]">
+      <div className="glass-panel w-full max-w-xl rounded-3xl border border-purple-500/30 overflow-hidden shadow-2xl bg-cine-950/95 flex flex-col max-h-[92vh]">
         {/* Cabecera */}
         <div className="p-6 border-b border-cine-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             {game.backgroundImage && (
               <img
                 src={game.backgroundImage}
                 alt={game.title}
-                className="w-12 h-14 object-cover rounded-xl border border-white/10"
+                className="w-14 h-16 object-cover rounded-xl border border-white/10"
               />
             )}
             <div>
               <span className="text-[11px] font-mono uppercase tracking-widest text-purple-400 font-bold">
-                Registro Gamer
+                Registro Gamer Multi-Plataforma
               </span>
               <h2 className="text-base sm:text-lg font-bold text-white line-clamp-1">
                 {game.title}
@@ -143,7 +167,7 @@ export default function GameReviewModal({
           </button>
         </div>
 
-        {/* Formulario con scroll */}
+        {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
           {/* Selector de Estado */}
           <div className="space-y-2">
@@ -168,50 +192,127 @@ export default function GameReviewModal({
             </div>
           </div>
 
-          {/* Horas Jugadas y Plataforma */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Horas */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  max="9999"
-                  value={hours}
-                  onChange={(e) => setHours(e.target.value)}
-                  placeholder="ej. 127"
-                  className="w-full px-3.5 py-2.5 bg-cine-900 border border-cine-700 rounded-xl text-sm text-white font-mono placeholder-cine-500 focus:outline-none focus:border-cyan-400"
-                />
-                <span className="absolute right-3.5 top-2.5 text-xs text-cine-500 font-mono">
-                  horas
-                </span>
-              </div>
-            </div>
-
-            {/* Plataforma */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Plataforma
-              </label>
-              <select
-                value={selectedPlatform}
-                onChange={(e) => setSelectedPlatform(e.target.value)}
-                className="w-full px-3 py-2.5 bg-cine-900 border border-cine-700 rounded-xl text-xs text-white focus:outline-none focus:border-purple-400"
-              >
-                {platformsList.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
+          {/* Horas Jugadas */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas Totales
+            </label>
+            <div className="relative max-w-xs">
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                max="9999"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+                placeholder="ej. 127"
+                className="w-full px-3.5 py-2.5 bg-cine-900 border border-cine-700 rounded-xl text-sm text-white font-mono placeholder-cine-500 focus:outline-none focus:border-cyan-400"
+              />
+              <span className="absolute right-3.5 top-2.5 text-xs text-cine-500 font-mono">
+                horas
+              </span>
             </div>
           </div>
 
-          {/* Calificación (Slider + Input numérico) */}
+          {/* Selector Multi-Plataforma */}
+          <div className="space-y-3 pt-2 border-t border-cine-800/80">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Plataformas donde lo jugaste o completaste
+              </label>
+              <span className="text-[11px] font-mono text-purple-300">
+                {selectedPlatforms.length} seleccionada(s)
+              </span>
+            </div>
+
+            {/* Chips de plataformas actualmente seleccionadas */}
+            {selectedPlatforms.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 min-h-[44px] items-center">
+                {selectedPlatforms.map((plat) => (
+                  <span
+                    key={plat}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-purple-600/40 text-white border border-purple-400 shadow-sm"
+                  >
+                    <Check className="w-3 h-3 text-cyan-300" />
+                    {plat}
+                    <button
+                      type="button"
+                      onClick={() => togglePlatform(plat)}
+                      className="ml-1 hover:text-rose-400"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Pestañas de categorías de plataformas */}
+            <div className="flex flex-wrap gap-1 border-b border-cine-800 pb-1 text-xs">
+              {PLATFORM_CATEGORIES.map((cat) => (
+                <button
+                  type="button"
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                    activeCategory === cat
+                      ? 'bg-cine-800 text-purple-300 border border-purple-500/30'
+                      : 'text-cine-400 hover:text-white'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Grid de opciones de la categoría activa */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto p-1">
+              {ALL_PLATFORMS.filter((p) => p.category === activeCategory).map((plat) => {
+                const isSelected = selectedPlatforms.includes(plat.name);
+                return (
+                  <button
+                    type="button"
+                    key={plat.id}
+                    onClick={() => togglePlatform(plat.name)}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-mono text-left transition-all flex items-center justify-between border ${
+                      isSelected
+                        ? 'bg-purple-600/30 border-purple-400 text-white font-bold'
+                        : 'bg-cine-900 border-cine-800 text-cine-400 hover:border-cine-700 hover:text-cine-200'
+                    }`}
+                  >
+                    <span className="truncate">{plat.name}</span>
+                    {isSelected && <Check className="w-3 h-3 text-cyan-400 flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Añadir plataforma personalizada si no está en la lista */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="text"
+                value={customPlatform}
+                onChange={(e) => setCustomPlatform(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addCustomPlatform();
+                  }
+                }}
+                placeholder="Otra plataforma (ej. PS Vita, Amiga, SteamOS)..."
+                className="flex-1 px-3 py-1.5 bg-cine-900 border border-cine-800 rounded-xl text-xs text-white placeholder-cine-500 focus:outline-none focus:border-purple-400"
+              />
+              <button
+                type="button"
+                onClick={addCustomPlatform}
+                className="px-3 py-1.5 bg-cine-800 hover:bg-cine-700 text-purple-300 font-semibold rounded-xl text-xs flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" /> Añadir
+              </button>
+            </div>
+          </div>
+
+          {/* Calificación */}
           <div className="space-y-3 pt-2 border-t border-cine-800/80">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
@@ -268,8 +369,8 @@ export default function GameReviewModal({
             <textarea
               value={review}
               onChange={(e) => setReview(e.target.value)}
-              placeholder="¿Qué te pareció la jugabilidad, el mundo, la dificultad, el final?..."
-              rows={4}
+              placeholder="¿Qué te pareció en cada plataforma?..."
+              rows={3}
               className="w-full p-3.5 bg-cine-900 border border-cine-700 rounded-xl text-sm text-cine-200 placeholder-cine-500 focus:outline-none focus:border-purple-400 resize-none"
             />
           </div>

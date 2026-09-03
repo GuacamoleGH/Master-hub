@@ -1,9 +1,9 @@
-import React from 'react';
-import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
-import { calculateGamerLevelAndRank } from '@/lib/gameKnowledge';
-import GameCard from '@/components/games/GameCard';
-import GamerLevelBar from '@/components/games/GamerLevelBar';
+import React from "react";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
+import GameCard from "@/components/games/GameCard";
+import GamerLevelBar from "@/components/games/GamerLevelBar";
 import {
   Gamepad2,
   Bookmark,
@@ -14,22 +14,22 @@ import {
   TrendingUp,
   Award,
   Compass,
-} from 'lucide-react';
+} from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function GamerHomePage() {
   // 1. Obtener perfil gamer
   let profile = await prisma.gamerProfile.findUnique({
-    where: { id: 'gamer-default' },
+    where: { id: "gamer-default" },
   });
 
   if (!profile) {
     profile = {
-      id: 'gamer-default',
-      displayName: 'Jose',
+      id: "gamer-default",
+      displayName: "Jose",
       avatarUrl: null,
-      bio: 'Explorador y analista de videojuegos.',
+      bio: "Explorador y analista de videojuegos.",
       totalXp: 0,
       updatedAt: new Date(),
     };
@@ -39,23 +39,23 @@ export default async function GamerHomePage() {
 
   // 2. Obtener backlog
   const backlogRecords = await prisma.userGame.findMany({
-    where: { status: 'BACKLOG' },
+    where: { status: "BACKLOG" },
     include: { game: true },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     take: 6,
   });
 
   // 3. Obtener completados
   const completedRecords = await prisma.userGame.findMany({
-    where: { status: { in: ['COMPLETED', 'PLATINUM'] } },
+    where: { status: { in: ["COMPLETED", "PLATINUM"] } },
     include: { game: true },
-    orderBy: { completedDate: 'desc' },
+    orderBy: { completedDate: "desc" },
     take: 6,
   });
 
   // 4. Jugando actualmente
   const playingRecords = await prisma.userGame.findMany({
-    where: { status: 'PLAYING' },
+    where: { status: "PLAYING" },
     include: { game: true },
     take: 4,
   });
@@ -67,21 +67,26 @@ export default async function GamerHomePage() {
 
   let totalHours = 0;
   let totalCompleted = 0;
-  const withGk = allUserGames.filter((ug) => typeof ug.gameKnowledge === 'number');
+  const withGk = allUserGames.filter(
+    (ug) => typeof ug.gameKnowledge === "number",
+  );
   const avgGk =
     withGk.length > 0
-      ? (withGk.reduce((acc, c) => acc + (c.gameKnowledge || 0), 0) / withGk.length).toFixed(1)
+      ? (
+          withGk.reduce((acc, c) => acc + (c.gameKnowledge || 0), 0) /
+          withGk.length
+        ).toFixed(1)
       : null;
 
   for (const ug of allUserGames) {
     if (ug.hoursPlayed) totalHours += ug.hoursPlayed;
-    if (ug.status === 'COMPLETED' || ug.status === 'PLATINUM') totalCompleted++;
+    if (ug.status === "COMPLETED" || ug.status === "PLATINUM") totalCompleted++;
   }
 
   // 6. Catálogo general para explorar
   const exploreGames = await prisma.game.findMany({
     take: 6,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     include: { userGame: true },
   });
 
@@ -100,11 +105,17 @@ export default async function GamerHomePage() {
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Bienvenido, <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">{profile.displayName}</span>
+              Bienvenido,{" "}
+              <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                {profile.displayName}
+              </span>
             </h1>
 
             <p className="text-sm sm:text-base text-cine-300 leading-relaxed">
-              Registra tus aventuras virtuales, acumula horas de juego, analiza tus discrepancias frente a Metacritic con el índice <strong className="text-purple-300">Game Knowledge</strong> y descubre tus <strong className="text-cyan-300">Hot Takes</strong>.
+              Registra tus aventuras virtuales, acumula horas de juego, analiza
+              tus discrepancias frente a Metacritic con el índice{" "}
+              <strong className="text-purple-300">Game Knowledge</strong> y
+              descubre tus <strong className="text-cyan-300">Hot Takes</strong>.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -112,13 +123,15 @@ export default async function GamerHomePage() {
                 href="/games/completed"
                 className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.4)] text-sm transition-all flex items-center gap-2"
               >
-                <CheckCircle2 className="w-4 h-4" /> Completados ({totalCompleted})
+                <CheckCircle2 className="w-4 h-4" /> Completados (
+                {totalCompleted})
               </Link>
               <Link
                 href="/games/backlog"
                 className="px-5 py-2.5 glass-card hover:bg-purple-950/40 text-white font-semibold rounded-xl border border-purple-500/30 text-sm transition-all flex items-center gap-2"
               >
-                <Bookmark className="w-4 h-4 text-cyan-400" /> Backlog ({backlogRecords.length})
+                <Bookmark className="w-4 h-4 text-cyan-400" /> Backlog (
+                {backlogRecords.length})
               </Link>
             </div>
           </div>
@@ -140,15 +153,21 @@ export default async function GamerHomePage() {
             {Math.round(totalHours)}
             <span className="text-xs text-cine-500 font-normal"> h</span>
           </div>
-          <div className="text-[11px] text-cine-500 mt-1">Registradas en tu diario</div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Registradas en tu diario
+          </div>
         </div>
 
         <div className="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
             <Award className="w-4 h-4 text-purple-400" /> Completados
           </div>
-          <div className="text-2xl font-black text-purple-300 font-mono">{totalCompleted}</div>
-          <div className="text-[11px] text-cine-500 mt-1">Campañas finalizadas</div>
+          <div className="text-2xl font-black text-purple-300 font-mono">
+            {totalCompleted}
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Campañas finalizadas
+          </div>
         </div>
 
         <div className="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-cine-900/60">
@@ -156,16 +175,20 @@ export default async function GamerHomePage() {
             <span className="text-sm">🧠</span> Game Knowledge
           </div>
           <div className="text-2xl font-black text-cyan-400 font-mono">
-            {avgGk ? `${avgGk}%` : '—'}
+            {avgGk ? `${avgGk}%` : "—"}
           </div>
-          <div className="text-[11px] text-cine-500 mt-1">Afinidad con Metacritic</div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Afinidad con Metacritic
+          </div>
         </div>
 
         <div className="glass-panel p-4 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
             <TrendingUp className="w-4 h-4 text-purple-400" /> Experiencia Gamer
           </div>
-          <div className="text-2xl font-black text-purple-400 font-mono">{profile.totalXp}</div>
+          <div className="text-2xl font-black text-purple-400 font-mono">
+            {profile.totalXp}
+          </div>
           <div className="text-[11px] text-cine-500 mt-1">
             {levelInfo.xpProgressPercent}% hacia Lvl. {levelInfo.level + 1}
           </div>
@@ -185,7 +208,9 @@ export default async function GamerHomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {playingRecords.map((item) => {
               let platforms: string[] = [];
-              try { platforms = JSON.parse(item.game.platforms); } catch {}
+              try {
+                platforms = JSON.parse(item.game.platforms);
+              } catch {}
               return (
                 <GameCard
                   key={item.id}
@@ -199,7 +224,7 @@ export default async function GamerHomePage() {
                     platforms,
                   }}
                   userGame={{
-                    status: 'PLAYING',
+                    status: "PLAYING",
                     hoursPlayed: item.hoursPlayed,
                     platform: item.platform,
                   }}
@@ -224,7 +249,7 @@ export default async function GamerHomePage() {
               href="/games/completed"
               className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1 group"
             >
-              Ver todos ({totalCompleted}){' '}
+              Ver todos ({totalCompleted}){" "}
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
@@ -232,7 +257,9 @@ export default async function GamerHomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {completedRecords.map((item) => {
               let platforms: string[] = [];
-              try { platforms = JSON.parse(item.game.platforms); } catch {}
+              try {
+                platforms = JSON.parse(item.game.platforms);
+              } catch {}
               return (
                 <GameCard
                   key={item.id}
@@ -275,7 +302,7 @@ export default async function GamerHomePage() {
               href="/games/backlog"
               className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 group"
             >
-              Ver todos ({backlogRecords.length}){' '}
+              Ver todos ({backlogRecords.length}){" "}
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
@@ -283,7 +310,9 @@ export default async function GamerHomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {backlogRecords.map((item) => {
               let platforms: string[] = [];
-              try { platforms = JSON.parse(item.game.platforms); } catch {}
+              try {
+                platforms = JSON.parse(item.game.platforms);
+              } catch {}
               return (
                 <GameCard
                   key={item.id}
@@ -297,7 +326,7 @@ export default async function GamerHomePage() {
                     platforms,
                   }}
                   userGame={{
-                    status: 'BACKLOG',
+                    status: "BACKLOG",
                     platform: item.platform,
                   }}
                 />
@@ -319,7 +348,9 @@ export default async function GamerHomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {exploreGames.map((game) => {
             let platforms: string[] = [];
-            try { platforms = JSON.parse(game.platforms); } catch {}
+            try {
+              platforms = JSON.parse(game.platforms);
+            } catch {}
             return (
               <GameCard
                 key={game.id}

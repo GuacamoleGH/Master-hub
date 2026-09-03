@@ -26,7 +26,7 @@ export interface GameDetail {
   trailerUrl: string | null;
   userGame?: {
     id: string;
-    status: 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED';
+    status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
     userRating: number | null;
     hoursPlayed: number | null;
     platform: string | null;
@@ -40,7 +40,7 @@ export interface GameDetail {
 export interface UserGameItem {
   id: string;
   gameId: string;
-  status: 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED';
+  status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
   userRating: number | null;
   hoursPlayed: number | null;
   platform: string | null;
@@ -78,7 +78,7 @@ export interface HotTake {
   criticRating: number; // escala 0-10
   difference: number;
   gameKnowledge: number;
-  type: 'BASED' | 'OVERRATED' | 'UNDERRATED';
+  type: "BASED" | "OVERRATED" | "UNDERRATED";
   hoursPlayed?: number | null;
 }
 

@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getGameDetail } from '@/lib/rawg';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getGameDetail } from "@/lib/rawg";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const idOrRawg = params.id;
 
@@ -26,11 +26,22 @@ export async function GET(
       let parsedPublishers: string[] = [];
       let parsedScreenshots: string[] = [];
 
-      try { parsedGenres = JSON.parse(dbGame.genres); } catch {}
-      try { parsedPlatforms = JSON.parse(dbGame.platforms); } catch {}
-      try { if (dbGame.developers) parsedDevelopers = JSON.parse(dbGame.developers); } catch {}
-      try { if (dbGame.publishers) parsedPublishers = JSON.parse(dbGame.publishers); } catch {}
-      try { if (dbGame.screenshots) parsedScreenshots = JSON.parse(dbGame.screenshots); } catch {}
+      try {
+        parsedGenres = JSON.parse(dbGame.genres);
+      } catch {}
+      try {
+        parsedPlatforms = JSON.parse(dbGame.platforms);
+      } catch {}
+      try {
+        if (dbGame.developers) parsedDevelopers = JSON.parse(dbGame.developers);
+      } catch {}
+      try {
+        if (dbGame.publishers) parsedPublishers = JSON.parse(dbGame.publishers);
+      } catch {}
+      try {
+        if (dbGame.screenshots)
+          parsedScreenshots = JSON.parse(dbGame.screenshots);
+      } catch {}
 
       return NextResponse.json({
         game: {
@@ -75,9 +86,15 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ error: 'Videojuego no encontrado' }, { status: 404 });
+    return NextResponse.json(
+      { error: "Videojuego no encontrado" },
+      { status: 404 },
+    );
   } catch (error) {
-    console.error('Error en /api/games/[id]:', error);
-    return NextResponse.json({ error: 'Error al obtener el videojuego' }, { status: 500 });
+    console.error("Error en /api/games/[id]:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el videojuego" },
+      { status: 500 },
+    );
   }
 }

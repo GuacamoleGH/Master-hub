@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   Gamepad2,
   Calendar,
@@ -17,10 +17,12 @@ import {
   Tv,
   Play,
   Layers,
-} from 'lucide-react';
-import { GameDetail } from '@/types/game';
-import GameKnowledgeBadge from '@/components/games/GameKnowledgeBadge';
-import GameReviewModal from '@/components/games/GameReviewModal';
+} from "lucide-react";
+import { GameDetail } from "@/types/game";
+import GameKnowledgeBadge from "@/components/games/GameKnowledgeBadge";
+import GameReviewModal from "@/components/games/GameReviewModal";
+import GamePoster from '@/components/games/GamePoster';
+import PlatformBadge from '@/components/games/PlatformBadge';
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -57,7 +59,9 @@ export default function GameDetailPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-        <p className="text-sm text-cine-400 font-medium font-mono">Cargando base de datos gamer...</p>
+        <p className="text-sm text-cine-400 font-medium font-mono">
+          Cargando base de datos gamer...
+        </p>
       </div>
     );
   }
@@ -66,7 +70,9 @@ export default function GameDetailPage() {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center gap-4">
         <Gamepad2 className="w-12 h-12 text-cine-600" />
-        <h2 className="text-xl font-bold text-white">Videojuego no encontrado</h2>
+        <h2 className="text-xl font-bold text-white">
+          Videojuego no encontrado
+        </h2>
         <button
           onClick={() => router.back()}
           className="px-4 py-2 bg-cine-800 hover:bg-cine-700 text-sm rounded-xl transition-colors"
@@ -77,22 +83,24 @@ export default function GameDetailPage() {
     );
   }
 
-  const isBacklog = game.userGame?.status === 'BACKLOG';
-  const isFinished = game.userGame?.status === 'COMPLETED' || game.userGame?.status === 'PLATINUM';
+  const isBacklog = game.userGame?.status === "BACKLOG";
+  const isFinished =
+    game.userGame?.status === "COMPLETED" ||
+    game.userGame?.status === "PLATINUM";
 
   const handleToggleBacklog = async () => {
     setIsUpdatingBacklog(true);
     try {
       if (isBacklog) {
-        await fetch(`/api/user-games?gameId=${game.id}`, { method: 'DELETE' });
+        await fetch(`/api/user-games?gameId=${game.id}`, { method: "DELETE" });
       } else {
-        await fetch('/api/user-games', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("/api/user-games", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             rawgId: game.rawgId,
-            status: 'BACKLOG',
-            platform: game.platforms?.[0] || 'PC',
+            status: "BACKLOG",
+            platform: game.platforms?.[0] || "PC",
           }),
         });
       }
@@ -104,7 +112,9 @@ export default function GameDetailPage() {
     }
   };
 
-  const criticScore = game.metacritic ? (game.metacritic / 10).toFixed(1) : null;
+  const criticScore = game.metacritic
+    ? (game.metacritic / 10).toFixed(1)
+    : null;
 
   return (
     <div className="space-y-10 pb-16 animate-fade-in">
@@ -133,17 +143,11 @@ export default function GameDetailPage() {
         <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
           {/* Carátula */}
           <div className="w-48 sm:w-60 flex-shrink-0 aspect-[16/10] sm:aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900">
-            {game.backgroundImage ? (
-              <img
-                src={game.backgroundImage}
-                alt={game.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-cine-600">
-                <Gamepad2 className="w-12 h-12" />
-              </div>
-            )}
+            <GamePoster
+              src={game.backgroundImage}
+              alt={game.title}
+              className="w-full h-full object-cover"
+            />
           </div>
 
           {/* Datos y Ficha */}
@@ -157,7 +161,8 @@ export default function GameDetailPage() {
                 )}
                 {criticScore && (
                   <span className="text-xs text-cine-400 font-mono">
-                    (Crítica: <strong className="text-cyan-300">{criticScore}/10</strong>)
+                    (Crítica:{" "}
+                    <strong className="text-cyan-300">{criticScore}/10</strong>)
                   </span>
                 )}
               </div>
@@ -169,7 +174,7 @@ export default function GameDetailPage() {
               {game.developers && game.developers.length > 0 && (
                 <p className="text-sm text-purple-300 mt-1 flex items-center gap-1.5">
                   <Building className="w-3.5 h-3.5 text-purple-400" />
-                  {game.developers.join(', ')}
+                  {game.developers.join(", ")}
                 </p>
               )}
             </div>
@@ -231,24 +236,28 @@ export default function GameDetailPage() {
                 disabled={isUpdatingBacklog}
                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
                   isBacklog
-                    ? 'bg-cyan-500 text-cine-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                    : 'glass-card border border-purple-500/30 text-cine-200 hover:text-white hover:bg-purple-950/40'
+                    ? "bg-cyan-500 text-cine-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                    : "glass-card border border-purple-500/30 text-cine-200 hover:text-white hover:bg-purple-950/40"
                 }`}
               >
-                <Bookmark className={`w-4 h-4 ${isBacklog ? 'fill-cine-950' : 'text-cyan-400'}`} />
-                {isBacklog ? 'En tu Backlog' : '+ Añadir a Backlog'}
+                <Bookmark
+                  className={`w-4 h-4 ${isBacklog ? "fill-cine-950" : "text-cyan-400"}`}
+                />
+                {isBacklog ? "En tu Backlog" : "+ Añadir a Backlog"}
               </button>
 
               <button
                 onClick={() => setIsReviewOpen(true)}
                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
                   isFinished
-                    ? 'bg-purple-600 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)]'
-                    : 'bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                    ? "bg-purple-600 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                    : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)]"
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {game.userGame ? 'Modificar veredicto gamer' : 'Registrar partida'}
+                {game.userGame
+                  ? "Modificar veredicto gamer"
+                  : "Registrar partida"}
               </button>
             </div>
           </div>
@@ -261,7 +270,9 @@ export default function GameDetailPage() {
           <div className="flex items-center justify-between border-b border-cine-800 pb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-400" />
-              <h2 className="text-xl font-bold text-white tracking-wide">Tu Veredicto Gamer</h2>
+              <h2 className="text-xl font-bold text-white tracking-wide">
+                Tu Veredicto Gamer
+              </h2>
             </div>
             <button
               onClick={() => setIsReviewOpen(true)}
@@ -274,10 +285,12 @@ export default function GameDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-2">
             {/* Mi Calificación */}
             <div className="space-y-1">
-              <span className="text-xs text-cine-400 font-medium">Tu Puntuación</span>
+              <span className="text-xs text-cine-400 font-medium">
+                Tu Puntuación
+              </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-purple-400 font-mono">
-                  {game.userGame.userRating?.toFixed(1) ?? '—'}
+                  {game.userGame.userRating?.toFixed(1) ?? "—"}
                 </span>
                 <span className="text-sm text-cine-500 font-mono">/ 10</span>
                 {criticScore && (
@@ -286,27 +299,33 @@ export default function GameDetailPage() {
                   </span>
                 )}
               </div>
-              {game.userGame.difference !== null && game.userGame.difference !== undefined && (
-                <div className="text-xs text-cine-400 font-mono">
-                  Diferencia:{' '}
-                  <strong
-                    className={
-                      Math.abs(game.userGame.difference) <= 0.3
-                        ? 'text-cyan-400'
-                        : game.userGame.difference > 0
-                        ? 'text-emerald-400'
-                        : 'text-rose-400'
-                    }
-                  >
-                    {game.userGame.difference > 0 ? `+${game.userGame.difference}` : game.userGame.difference} pts
-                  </strong>
-                </div>
-              )}
+              {game.userGame.difference !== null &&
+                game.userGame.difference !== undefined && (
+                  <div className="text-xs text-cine-400 font-mono">
+                    Diferencia:{" "}
+                    <strong
+                      className={
+                        Math.abs(game.userGame.difference) <= 0.3
+                          ? "text-cyan-400"
+                          : game.userGame.difference > 0
+                            ? "text-emerald-400"
+                            : "text-rose-400"
+                      }
+                    >
+                      {game.userGame.difference > 0
+                        ? `+${game.userGame.difference}`
+                        : game.userGame.difference}{" "}
+                      pts
+                    </strong>
+                  </div>
+                )}
             </div>
 
             {/* Game Knowledge */}
             <div className="space-y-2">
-              <span className="text-xs text-cine-400 font-medium">Índice Game Knowledge</span>
+              <span className="text-xs text-cine-400 font-medium">
+                Índice Game Knowledge
+              </span>
               <div>
                 <GameKnowledgeBadge
                   score={game.userGame.gameKnowledge}
@@ -316,15 +335,23 @@ export default function GameDetailPage() {
               </div>
             </div>
 
-            {/* Horas Jugadas */}
+            {/* Horas Jugadas y Plataformas */}
             <div className="space-y-1">
-              <span className="text-xs text-cine-400 font-medium">Tiempo Invertido</span>
-              <div className="text-2xl font-black text-cyan-400 font-mono">
-                {game.userGame.hoursPlayed ? `${game.userGame.hoursPlayed} h` : 'No registrado'}
-              </div>
-              <span className="text-[11px] text-cine-500 font-mono">
-                Plataforma: <strong className="text-cine-300">{game.userGame.platform || 'General'}</strong>
+              <span className="text-xs text-cine-400 font-medium">
+                Tiempo & Plataformas
               </span>
+              <div className="text-2xl font-black text-cyan-400 font-mono">
+                {game.userGame.hoursPlayed
+                  ? `${game.userGame.hoursPlayed} h`
+                  : "No registrado"}
+              </div>
+              <div className="pt-1">
+                {game.userGame.platform ? (
+                  <PlatformBadge platform={game.userGame.platform} size="sm" />
+                ) : (
+                  <span className="text-[11px] text-cine-500 italic">Sin plataforma</span>
+                )}
+              </div>
             </div>
 
             {/* Estado */}
@@ -341,7 +368,9 @@ export default function GameDetailPage() {
           {/* Reseña Completa */}
           {game.userGame.review && (
             <div className="pt-4 border-t border-cine-800/80">
-              <span className="text-xs text-cine-400 font-medium block mb-1">Tu Crítica</span>
+              <span className="text-xs text-cine-400 font-medium block mb-1">
+                Tu Crítica
+              </span>
               <blockquote className="p-4 rounded-xl bg-cine-950/70 border border-purple-500/20 text-cine-200 text-sm italic leading-relaxed">
                 &quot;{game.userGame.review}&quot;
               </blockquote>
@@ -355,7 +384,9 @@ export default function GameDetailPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Play className="w-5 h-5 text-purple-400" />
-            <h2 className="text-xl font-bold text-white tracking-wide">Trailer Oficial</h2>
+            <h2 className="text-xl font-bold text-white tracking-wide">
+              Trailer Oficial
+            </h2>
           </div>
           <div className="rounded-3xl overflow-hidden glass-panel border border-purple-500/30 aspect-video max-w-4xl bg-black">
             <video
@@ -401,7 +432,8 @@ export default function GameDetailPage() {
           Sinopsis
         </h2>
         <div className="text-cine-300 text-sm sm:text-base leading-relaxed whitespace-pre-line max-w-4xl">
-          {game.description || 'Sin descripción disponible para este videojuego.'}
+          {game.description ||
+            "Sin descripción disponible para este videojuego."}
         </div>
       </section>
 
@@ -418,7 +450,7 @@ export default function GameDetailPage() {
           metacritic: game.metacritic,
           platforms: game.platforms,
         }}
-        initialStatus={game.userGame?.status || 'COMPLETED'}
+        initialStatus={game.userGame?.status || "COMPLETED"}
         initialRating={game.userGame?.userRating}
         initialHours={game.userGame?.hoursPlayed}
         initialPlatform={game.userGame?.platform}

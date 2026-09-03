@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Search, Loader2, Gamepad2, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { GameSearchResult } from '@/types/game';
-import GameCard from '@/components/games/GameCard';
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { Search, Loader2, Gamepad2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { GameSearchResult } from "@/types/game";
+import GameCard from "@/components/games/GameCard";
 
 function GameSearchContent() {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const query = searchParams.get("q") || "";
 
   const [results, setResults] = useState<GameSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,13 +20,15 @@ function GameSearchContent() {
     const fetchSearch = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/games/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(
+          `/api/games/search?q=${encodeURIComponent(query)}`,
+        );
         if (res.ok) {
           const data = await res.json();
           setResults(data.results || []);
         }
       } catch (err) {
-        console.error('Error al buscar juegos:', err);
+        console.error("Error al buscar juegos:", err);
       } finally {
         setIsLoading(false);
       }
@@ -51,7 +53,8 @@ function GameSearchContent() {
             <Search className="w-5 h-5" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Resultados para &quot;<span className="text-purple-400">{query}</span>&quot;
+            Resultados para &quot;
+            <span className="text-purple-400">{query}</span>&quot;
           </h1>
           <span className="px-2.5 py-0.5 rounded-full bg-cine-800 border border-purple-500/30 text-xs font-mono font-bold text-purple-300">
             {results.length}
@@ -65,7 +68,9 @@ function GameSearchContent() {
       {isLoading ? (
         <div className="min-h-[40vh] flex flex-col items-center justify-center gap-2">
           <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
-          <span className="text-xs text-cine-400 font-mono">Buscando videojuegos en RAWG...</span>
+          <span className="text-xs text-cine-400 font-mono">
+            Buscando videojuegos en RAWG...
+          </span>
         </div>
       ) : results.length === 0 ? (
         <div className="glass-panel p-12 rounded-3xl border border-purple-500/20 text-center flex flex-col items-center justify-center gap-4 max-w-lg mx-auto bg-cine-950">
@@ -73,9 +78,12 @@ function GameSearchContent() {
             <Gamepad2 className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-white">No se encontraron videojuegos</h3>
+            <h3 className="text-base font-bold text-white">
+              No se encontraron videojuegos
+            </h3>
             <p className="text-xs text-cine-400">
-              Prueba a escribir el título en inglés o con palabras clave más generales.
+              Prueba a escribir el título en inglés o con palabras clave más
+              generales.
             </p>
           </div>
           <Link

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, Loader2, Gamepad2 } from 'lucide-react';
-import { GameSearchResult } from '@/types/game';
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Search, Loader2, Gamepad2 } from "lucide-react";
+import { GameSearchResult } from "@/types/game";
 
 interface GameSearchInputProps {
   placeholder?: string;
@@ -11,11 +11,11 @@ interface GameSearchInputProps {
 }
 
 export default function GameSearchInput({
-  placeholder = 'Buscar juego (ej. The Witcher 3, Elden Ring, Hollow Knight)...',
-  className = '',
+  placeholder = "Buscar juego (ej. The Witcher 3, Elden Ring, Hollow Knight)...",
+  className = "",
 }: GameSearchInputProps) {
   const router = useRouter();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<GameSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -31,14 +31,16 @@ export default function GameSearchInput({
     setIsLoading(true);
     const timeoutId = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/games/search?q=${encodeURIComponent(query.trim())}`);
+        const res = await fetch(
+          `/api/games/search?q=${encodeURIComponent(query.trim())}`,
+        );
         if (res.ok) {
           const data = await res.json();
           setResults(data.results || []);
           setIsOpen(true);
         }
       } catch (err) {
-        console.error('Error al buscar juegos:', err);
+        console.error("Error al buscar juegos:", err);
       } finally {
         setIsLoading(false);
       }
@@ -50,22 +52,25 @@ export default function GameSearchInput({
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSelect = (gameId: number) => {
     setIsOpen(false);
-    setQuery('');
+    setQuery("");
     router.push(`/games/${gameId}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && query.trim()) {
+    if (e.key === "Enter" && query.trim()) {
       setIsOpen(false);
       router.push(`/games/search?q=${encodeURIComponent(query.trim())}`);
     }
@@ -115,7 +120,7 @@ export default function GameSearchInput({
                     alt={game.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
+                      (e.target as HTMLElement).style.display = "none";
                     }}
                   />
                 ) : (
@@ -131,10 +136,10 @@ export default function GameSearchInput({
                   {game.title}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-cine-400 mt-0.5">
-                  {game.released && <span>{game.released.split('-')[0]}</span>}
+                  {game.released && <span>{game.released.split("-")[0]}</span>}
                   {game.platforms.length > 0 && (
                     <span className="truncate max-w-[140px] text-cine-500">
-                      • {game.platforms.slice(0, 2).join(', ')}
+                      • {game.platforms.slice(0, 2).join(", ")}
                     </span>
                   )}
                 </div>
@@ -152,7 +157,9 @@ export default function GameSearchInput({
           <button
             onClick={() => {
               setIsOpen(false);
-              router.push(`/games/search?q=${encodeURIComponent(query.trim())}`);
+              router.push(
+                `/games/search?q=${encodeURIComponent(query.trim())}`,
+              );
             }}
             className="w-full py-2.5 text-center text-xs text-purple-400 hover:text-purple-300 font-semibold bg-purple-950/20 hover:bg-purple-950/40 transition-colors"
           >

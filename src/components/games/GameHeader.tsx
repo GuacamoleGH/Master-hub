@@ -1,24 +1,32 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Gamepad2, Bookmark, CheckCircle2, User, Menu, X, ArrowLeft } from 'lucide-react';
-import GameSearchInput from './GameSearchInput';
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Gamepad2,
+  Bookmark,
+  CheckCircle2,
+  User,
+  Menu,
+  X,
+  ArrowLeft,
+} from "lucide-react";
+import GameSearchInput from "./GameSearchInput";
 
 export default function GameHeader() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '/games', label: 'Inicio', icon: Gamepad2 },
-    { href: '/games/backlog', label: 'Backlog', icon: Bookmark },
-    { href: '/games/completed', label: 'Completados', icon: CheckCircle2 },
-    { href: '/games/profile', label: 'Perfil Gamer', icon: User },
+    { href: "/games", label: "Inicio", icon: Gamepad2 },
+    { href: "/games/backlog", label: "Backlog", icon: Bookmark },
+    { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
+    { href: "/games/profile", label: "Perfil Gamer", icon: User },
   ];
 
   const isActive = (href: string) => {
-    if (href === '/games') return pathname === '/games';
+    if (href === "/games") return pathname === "/games";
     return pathname.startsWith(href);
   };
 
@@ -67,11 +75,13 @@ export default function GameHeader() {
                 href={link.href}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                   active
-                    ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(139,92,246,0.2)]'
-                    : 'text-cine-300 hover:text-white hover:bg-cine-900'
+                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(139,92,246,0.2)]"
+                    : "text-cine-300 hover:text-white hover:bg-cine-900"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${active ? 'text-purple-400' : 'text-cine-400'}`} />
+                <Icon
+                  className={`w-3.5 h-3.5 ${active ? "text-purple-400" : "text-cine-400"}`}
+                />
                 <span>{link.label}</span>
               </Link>
             );
@@ -84,7 +94,11 @@ export default function GameHeader() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 rounded-xl text-cine-400 hover:text-white hover:bg-cine-900 border border-cine-800"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -107,8 +121,8 @@ export default function GameHeader() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold ${
                   active
-                    ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40'
-                    : 'text-cine-300 hover:bg-cine-900'
+                    ? "bg-purple-600/30 text-purple-300 border border-purple-500/40"
+                    : "text-cine-300 hover:bg-cine-900"
                 }`}
               >
                 <Icon className="w-4 h-4 text-purple-400" />

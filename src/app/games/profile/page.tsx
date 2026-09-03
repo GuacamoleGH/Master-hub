@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Gamepad2,
   Clock,
@@ -13,11 +13,11 @@ import {
   Tv,
   Flame,
   BarChart3,
-} from 'lucide-react';
-import { GamerStats } from '@/types/game';
-import GamerLevelBar from '@/components/games/GamerLevelBar';
-import CriticVsYouChart from '@/components/games/CriticVsYouChart';
-import HotTakesTable from '@/components/games/HotTakesTable';
+} from "lucide-react";
+import { GamerStats } from "@/types/game";
+import GamerLevelBar from "@/components/games/GamerLevelBar";
+import CriticVsYouChart from "@/components/games/CriticVsYouChart";
+import HotTakesTable from "@/components/games/HotTakesTable";
 import {
   ResponsiveContainer,
   BarChart,
@@ -26,11 +26,15 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-} from 'recharts';
+} from "recharts";
 
 export default function GamerProfilePage() {
   const [profileData, setProfileData] = useState<{
-    profile: { displayName: string; bio: string | null; avatarUrl: string | null };
+    profile: {
+      displayName: string;
+      bio: string | null;
+      avatarUrl: string | null;
+    };
     stats: GamerStats;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,13 +42,13 @@ export default function GamerProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/games/profile');
+      const res = await fetch("/api/games/profile");
       if (res.ok) {
         const data = await res.json();
         setProfileData(data);
       }
     } catch (err) {
-      console.error('Error al cargar perfil gamer:', err);
+      console.error("Error al cargar perfil gamer:", err);
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +62,9 @@ export default function GamerProfilePage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-        <p className="text-xs text-cine-400 font-mono">Calculando telemetría de juego y Game Knowledge...</p>
+        <p className="text-xs text-cine-400 font-mono">
+          Calculando telemetría de juego y Game Knowledge...
+        </p>
       </div>
     );
   }
@@ -108,7 +114,8 @@ export default function GamerProfilePage() {
               </h1>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg">
-                {profile.bio || 'Jugador y analista del catálogo universal de videojuegos.'}
+                {profile.bio ||
+                  "Jugador y analista del catálogo universal de videojuegos."}
               </p>
             </div>
           </div>
@@ -130,7 +137,9 @@ export default function GamerProfilePage() {
             {stats.totalHours}
             <span className="text-sm font-normal text-cyan-400"> h</span>
           </div>
-          <div className="text-[11px] text-cine-500 mt-1">Tiempo de vida en videojuegos</div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Tiempo de vida en videojuegos
+          </div>
         </div>
 
         {/* Campañas Completadas */}
@@ -142,7 +151,9 @@ export default function GamerProfilePage() {
             {stats.totalCompleted}
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
-            {stats.totalPlatinum > 0 ? `${stats.totalPlatinum} platinos al 100%` : 'Campañas finalizadas'}
+            {stats.totalPlatinum > 0
+              ? `${stats.totalPlatinum} platinos al 100%`
+              : "Campañas finalizadas"}
           </div>
         </div>
 
@@ -152,22 +163,29 @@ export default function GamerProfilePage() {
             <Brain className="w-4 h-4 text-cyan-400" /> Game Knowledge
           </div>
           <div className="text-3xl font-black text-cyan-400 font-mono">
-            {stats.globalGameKnowledge ? `${stats.globalGameKnowledge}%` : '—'}
+            {stats.globalGameKnowledge ? `${stats.globalGameKnowledge}%` : "—"}
           </div>
-          <div className="text-[11px] text-cine-500 mt-1">Afinidad global vs Metacritic</div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Afinidad global vs Metacritic
+          </div>
         </div>
 
         {/* Nota Media vs Crítica */}
         <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota Media
+            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota
+            Media
           </div>
           <div className="text-3xl font-black text-purple-400 font-mono">
-            {stats.averageRating ? `${stats.averageRating}` : '—'}
-            <span className="text-xs font-normal text-cine-500 font-sans"> / 10</span>
+            {stats.averageRating ? `${stats.averageRating}` : "—"}
+            <span className="text-xs font-normal text-cine-500 font-sans">
+              {" "}
+              / 10
+            </span>
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
-            Crítica promedio: {stats.averageMetacritic ? `${stats.averageMetacritic}/10` : '—'}
+            Crítica promedio:{" "}
+            {stats.averageMetacritic ? `${stats.averageMetacritic}/10` : "—"}
           </div>
         </div>
       </section>
@@ -212,7 +230,9 @@ export default function GamerProfilePage() {
         <section className="glass-panel p-6 rounded-3xl border border-purple-500/20 bg-cine-950 space-y-4">
           <div className="flex items-center gap-2 border-b border-cine-800 pb-3">
             <Tv className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-base font-bold text-white">Horas por Plataforma</h3>
+            <h3 className="text-base font-bold text-white">
+              Horas por Plataforma
+            </h3>
           </div>
 
           {stats.hoursByPlatform.length === 0 ? (
@@ -227,8 +247,17 @@ export default function GamerProfilePage() {
                   layout="vertical"
                   margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#232635" horizontal={false} />
-                  <XAxis type="number" stroke="#71717A" fontSize={11} tickLine={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#232635"
+                    horizontal={false}
+                  />
+                  <XAxis
+                    type="number"
+                    stroke="#71717A"
+                    fontSize={11}
+                    tickLine={false}
+                  />
                   <YAxis
                     dataKey="platform"
                     type="category"
@@ -238,14 +267,19 @@ export default function GamerProfilePage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#090A10',
-                      borderColor: '#8B5CF6',
-                      borderRadius: '12px',
-                      fontSize: '12px',
+                      backgroundColor: "#090A10",
+                      borderColor: "#8B5CF6",
+                      borderRadius: "12px",
+                      fontSize: "12px",
                     }}
-                    formatter={(val: any) => [`${val} horas`, 'Tiempo']}
+                    formatter={(val: any) => [`${val} horas`, "Tiempo"]}
                   />
-                  <Bar dataKey="hours" fill="#06B6D4" radius={[0, 4, 4, 0]} maxBarSize={22} />
+                  <Bar
+                    dataKey="hours"
+                    fill="#06B6D4"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={22}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -271,8 +305,17 @@ export default function GamerProfilePage() {
                   layout="vertical"
                   margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#232635" horizontal={false} />
-                  <XAxis type="number" stroke="#71717A" fontSize={11} tickLine={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#232635"
+                    horizontal={false}
+                  />
+                  <XAxis
+                    type="number"
+                    stroke="#71717A"
+                    fontSize={11}
+                    tickLine={false}
+                  />
                   <YAxis
                     dataKey="genre"
                     type="category"
@@ -282,14 +325,19 @@ export default function GamerProfilePage() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#090A10',
-                      borderColor: '#8B5CF6',
-                      borderRadius: '12px',
-                      fontSize: '12px',
+                      backgroundColor: "#090A10",
+                      borderColor: "#8B5CF6",
+                      borderRadius: "12px",
+                      fontSize: "12px",
                     }}
-                    formatter={(val: any) => [`${val} horas`, 'Tiempo']}
+                    formatter={(val: any) => [`${val} horas`, "Tiempo"]}
                   />
-                  <Bar dataKey="hours" fill="#8B5CF6" radius={[0, 4, 4, 0]} maxBarSize={22} />
+                  <Bar
+                    dataKey="hours"
+                    fill="#8B5CF6"
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={22}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>

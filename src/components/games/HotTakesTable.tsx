@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { HotTake } from '@/types/game';
-import { Flame, Brain, Gem } from 'lucide-react';
+import React from "react";
+import { HotTake } from "@/types/game";
+import { Flame, Brain, Gem } from "lucide-react";
 
 interface HotTakesTableProps {
   hotTakes: HotTake[];
@@ -12,20 +12,21 @@ export default function HotTakesTable({ hotTakes }: HotTakesTableProps) {
   if (!hotTakes || hotTakes.length === 0) {
     return (
       <div className="p-8 text-center text-xs text-cine-500 italic">
-        Aún no hay suficientes calificaciones para calcular tus Hot Takes frente a la crítica.
+        Aún no hay suficientes calificaciones para calcular tus Hot Takes frente
+        a la crítica.
       </div>
     );
   }
 
-  const getTag = (type: HotTake['type']) => {
+  const getTag = (type: HotTake["type"]) => {
     switch (type) {
-      case 'OVERRATED':
+      case "OVERRATED":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
             <Flame className="w-3 h-3 text-rose-400" /> Sobrevalorado 🤡
           </span>
         );
-      case 'UNDERRATED':
+      case "UNDERRATED":
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
             <Gem className="w-3 h-3 text-emerald-400" /> Joya Oculta 💎
@@ -57,7 +58,10 @@ export default function HotTakesTable({ hotTakes }: HotTakesTableProps) {
           {hotTakes.map((take, idx) => {
             const diff = take.difference;
             return (
-              <tr key={idx} className="hover:bg-purple-950/20 transition-colors">
+              <tr
+                key={idx}
+                className="hover:bg-purple-950/20 transition-colors"
+              >
                 {/* Juego */}
                 <td className="py-3 px-4 font-semibold text-white flex items-center gap-3">
                   {take.cover && (
@@ -85,10 +89,10 @@ export default function HotTakesTable({ hotTakes }: HotTakesTableProps) {
                   <span
                     className={
                       Math.abs(diff) <= 0.3
-                        ? 'text-cyan-400'
+                        ? "text-cyan-400"
                         : diff > 0
-                        ? 'text-emerald-400'
-                        : 'text-rose-400'
+                          ? "text-emerald-400"
+                          : "text-rose-400"
                     }
                   >
                     {diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1)}

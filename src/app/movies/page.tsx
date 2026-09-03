@@ -240,8 +240,15 @@ export default async function MoviesHomePage() {
             {watchedRecords.map((item) => {
               let genres: string[] = [];
               let streamingPlatforms: string[] = [];
-              try { genres = JSON.parse(item.movie.genres); } catch {}
-              try { if (item.movie.streamingPlatforms) streamingPlatforms = JSON.parse(item.movie.streamingPlatforms); } catch {}
+              try {
+                genres = JSON.parse(item.movie.genres);
+              } catch {}
+              try {
+                if (item.movie.streamingPlatforms)
+                  streamingPlatforms = JSON.parse(
+                    item.movie.streamingPlatforms,
+                  );
+              } catch {}
 
               return (
                 <MovieCard
@@ -298,8 +305,15 @@ export default async function MoviesHomePage() {
             {watchlistRecords.map((item) => {
               let genres: string[] = [];
               let streamingPlatforms: string[] = [];
-              try { genres = JSON.parse(item.movie.genres); } catch {}
-              try { if (item.movie.streamingPlatforms) streamingPlatforms = JSON.parse(item.movie.streamingPlatforms); } catch {}
+              try {
+                genres = JSON.parse(item.movie.genres);
+              } catch {}
+              try {
+                if (item.movie.streamingPlatforms)
+                  streamingPlatforms = JSON.parse(
+                    item.movie.streamingPlatforms,
+                  );
+              } catch {}
 
               return (
                 <MovieCard
@@ -341,8 +355,13 @@ export default async function MoviesHomePage() {
           {exploreMovies.map((movie) => {
             let genres: string[] = [];
             let streamingPlatforms: string[] = [];
-            try { genres = JSON.parse(movie.genres); } catch {}
-            try { if (movie.streamingPlatforms) streamingPlatforms = JSON.parse(movie.streamingPlatforms); } catch {}
+            try {
+              genres = JSON.parse(movie.genres);
+            } catch {}
+            try {
+              if (movie.streamingPlatforms)
+                streamingPlatforms = JSON.parse(movie.streamingPlatforms);
+            } catch {}
 
             return (
               <MovieCard

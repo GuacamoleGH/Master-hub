@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Trophy, Zap } from 'lucide-react';
-import { calculateGamerLevelAndRank } from '@/lib/gameKnowledge';
+import React from "react";
+import { Trophy, Zap } from "lucide-react";
+import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
 
 interface GamerLevelBarProps {
   totalXp: number;
@@ -58,10 +58,11 @@ export default function GamerLevelBar({ totalXp }: GamerLevelBarProps) {
         {/* XP acumulada */}
         <div className="sm:text-right">
           <div className="text-xs text-cine-400 flex items-center sm:justify-end gap-1 font-medium">
-            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" /> Experiencia Total
+            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />{" "}
+            Experiencia Total
           </div>
           <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight">
-            {totalXp.toLocaleString()}{' '}
+            {totalXp.toLocaleString()}{" "}
             <span className="text-xs font-bold text-purple-400">XP</span>
           </div>
         </div>
@@ -71,7 +72,7 @@ export default function GamerLevelBar({ totalXp }: GamerLevelBarProps) {
       <div className="mt-4 space-y-1.5">
         <div className="flex items-center justify-between text-xs text-cine-400 font-mono">
           <span>
-            Progreso nivel {level}:{' '}
+            Progreso nivel {level}:{" "}
             <strong className="text-purple-300">
               {xpInCurrentLevel} / {xpNeededForNext} XP
             </strong>
@@ -89,7 +90,8 @@ export default function GamerLevelBar({ totalXp }: GamerLevelBarProps) {
         <div className="flex items-center justify-between text-[11px] text-cine-500 pt-0.5">
           <span>{currentLevelBaseXp} XP</span>
           <span className="flex items-center gap-1 text-cine-400">
-            <Trophy className="w-3 h-3 text-purple-400" /> Siguiente nivel: {nextLevelXp} XP
+            <Trophy className="w-3 h-3 text-purple-400" /> Siguiente nivel:{" "}
+            {nextLevelXp} XP
           </span>
         </div>
       </div>

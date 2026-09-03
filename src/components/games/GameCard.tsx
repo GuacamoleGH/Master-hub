@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Clock, Gamepad2, Star } from 'lucide-react';
+import { Clock, Star } from 'lucide-react';
 import GameKnowledgeBadge from './GameKnowledgeBadge';
 import GameReviewModal from './GameReviewModal';
+import GamePoster from './GamePoster';
+import PlatformBadge from './PlatformBadge';
 
 interface GameCardProps {
   game: {
@@ -31,7 +33,6 @@ interface GameCardProps {
 
 export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
-  const [imgError, setImgError] = useState(false);
 
   const releaseYear = game.released ? game.released.split('-')[0] : null;
 
@@ -46,21 +47,13 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
   return (
     <>
       <div className="group relative flex flex-col rounded-2xl overflow-hidden glass-card border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1 bg-cine-900/80 shadow-lg">
-        {/* Carátula */}
+        {/* Carátula con GamePoster */}
         <Link href={`/games/${game.rawgId}`} className="block relative aspect-[16/10] overflow-hidden bg-cine-950">
-          {game.backgroundImage && !imgError ? (
-            <img
-              src={game.backgroundImage}
-              alt={game.title}
-              onError={() => setImgError(true)}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-cine-950 text-cine-600">
-              <Gamepad2 className="w-8 h-8 mb-1" />
-              <span className="text-[11px] font-semibold text-cine-400 line-clamp-2">{game.title}</span>
-            </div>
-          )}
+          <GamePoster
+            src={game.backgroundImage}
+            alt={game.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
 
           {/* Gradiente oscuro inferior */}
           <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/30" />
@@ -109,12 +102,14 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
 
             <div className="flex items-center justify-between text-xs text-cine-400 mt-1">
               <span>{releaseYear || '—'}</span>
-              {userGame?.platform && (
-                <span className="text-[10px] font-mono text-purple-300 bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-500/20">
-                  {userGame.platform}
-                </span>
-              )}
             </div>
+
+            {/* Plataformas donde se jugó */}
+            {userGame?.platform && (
+              <div className="mt-1.5">
+                <PlatformBadge platform={userGame.platform} size="xs" />
+              </div>
+            )}
           </div>
 
           {/* Mi Puntuación y Game Knowledge */}

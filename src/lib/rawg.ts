@@ -1,9 +1,9 @@
-import { GameSearchResult, GameDetail } from '@/types/game';
+import { GameSearchResult, GameDetail } from "@/types/game";
 
-const RAWG_BASE_URL = 'https://api.rawg.io/api';
+const RAWG_BASE_URL = "https://api.rawg.io/api";
 
 function getApiKey(): string {
-  return process.env.RAWG_API_KEY || '976bc28df89142868e4721cff5fc5645';
+  return process.env.RAWG_API_KEY || "976bc28df89142868e4721cff5fc5645";
 }
 
 /**
@@ -26,7 +26,9 @@ export async function searchGames(query: string): Promise<GameSearchResult[]> {
       const platforms = (item.platforms || [])
         .map((p: any) => p.platform?.name)
         .filter(Boolean);
-      const genres = (item.genres || []).map((g: any) => g.name).filter(Boolean);
+      const genres = (item.genres || [])
+        .map((g: any) => g.name)
+        .filter(Boolean);
 
       return {
         id: item.id,
@@ -40,7 +42,7 @@ export async function searchGames(query: string): Promise<GameSearchResult[]> {
       };
     });
   } catch (error) {
-    console.error('Error al buscar juegos en RAWG:', error);
+    console.error("Error al buscar juegos en RAWG:", error);
     return [];
   }
 }
@@ -48,7 +50,9 @@ export async function searchGames(query: string): Promise<GameSearchResult[]> {
 /**
  * Obtiene el detalle completo de un videojuego en RAWG incluyendo screenshots y trailers
  */
-export async function getGameDetail(rawgId: number): Promise<GameDetail | null> {
+export async function getGameDetail(
+  rawgId: number,
+): Promise<GameDetail | null> {
   const key = getApiKey();
 
   try {
@@ -63,31 +67,46 @@ export async function getGameDetail(rawgId: number): Promise<GameDetail | null> 
       .map((p: any) => p.platform?.name)
       .filter(Boolean);
     const genres = (data.genres || []).map((g: any) => g.name).filter(Boolean);
-    const developers = (data.developers || []).map((d: any) => d.name).filter(Boolean);
-    const publishers = (data.publishers || []).map((p: any) => p.name).filter(Boolean);
+    const developers = (data.developers || [])
+      .map((d: any) => d.name)
+      .filter(Boolean);
+    const publishers = (data.publishers || [])
+      .map((p: any) => p.name)
+      .filter(Boolean);
 
     // 2. Obtener screenshots
     let screenshots: string[] = [];
     try {
-      const screenRes = await fetch(`${RAWG_BASE_URL}/games/${rawgId}/screenshots?key=${key}`, {
-        next: { revalidate: 86400 },
-      });
+      const screenRes = await fetch(
+        `${RAWG_BASE_URL}/games/${rawgId}/screenshots?key=${key}`,
+        {
+          next: { revalidate: 86400 },
+        },
+      );
       if (screenRes.ok) {
         const screenData = await screenRes.json();
-        screenshots = (screenData.results || []).map((s: any) => s.image).filter(Boolean);
+        screenshots = (screenData.results || [])
+          .map((s: any) => s.image)
+          .filter(Boolean);
       }
     } catch {}
 
     // 3. Obtener trailer/clip
     let trailerUrl: string | null = null;
     try {
-      const movieRes = await fetch(`${RAWG_BASE_URL}/games/${rawgId}/movies?key=${key}`, {
-        next: { revalidate: 86400 },
-      });
+      const movieRes = await fetch(
+        `${RAWG_BASE_URL}/games/${rawgId}/movies?key=${key}`,
+        {
+          next: { revalidate: 86400 },
+        },
+      );
       if (movieRes.ok) {
         const movieData = await movieRes.json();
         if (movieData.results && movieData.results.length > 0) {
-          trailerUrl = movieData.results[0].data?.max || movieData.results[0].data?.[480] || null;
+          trailerUrl =
+            movieData.results[0].data?.max ||
+            movieData.results[0].data?.[480] ||
+            null;
         }
       }
     } catch {}
@@ -109,7 +128,7 @@ export async function getGameDetail(rawgId: number): Promise<GameDetail | null> 
       trailerUrl,
     };
   } catch (error) {
-    console.error('Error al obtener detalle de juego en RAWG:', error);
+    console.error("Error al obtener detalle de juego en RAWG:", error);
     return null;
   }
 }

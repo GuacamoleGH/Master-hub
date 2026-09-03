@@ -1,26 +1,41 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { CheckCircle2, Filter, ArrowUpDown, Loader2, Gamepad2, Plus, Tv, Clock } from 'lucide-react';
-import { UserGameItem } from '@/types/game';
-import GameCard from '@/components/games/GameCard';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  CheckCircle2,
+  Filter,
+  ArrowUpDown,
+  Loader2,
+  Gamepad2,
+  Plus,
+  Tv,
+  Clock,
+} from "lucide-react";
+import { UserGameItem } from "@/types/game";
+import GameCard from "@/components/games/GameCard";
 
 const PLATFORM_OPTIONS = [
   { value: 'all', label: 'Todas las plataformas' },
-  { value: 'PC', label: 'PC' },
-  { value: 'PlayStation', label: 'PlayStation' },
-  { value: 'Nintendo', label: 'Nintendo Switch' },
-  { value: 'Xbox', label: 'Xbox' },
+  { value: 'Steam', label: 'PC (Steam)' },
+  { value: 'Epic', label: 'PC (Epic Games)' },
+  { value: 'Game Pass', label: 'PC (Game Pass)' },
+  { value: 'PlayStation 5', label: 'PlayStation 5' },
+  { value: 'PlayStation 4', label: 'PlayStation 4' },
+  { value: 'PlayStation 3', label: 'PlayStation 3 (Old Gen)' },
+  { value: 'Xbox 360', label: 'Xbox 360 (Old Gen)' },
+  { value: 'Xbox Series', label: 'Xbox Series S/X' },
+  { value: 'Nintendo Switch', label: 'Nintendo Switch' },
+  { value: 'Deck', label: 'Steam Deck' },
 ];
 
 export default function GamerCompletedPage() {
   const [items, setItems] = useState<UserGameItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('hoursDesc');
-  const [selectedGenre, setSelectedGenre] = useState('all');
-  const [selectedPlatform, setSelectedPlatform] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('COMPLETED_ALL');
+  const [sortBy, setSortBy] = useState("hoursDesc");
+  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedPlatform, setSelectedPlatform] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("COMPLETED_ALL");
 
   const fetchCompleted = async () => {
     try {
@@ -32,7 +47,7 @@ export default function GamerCompletedPage() {
         setItems(data.items || []);
       }
     } catch (err) {
-      console.error('Error al cargar juegos completados:', err);
+      console.error("Error al cargar juegos completados:", err);
     } finally {
       setIsLoading(false);
     }
@@ -43,10 +58,13 @@ export default function GamerCompletedPage() {
   }, [sortBy, selectedGenre, selectedPlatform, statusFilter]);
 
   const allGenres = Array.from(
-    new Set(items.flatMap((item) => item.game.genres))
+    new Set(items.flatMap((item) => item.game.genres)),
   ).sort();
 
-  const totalHoursInView = items.reduce((acc, c) => acc + (c.hoursPlayed || 0), 0);
+  const totalHoursInView = items.reduce(
+    (acc, c) => acc + (c.hoursPlayed || 0),
+    0,
+  );
 
   return (
     <div className="space-y-8 pb-16 animate-fade-in">
@@ -69,7 +87,8 @@ export default function GamerCompletedPage() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-cine-400 mt-1">
-            Historial de campañas terminadas, horas dedicadas y precisión de Game Knowledge.
+            Historial de campañas terminadas, horas dedicadas y precisión de
+            Game Knowledge.
           </p>
         </div>
 
@@ -83,9 +102,15 @@ export default function GamerCompletedPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
-              <option value="COMPLETED_ALL" className="bg-cine-900 text-white">Completados + Platinos</option>
-              <option value="PLATINUM" className="bg-cine-900 text-white">Solo 100% Platino 👑</option>
-              <option value="COMPLETED" className="bg-cine-900 text-white">Solo Campaña Terminada 🏆</option>
+              <option value="COMPLETED_ALL" className="bg-cine-900 text-white">
+                Completados + Platinos
+              </option>
+              <option value="PLATINUM" className="bg-cine-900 text-white">
+                Solo 100% Platino 👑
+              </option>
+              <option value="COMPLETED" className="bg-cine-900 text-white">
+                Solo Campaña Terminada 🏆
+              </option>
             </select>
           </div>
 
@@ -98,7 +123,11 @@ export default function GamerCompletedPage() {
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
               {PLATFORM_OPTIONS.map((p) => (
-                <option key={p.value} value={p.value} className="bg-cine-900 text-white">
+                <option
+                  key={p.value}
+                  value={p.value}
+                  className="bg-cine-900 text-white"
+                >
                   {p.label}
                 </option>
               ))}
@@ -113,7 +142,9 @@ export default function GamerCompletedPage() {
               onChange={(e) => setSelectedGenre(e.target.value)}
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
-              <option value="all" className="bg-cine-900 text-white">Todos los géneros</option>
+              <option value="all" className="bg-cine-900 text-white">
+                Todos los géneros
+              </option>
               {allGenres.map((g) => (
                 <option key={g} value={g} className="bg-cine-900 text-white">
                   {g}
@@ -130,14 +161,30 @@ export default function GamerCompletedPage() {
               onChange={(e) => setSortBy(e.target.value)}
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
-              <option value="hoursDesc" className="bg-cine-900 text-white">Más horas jugadas</option>
-              <option value="hoursAsc" className="bg-cine-900 text-white">Menos horas jugadas</option>
-              <option value="myRatingDesc" className="bg-cine-900 text-white">Mi nota (Mayor a menor)</option>
-              <option value="gkDesc" className="bg-cine-900 text-white">🧠 Mayor Game Knowledge</option>
-              <option value="gkAsc" className="bg-cine-900 text-white">🔥 Mayor Hot Take (Menor GK)</option>
-              <option value="metacriticDesc" className="bg-cine-900 text-white">Mayor Metacritic</option>
-              <option value="recent" className="bg-cine-900 text-white">Completados recientemente</option>
-              <option value="title" className="bg-cine-900 text-white">Título alfabético</option>
+              <option value="hoursDesc" className="bg-cine-900 text-white">
+                Más horas jugadas
+              </option>
+              <option value="hoursAsc" className="bg-cine-900 text-white">
+                Menos horas jugadas
+              </option>
+              <option value="myRatingDesc" className="bg-cine-900 text-white">
+                Mi nota (Mayor a menor)
+              </option>
+              <option value="gkDesc" className="bg-cine-900 text-white">
+                🧠 Mayor Game Knowledge
+              </option>
+              <option value="gkAsc" className="bg-cine-900 text-white">
+                🔥 Mayor Hot Take (Menor GK)
+              </option>
+              <option value="metacriticDesc" className="bg-cine-900 text-white">
+                Mayor Metacritic
+              </option>
+              <option value="recent" className="bg-cine-900 text-white">
+                Completados recientemente
+              </option>
+              <option value="title" className="bg-cine-900 text-white">
+                Título alfabético
+              </option>
             </select>
           </div>
         </div>
@@ -147,7 +194,9 @@ export default function GamerCompletedPage() {
       {isLoading ? (
         <div className="min-h-[40vh] flex flex-col items-center justify-center gap-2">
           <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
-          <span className="text-xs text-cine-400 font-mono">Cargando videojuegos completados...</span>
+          <span className="text-xs text-cine-400 font-mono">
+            Cargando videojuegos completados...
+          </span>
         </div>
       ) : items.length === 0 ? (
         <div className="glass-panel p-12 rounded-3xl border border-purple-500/20 text-center flex flex-col items-center justify-center gap-4 max-w-lg mx-auto bg-cine-950">
@@ -155,7 +204,9 @@ export default function GamerCompletedPage() {
             <Gamepad2 className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-white">No hay juegos con estos filtros</h3>
+            <h3 className="text-base font-bold text-white">
+              No hay juegos con estos filtros
+            </h3>
             <p className="text-xs text-cine-400">
               Prueba a cambiar los filtros de plataforma, estado o género.
             </p>

@@ -1,6 +1,6 @@
-import React from 'react';
-import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
+import React from "react";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import {
   Film,
   Gamepad2,
@@ -12,9 +12,9 @@ import {
   Database,
   ShieldCheck,
   PlusCircle,
-} from 'lucide-react';
+} from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function MasterHubPage() {
   // Estadísticas rápidas de Cine
@@ -25,14 +25,17 @@ export default async function MasterHubPage() {
   try {
     movieCount = await prisma.movie.count();
     const watched = await prisma.userMovie.findMany({
-      where: { status: 'WATCHED' },
+      where: { status: "WATCHED" },
       select: { ballKnowledge: true },
     });
     movieWatchedCount = watched.length;
-    const withBk = watched.filter((w) => typeof w.ballKnowledge === 'number');
+    const withBk = watched.filter((w) => typeof w.ballKnowledge === "number");
     if (withBk.length > 0) {
       avgBallKnowledge = Number(
-        (withBk.reduce((acc, c) => acc + (c.ballKnowledge || 0), 0) / withBk.length).toFixed(1)
+        (
+          withBk.reduce((acc, c) => acc + (c.ballKnowledge || 0), 0) /
+          withBk.length
+        ).toFixed(1),
       );
     }
   } catch {}
@@ -50,12 +53,18 @@ export default async function MasterHubPage() {
     });
     for (const ug of userGames) {
       if (ug.hoursPlayed) totalHours += ug.hoursPlayed;
-      if (ug.status === 'COMPLETED' || ug.status === 'PLATINUM') completedGamesCount++;
+      if (ug.status === "COMPLETED" || ug.status === "PLATINUM")
+        completedGamesCount++;
     }
-    const withGk = userGames.filter((ug) => typeof ug.gameKnowledge === 'number');
+    const withGk = userGames.filter(
+      (ug) => typeof ug.gameKnowledge === "number",
+    );
     if (withGk.length > 0) {
       avgGameKnowledge = Number(
-        (withGk.reduce((acc, c) => acc + (c.gameKnowledge || 0), 0) / withGk.length).toFixed(1)
+        (
+          withGk.reduce((acc, c) => acc + (c.gameKnowledge || 0), 0) /
+          withGk.length
+        ).toFixed(1),
       );
     }
   } catch {}
@@ -72,11 +81,16 @@ export default async function MasterHubPage() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-          Elige tu universo de <span className="bg-gradient-to-r from-amber-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">entretenimiento</span>
+          Elige tu universo de{" "}
+          <span className="bg-gradient-to-r from-amber-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            entretenimiento
+          </span>
         </h1>
 
         <p className="text-sm sm:text-base text-cine-400 max-w-xl mx-auto">
-          Gestiona tus colecciones, registra críticas personales y mide tu criterio frente al canon oficial con los motores de precisión cultural.
+          Gestiona tus colecciones, registra críticas personales y mide tu
+          criterio frente al canon oficial con los motores de precisión
+          cultural.
         </p>
       </div>
 
@@ -101,26 +115,39 @@ export default async function MasterHubPage() {
                 Cinephile<span className="text-amber-400">Hub</span>
               </h2>
               <p className="text-sm text-cine-300 mt-2 leading-relaxed">
-                Tu Letterboxd cinematográfico. Registra películas, escribe reseñas, sigue plataformas de streaming (con opción 🏴‍☠️ Pirata) y calcula tu precisión frente a IMDb con el índice <strong>Ball Knowledge</strong>.
+                Tu Letterboxd cinematográfico. Registra películas, escribe
+                reseñas, sigue plataformas de streaming (con opción 🏴‍☠️ Pirata) y
+                calcula tu precisión frente a IMDb con el índice{" "}
+                <strong>Ball Knowledge</strong>.
               </p>
             </div>
 
             {/* Métricas rápidas */}
             <div className="grid grid-cols-3 gap-3 pt-2 border-t border-cine-800/80">
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">Vistas</div>
-                <div className="text-lg font-mono font-black text-white mt-0.5">{movieWatchedCount}</div>
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Vistas
+                </div>
+                <div className="text-lg font-mono font-black text-white mt-0.5">
+                  {movieWatchedCount}
+                </div>
               </div>
 
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">Catálogo</div>
-                <div className="text-lg font-mono font-black text-amber-400 mt-0.5">{movieCount}</div>
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Catálogo
+                </div>
+                <div className="text-lg font-mono font-black text-amber-400 mt-0.5">
+                  {movieCount}
+                </div>
               </div>
 
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">Ball Knowledge</div>
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Ball Knowledge
+                </div>
                 <div className="text-lg font-mono font-black text-emerald-400 mt-0.5">
-                  {avgBallKnowledge ? `${avgBallKnowledge}%` : '—'}
+                  {avgBallKnowledge ? `${avgBallKnowledge}%` : "—"}
                 </div>
               </div>
             </div>
@@ -156,26 +183,39 @@ export default async function MasterHubPage() {
                 Gamer<span className="text-purple-400">Hub</span>
               </h2>
               <p className="text-sm text-cine-300 mt-2 leading-relaxed">
-                Tu Letterboxd de videojuegos. Registra horas jugadas, gestiona tu backlog, descubre trailers y capturas, y compara tu criterio frente a Metacritic con <strong>Game Knowledge</strong> y tus <strong>Hot Takes</strong>.
+                Tu Letterboxd de videojuegos. Registra horas jugadas, gestiona
+                tu backlog, descubre trailers y capturas, y compara tu criterio
+                frente a Metacritic con <strong>Game Knowledge</strong> y tus{" "}
+                <strong>Hot Takes</strong>.
               </p>
             </div>
 
             {/* Métricas rápidas */}
             <div className="grid grid-cols-3 gap-3 pt-2 border-t border-cine-800/80">
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">Horas</div>
-                <div className="text-lg font-mono font-black text-cyan-400 mt-0.5">{Math.round(totalHours)}h</div>
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Horas
+                </div>
+                <div className="text-lg font-mono font-black text-cyan-400 mt-0.5">
+                  {Math.round(totalHours)}h
+                </div>
               </div>
 
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">Completados</div>
-                <div className="text-lg font-mono font-black text-purple-400 mt-0.5">{completedGamesCount}</div>
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Completados
+                </div>
+                <div className="text-lg font-mono font-black text-purple-400 mt-0.5">
+                  {completedGamesCount}
+                </div>
               </div>
 
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">Game Knowledge</div>
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Game Knowledge
+                </div>
                 <div className="text-lg font-mono font-black text-cyan-300 mt-0.5">
-                  {avgGameKnowledge ? `${avgGameKnowledge}%` : '—'}
+                  {avgGameKnowledge ? `${avgGameKnowledge}%` : "—"}
                 </div>
               </div>
             </div>
@@ -201,16 +241,23 @@ export default async function MasterHubPage() {
               <PlusCircle className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base">Próximos Universos (En desarrollo)</h3>
+              <h3 className="font-bold text-white text-base">
+                Próximos Universos (En desarrollo)
+              </h3>
               <p className="text-xs text-cine-400">
-                Arquitectura modular preparada para incorporar Anime, Libros o Música cuando lo decidas.
+                Arquitectura modular preparada para incorporar Anime, Libros o
+                Música cuando lo decidas.
               </p>
             </div>
           </div>
 
           <div className="flex items-center justify-center sm:justify-end gap-3 text-xs font-mono text-cine-500">
-            <span className="px-2.5 py-1 rounded-lg bg-cine-900 border border-cine-800">100% Escalable</span>
-            <span className="px-2.5 py-1 rounded-lg bg-cine-900 border border-cine-800">Supabase DB</span>
+            <span className="px-2.5 py-1 rounded-lg bg-cine-900 border border-cine-800">
+              100% Escalable
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-cine-900 border border-cine-800">
+              Supabase DB
+            </span>
           </div>
         </div>
       </div>

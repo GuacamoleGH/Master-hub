@@ -1,22 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getGameDetail } from '@/lib/rawg';
-import { calculateGameKnowledge, calculateGameXp } from '@/lib/gameKnowledge';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getGameDetail } from "@/lib/rawg";
+import { calculateGameKnowledge, calculateGameXp } from "@/lib/gameKnowledge";
 
 async function refreshGamerXp() {
   const allUserGames = await prisma.userGame.findMany();
   let totalXp = 0;
   for (const ug of allUserGames) {
     const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
-    totalXp += calculateGameXp(ug.status, hasReview, ug.hoursPlayed, ug.gameKnowledge);
+    totalXp += calculateGameXp(
+      ug.status,
+      hasReview,
+      ug.hoursPlayed,
+      ug.gameKnowledge,
+    );
   }
 
   await prisma.gamerProfile.upsert({
-    where: { id: 'gamer-default' },
+    where: { id: "gamer-default" },
     update: { totalXp },
     create: {
-      id: 'gamer-default',
-      displayName: 'Jose',
+      id: "gamer-default",
+      displayName: "Jose",
       totalXp,
     },
   });
@@ -24,29 +29,29 @@ async function refreshGamerXp() {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const status = searchParams.get('status'); // 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED'
-  const platform = searchParams.get('platform');
-  const genre = searchParams.get('genre');
-  const sort = searchParams.get('sort') || 'recent';
+  const status = searchParams.get("status"); // 'BACKLOG' | 'PLAYING' | 'COMPLETED' | 'PLATINUM' | 'DROPPED'
+  const platform = searchParams.get("platform");
+  const genre = searchParams.get("genre");
+  const sort = searchParams.get("sort") || "recent";
 
   try {
     const whereClause: any = {};
-    if (status && status !== 'all') {
-      if (status === 'COMPLETED_ALL') {
-        whereClause.status = { in: ['COMPLETED', 'PLATINUM'] };
+    if (status && status !== "all") {
+      if (status === "COMPLETED_ALL") {
+        whereClause.status = { in: ["COMPLETED", "PLATINUM"] };
       } else {
         whereClause.status = status;
       }
     }
 
-    let orderBy: any = { createdAt: 'desc' };
-    if (sort === 'hoursDesc') orderBy = { hoursPlayed: 'desc' };
-    else if (sort === 'hoursAsc') orderBy = { hoursPlayed: 'asc' };
-    else if (sort === 'myRatingDesc') orderBy = { userRating: 'desc' };
-    else if (sort === 'myRatingAsc') orderBy = { userRating: 'asc' };
-    else if (sort === 'gkDesc') orderBy = { gameKnowledge: 'desc' };
-    else if (sort === 'gkAsc') orderBy = { gameKnowledge: 'asc' };
-    else if (sort === 'oldest') orderBy = { createdAt: 'asc' };
+    let orderBy: any = { createdAt: "desc" };
+    if (sort === "hoursDesc") orderBy = { hoursPlayed: "desc" };
+    else if (sort === "hoursAsc") orderBy = { hoursPlayed: "asc" };
+    else if (sort === "myRatingDesc") orderBy = { userRating: "desc" };
+    else if (sort === "myRatingAsc") orderBy = { userRating: "asc" };
+    else if (sort === "gkDesc") orderBy = { gameKnowledge: "desc" };
+    else if (sort === "gkAsc") orderBy = { gameKnowledge: "asc" };
+    else if (sort === "oldest") orderBy = { createdAt: "asc" };
 
     const records = await prisma.userGame.findMany({
       where: whereClause,
@@ -60,9 +65,15 @@ export async function GET(request: NextRequest) {
       let genres: string[] = [];
       let platforms: string[] = [];
       let developers: string[] = [];
-      try { genres = JSON.parse(r.game.genres); } catch {}
-      try { platforms = JSON.parse(r.game.platforms); } catch {}
-      try { if (r.game.developers) developers = JSON.parse(r.game.developers); } catch {}
+      try {
+        genres = JSON.parse(r.game.genres);
+      } catch {}
+      try {
+        platforms = JSON.parse(r.game.platforms);
+      } catch {}
+      try {
+        if (r.game.developers) developers = JSON.parse(r.game.developers);
+      } catch {}
 
       return {
         id: r.id,
@@ -91,31 +102,36 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    if (genre && genre !== 'all') {
+    if (genre && genre !== "all") {
       results = results.filter((item) =>
-        item.game.genres.some((g) => g.toLowerCase() === genre.toLowerCase())
+        item.game.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
       );
     }
 
-    if (platform && platform !== 'all') {
+    if (platform && platform !== "all") {
       const cleanPlat = platform.toLowerCase();
       results = results.filter(
         (item) =>
           (item.platform && item.platform.toLowerCase().includes(cleanPlat)) ||
-          item.game.platforms.some((p) => p.toLowerCase().includes(cleanPlat))
+          item.game.platforms.some((p) => p.toLowerCase().includes(cleanPlat)),
       );
     }
 
-    if (sort === 'title') {
+    if (sort === "title") {
       results.sort((a, b) => a.game.title.localeCompare(b.game.title));
-    } else if (sort === 'metacriticDesc') {
-      results.sort((a, b) => (b.game.metacritic || 0) - (a.game.metacritic || 0));
+    } else if (sort === "metacriticDesc") {
+      results.sort(
+        (a, b) => (b.game.metacritic || 0) - (a.game.metacritic || 0),
+      );
     }
 
     return NextResponse.json({ items: results });
   } catch (error) {
-    console.error('Error en GET /api/user-games:', error);
-    return NextResponse.json({ error: 'Error al listar videojuegos' }, { status: 500 });
+    console.error("Error en GET /api/user-games:", error);
+    return NextResponse.json(
+      { error: "Error al listar videojuegos" },
+      { status: 500 },
+    );
   }
 }
 
@@ -133,7 +149,10 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!rawgId || !status) {
-      return NextResponse.json({ error: 'Faltan parámetros requeridos (rawgId, status)' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Faltan parámetros requeridos (rawgId, status)" },
+        { status: 400 },
+      );
     }
 
     // 1. Asegurar que el juego existe en base de datos
@@ -144,7 +163,10 @@ export async function POST(request: NextRequest) {
     if (!game) {
       const detail = await getGameDetail(Number(rawgId));
       if (!detail) {
-        return NextResponse.json({ error: 'No se pudo obtener información del juego desde RAWG' }, { status: 404 });
+        return NextResponse.json(
+          { error: "No se pudo obtener información del juego desde RAWG" },
+          { status: 404 },
+        );
       }
 
       game = await prisma.game.create({
@@ -170,22 +192,26 @@ export async function POST(request: NextRequest) {
     let gameKnowledge: number | null = null;
     let difference: number | null = null;
 
-    if (typeof userRating === 'number' && typeof game.metacritic === 'number') {
+    if (typeof userRating === "number" && typeof game.metacritic === "number") {
       const gk = calculateGameKnowledge(userRating, game.metacritic);
       gameKnowledge = gk.gameKnowledge;
       difference = gk.difference;
     }
 
-    const isFinished = status === 'COMPLETED' || status === 'PLATINUM';
-    const dateToSave = completedDate ? new Date(completedDate) : isFinished ? new Date() : null;
+    const isFinished = status === "COMPLETED" || status === "PLATINUM";
+    const dateToSave = completedDate
+      ? new Date(completedDate)
+      : isFinished
+        ? new Date()
+        : null;
 
     // 3. Upsert UserGame
     const userGame = await prisma.userGame.upsert({
       where: { gameId: game.id },
       update: {
         status,
-        userRating: typeof userRating === 'number' ? userRating : null,
-        hoursPlayed: typeof hoursPlayed === 'number' ? hoursPlayed : null,
+        userRating: typeof userRating === "number" ? userRating : null,
+        hoursPlayed: typeof hoursPlayed === "number" ? hoursPlayed : null,
         platform: platform !== undefined ? platform : undefined,
         review: review !== undefined ? review : null,
         completedDate: dateToSave,
@@ -195,8 +221,8 @@ export async function POST(request: NextRequest) {
       create: {
         gameId: game.id,
         status,
-        userRating: typeof userRating === 'number' ? userRating : null,
-        hoursPlayed: typeof hoursPlayed === 'number' ? hoursPlayed : null,
+        userRating: typeof userRating === "number" ? userRating : null,
+        hoursPlayed: typeof hoursPlayed === "number" ? hoursPlayed : null,
         platform: platform || null,
         review: review !== undefined ? review : null,
         completedDate: dateToSave,
@@ -209,15 +235,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, userGame });
   } catch (error) {
-    console.error('Error en POST /api/user-games:', error);
-    return NextResponse.json({ error: 'Error al registrar videojuego' }, { status: 500 });
+    console.error("Error en POST /api/user-games:", error);
+    return NextResponse.json(
+      { error: "Error al registrar videojuego" },
+      { status: 500 },
+    );
   }
 }
 
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const userGameId = searchParams.get('id');
-  const gameId = searchParams.get('gameId');
+  const userGameId = searchParams.get("id");
+  const gameId = searchParams.get("gameId");
 
   try {
     if (userGameId) {
@@ -225,13 +254,19 @@ export async function DELETE(request: NextRequest) {
     } else if (gameId) {
       await prisma.userGame.deleteMany({ where: { gameId } });
     } else {
-      return NextResponse.json({ error: 'Falta parámetro id o gameId' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Falta parámetro id o gameId" },
+        { status: 400 },
+      );
     }
 
     await refreshGamerXp();
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error en DELETE /api/user-games:', error);
-    return NextResponse.json({ error: 'Error al eliminar registro de videojuego' }, { status: 500 });
+    console.error("Error en DELETE /api/user-games:", error);
+    return NextResponse.json(
+      { error: "Error al eliminar registro de videojuego" },
+      { status: 500 },
+    );
   }
 }

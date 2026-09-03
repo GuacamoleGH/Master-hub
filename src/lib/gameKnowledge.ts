@@ -1,54 +1,57 @@
-import { GamerRank, HotTake } from '@/types/game';
+import { GamerRank, HotTake } from "@/types/game";
 
 export const GAMER_RANKS: GamerRank[] = [
   {
-    title: 'Button Masher',
+    title: "Button Masher",
     minLevel: 1,
     maxLevel: 5,
-    icon: '🕹️',
-    color: '#94A3B8', // slate
+    icon: "🕹️",
+    color: "#94A3B8", // slate
   },
   {
-    title: 'Casual Gamer',
+    title: "Casual Gamer",
     minLevel: 6,
     maxLevel: 15,
-    icon: '🎮',
-    color: '#38BDF8', // sky
+    icon: "🎮",
+    color: "#38BDF8", // sky
   },
   {
-    title: 'Core Gamer',
+    title: "Core Gamer",
     minLevel: 16,
     maxLevel: 30,
-    icon: '⚔️',
-    color: '#8B5CF6', // purple / violet
+    icon: "⚔️",
+    color: "#8B5CF6", // purple / violet
   },
   {
-    title: 'Game Knowledge Specialist',
+    title: "Game Knowledge Specialist",
     minLevel: 31,
     maxLevel: 50,
-    icon: '🧠',
-    color: '#EC4899', // pink
+    icon: "🧠",
+    color: "#EC4899", // pink
   },
   {
-    title: 'Backlog Slayer',
+    title: "Backlog Slayer",
     minLevel: 51,
     maxLevel: 75,
-    icon: '🏆',
-    color: '#F59E0B', // amber
+    icon: "🏆",
+    color: "#F59E0B", // amber
   },
   {
-    title: 'Gaming Legend',
+    title: "Gaming Legend",
     minLevel: 76,
     maxLevel: 999,
-    icon: '👑',
-    color: '#06B6D4', // cyan / gold
+    icon: "👑",
+    color: "#06B6D4", // cyan / gold
   },
 ];
 
 /**
  * Calcula la coincidencia de Game Knowledge a partir de tu nota y la de Metacritic (0-100 convertida a 0-10)
  */
-export function calculateGameKnowledge(userRating: number, metacritic: number): {
+export function calculateGameKnowledge(
+  userRating: number,
+  metacritic: number,
+): {
   gameKnowledge: number;
   criticRating: number;
   difference: number;
@@ -72,19 +75,19 @@ export function calculateGameXp(
   status: string,
   hasReview: boolean,
   hoursPlayed?: number | null,
-  gameKnowledge?: number | null
+  gameKnowledge?: number | null,
 ): number {
   let xp = 0;
 
-  if (status === 'BACKLOG') {
+  if (status === "BACKLOG") {
     xp = 15;
-  } else if (status === 'PLAYING') {
+  } else if (status === "PLAYING") {
     xp = 35;
-  } else if (status === 'COMPLETED') {
+  } else if (status === "COMPLETED") {
     xp = 150;
-  } else if (status === 'PLATINUM') {
+  } else if (status === "PLATINUM") {
     xp = 250;
-  } else if (status === 'DROPPED') {
+  } else if (status === "DROPPED") {
     xp = 20;
   }
 
@@ -92,7 +95,11 @@ export function calculateGameXp(
   if (hasReview) xp += 50;
 
   // Bonus por alta coincidencia Game Knowledge
-  if (gameKnowledge !== null && gameKnowledge !== undefined && gameKnowledge >= 95) {
+  if (
+    gameKnowledge !== null &&
+    gameKnowledge !== undefined &&
+    gameKnowledge >= 95
+  ) {
     xp += 30;
   }
 
@@ -114,7 +121,10 @@ export function calculateGamerLevelAndRank(totalXp: number) {
   const currentLevelBaseXp = (level - 1) * XP_PER_LEVEL;
   const nextLevelXp = level * XP_PER_LEVEL;
   const xpInCurrentLevel = totalXp - currentLevelBaseXp;
-  const progressPercent = Math.min(100, Math.max(0, Math.round((xpInCurrentLevel / XP_PER_LEVEL) * 100)));
+  const progressPercent = Math.min(
+    100,
+    Math.max(0, Math.round((xpInCurrentLevel / XP_PER_LEVEL) * 100)),
+  );
 
   const rank =
     GAMER_RANKS.find((r) => level >= r.minLevel && level <= r.maxLevel) ||
@@ -135,8 +145,8 @@ export function calculateGamerLevelAndRank(totalXp: number) {
 /**
  * Clasifica un juego en Hot Takes
  */
-export function classifyHotTake(diff: number): HotTake['type'] {
-  if (diff <= -2.0) return 'OVERRATED';
-  if (diff >= 2.0) return 'UNDERRATED';
-  return 'BASED';
+export function classifyHotTake(diff: number): HotTake["type"] {
+  if (diff <= -2.0) return "OVERRATED";
+  if (diff >= 2.0) return "UNDERRATED";
+  return "BASED";
 }

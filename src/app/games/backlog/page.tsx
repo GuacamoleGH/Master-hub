@@ -1,25 +1,39 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Bookmark, Filter, ArrowUpDown, Loader2, Gamepad2, Plus, Tv } from 'lucide-react';
-import { UserGameItem } from '@/types/game';
-import GameCard from '@/components/games/GameCard';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  Bookmark,
+  Filter,
+  ArrowUpDown,
+  Loader2,
+  Gamepad2,
+  Plus,
+  Tv,
+} from "lucide-react";
+import { UserGameItem } from "@/types/game";
+import GameCard from "@/components/games/GameCard";
 
 const PLATFORM_OPTIONS = [
   { value: 'all', label: 'Todas las plataformas' },
-  { value: 'PC', label: 'PC' },
-  { value: 'PlayStation', label: 'PlayStation' },
-  { value: 'Nintendo', label: 'Nintendo Switch' },
-  { value: 'Xbox', label: 'Xbox' },
+  { value: 'Steam', label: 'PC (Steam)' },
+  { value: 'Epic', label: 'PC (Epic Games)' },
+  { value: 'Game Pass', label: 'PC (Game Pass)' },
+  { value: 'PlayStation 5', label: 'PlayStation 5' },
+  { value: 'PlayStation 4', label: 'PlayStation 4' },
+  { value: 'PlayStation 3', label: 'PlayStation 3 (Old Gen)' },
+  { value: 'Xbox 360', label: 'Xbox 360 (Old Gen)' },
+  { value: 'Xbox Series', label: 'Xbox Series S/X' },
+  { value: 'Nintendo Switch', label: 'Nintendo Switch' },
+  { value: 'Deck', label: 'Steam Deck' },
 ];
 
 export default function GamerBacklogPage() {
   const [items, setItems] = useState<UserGameItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('recent');
-  const [selectedGenre, setSelectedGenre] = useState('all');
-  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [sortBy, setSortBy] = useState("recent");
+  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedPlatform, setSelectedPlatform] = useState("all");
 
   const fetchBacklog = async () => {
     try {
@@ -31,7 +45,7 @@ export default function GamerBacklogPage() {
         setItems(data.items || []);
       }
     } catch (err) {
-      console.error('Error al cargar Backlog:', err);
+      console.error("Error al cargar Backlog:", err);
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +56,7 @@ export default function GamerBacklogPage() {
   }, [sortBy, selectedGenre, selectedPlatform]);
 
   const allGenres = Array.from(
-    new Set(items.flatMap((item) => item.game.genres))
+    new Set(items.flatMap((item) => item.game.genres)),
   ).sort();
 
   return (
@@ -77,7 +91,11 @@ export default function GamerBacklogPage() {
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
               {PLATFORM_OPTIONS.map((p) => (
-                <option key={p.value} value={p.value} className="bg-cine-900 text-white">
+                <option
+                  key={p.value}
+                  value={p.value}
+                  className="bg-cine-900 text-white"
+                >
                   {p.label}
                 </option>
               ))}
@@ -92,7 +110,9 @@ export default function GamerBacklogPage() {
               onChange={(e) => setSelectedGenre(e.target.value)}
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
-              <option value="all" className="bg-cine-900 text-white">Todos los géneros</option>
+              <option value="all" className="bg-cine-900 text-white">
+                Todos los géneros
+              </option>
               {allGenres.map((g) => (
                 <option key={g} value={g} className="bg-cine-900 text-white">
                   {g}
@@ -109,10 +129,18 @@ export default function GamerBacklogPage() {
               onChange={(e) => setSortBy(e.target.value)}
               className="bg-transparent focus:outline-none cursor-pointer text-cine-200"
             >
-              <option value="recent" className="bg-cine-900 text-white">Añadidos recientemente</option>
-              <option value="oldest" className="bg-cine-900 text-white">Primeros añadidos</option>
-              <option value="metacriticDesc" className="bg-cine-900 text-white">Mayor Metacritic</option>
-              <option value="title" className="bg-cine-900 text-white">Título alfabético</option>
+              <option value="recent" className="bg-cine-900 text-white">
+                Añadidos recientemente
+              </option>
+              <option value="oldest" className="bg-cine-900 text-white">
+                Primeros añadidos
+              </option>
+              <option value="metacriticDesc" className="bg-cine-900 text-white">
+                Mayor Metacritic
+              </option>
+              <option value="title" className="bg-cine-900 text-white">
+                Título alfabético
+              </option>
             </select>
           </div>
         </div>
@@ -122,7 +150,9 @@ export default function GamerBacklogPage() {
       {isLoading ? (
         <div className="min-h-[40vh] flex flex-col items-center justify-center gap-2">
           <Loader2 className="w-7 h-7 text-cyan-400 animate-spin" />
-          <span className="text-xs text-cine-400 font-mono">Actualizando Backlog...</span>
+          <span className="text-xs text-cine-400 font-mono">
+            Actualizando Backlog...
+          </span>
         </div>
       ) : items.length === 0 ? (
         <div className="glass-panel p-12 rounded-3xl border border-purple-500/20 text-center flex flex-col items-center justify-center gap-4 max-w-lg mx-auto bg-cine-950">
@@ -130,9 +160,12 @@ export default function GamerBacklogPage() {
             <Gamepad2 className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-white">Tu Backlog está vacío o filtrado</h3>
+            <h3 className="text-base font-bold text-white">
+              Tu Backlog está vacío o filtrado
+            </h3>
             <p className="text-xs text-cine-400">
-              Busca cualquier juego en el buscador superior para agregarlo a tu lista de pendientes.
+              Busca cualquier juego en el buscador superior para agregarlo a tu
+              lista de pendientes.
             </p>
           </div>
           <Link
@@ -158,7 +191,7 @@ export default function GamerBacklogPage() {
                 genres: item.game.genres,
               }}
               userGame={{
-                status: 'BACKLOG',
+                status: "BACKLOG",
                 platform: item.platform,
               }}
               onUpdate={fetchBacklog}
