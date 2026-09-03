@@ -1,1 +1,1 @@
-export { default } from './movies/ReviewModal';
+export { default } from "./movies/ReviewModal";

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
 import GameCard from "@/components/games/GameCard";
 import GamerLevelBar from "@/components/games/GamerLevelBar";
+import ExploreGamesSection from "@/components/games/ExploreGamesSection";
 import {
   Gamepad2,
   Bookmark,
@@ -83,11 +84,53 @@ export default async function GamerHomePage() {
     if (ug.status === "COMPLETED" || ug.status === "PLATINUM") totalCompleted++;
   }
 
-  // 6. Catálogo general para explorar
-  const exploreGames = await prisma.game.findMany({
-    take: 6,
-    orderBy: { createdAt: "desc" },
+  // 6. Catálogo general para explorar (juegos no registrados o catálogo aclamado)
+  let exploreGames = await prisma.game.findMany({
+    where: {
+      userGame: null,
+    },
+    orderBy: { metacritic: "desc" },
     include: { userGame: true },
+  });
+
+  if (exploreGames.length === 0) {
+    exploreGames = await prisma.game.findMany({
+      take: 12,
+      orderBy: { rating: "desc" },
+      include: { userGame: true },
+    });
+  }
+
+  const formattedExploreGames = exploreGames.map((game) => {
+    let platforms: string[] = [];
+    let genres: string[] = [];
+    try {
+      platforms = JSON.parse(game.platforms);
+    } catch {}
+    try {
+      genres = JSON.parse(game.genres);
+    } catch {}
+    return {
+      id: game.id,
+      rawgId: game.rawgId,
+      title: game.title,
+      released: game.released,
+      backgroundImage: game.backgroundImage,
+      metacritic: game.metacritic,
+      platforms,
+      genres,
+      userGame: game.userGame
+        ? {
+            status: game.userGame.status as any,
+            userRating: game.userGame.userRating,
+            hoursPlayed: game.userGame.hoursPlayed,
+            platform: game.userGame.platform,
+            review: game.userGame.review,
+            gameKnowledge: game.userGame.gameKnowledge,
+            difference: game.userGame.difference,
+          }
+        : null,
+    };
   });
 
   return (
@@ -336,51 +379,8 @@ export default async function GamerHomePage() {
         </section>
       )}
 
-      {/* Continuar Explorando Videojuegos */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Compass className="w-5 h-5 text-purple-400" />
-          <h2 className="text-xl font-bold text-white tracking-wide">
-            Continuar Explorando
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {exploreGames.map((game) => {
-            let platforms: string[] = [];
-            try {
-              platforms = JSON.parse(game.platforms);
-            } catch {}
-            return (
-              <GameCard
-                key={game.id}
-                game={{
-                  id: game.id,
-                  rawgId: game.rawgId,
-                  title: game.title,
-                  released: game.released,
-                  backgroundImage: game.backgroundImage,
-                  metacritic: game.metacritic,
-                  platforms,
-                }}
-                userGame={
-                  game.userGame
-                    ? {
-                        status: game.userGame.status as any,
-                        userRating: game.userGame.userRating,
-                        hoursPlayed: game.userGame.hoursPlayed,
-                        platform: game.userGame.platform,
-                        review: game.userGame.review,
-                        gameKnowledge: game.userGame.gameKnowledge,
-                        difference: game.userGame.difference,
-                      }
-                    : null
-                }
-              />
-            );
-          })}
-        </div>
-      </section>
+      {/* Continuar Explorando Videojuegos con Desplegable y Modo Colapsable */}
+      <ExploreGamesSection games={formattedExploreGames} />
     </div>
   );
 }

@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
             directorImage: item.directorImage,
             cast: JSON.stringify(item.cast),
             imdbRating: item.imdbRating,
+            streamingPlatforms: item.streamingPlatforms
+              ? JSON.stringify(item.streamingPlatforms)
+              : null,
           },
         });
 

@@ -261,6 +261,199 @@ const CURATED_GAMES = [
       platform: "PlayStation 3, Xbox 360",
     },
   },
+  // Catálogo rico para "Continuar Explorando Videojuegos"
+  {
+    rawgId: 22511,
+    title: "The Legend of Zelda: Breath of the Wild",
+    released: "2017-03-03",
+    backgroundImage:
+      "https://media.rawg.io/media/games/cc1/cc196a5ad763955d6532cdba236f730c.jpg",
+    metacritic: 97,
+    rating: 4.54,
+    genres: JSON.stringify(["Action", "Adventure", "RPG"]),
+    platforms: JSON.stringify(["Nintendo Switch", "Wii U"]),
+    developers: JSON.stringify(["Nintendo"]),
+    publishers: JSON.stringify(["Nintendo"]),
+    description:
+      "Forget everything you know about The Legend of Zelda games. Step into a world of discovery, exploration and adventure in The Legend of Zelda: Breath of the Wild.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 58175,
+    title: "God of War (2018)",
+    released: "2018-04-20",
+    backgroundImage:
+      "https://media.rawg.io/media/games/4be/4be6a6ad0364751a96229c56bf69be59.jpg",
+    metacritic: 94,
+    rating: 4.58,
+    genres: JSON.stringify(["Action", "Adventure"]),
+    platforms: JSON.stringify(["PlayStation 5", "PlayStation 4", "PC"]),
+    developers: JSON.stringify(["Santa Monica Studio"]),
+    publishers: JSON.stringify(["Sony Interactive Entertainment"]),
+    description:
+      "His vengeance against the Gods of Olympus years behind him, Kratos now lives as a man in the realm of Norse Gods and monsters.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 3498,
+    title: "Grand Theft Auto V",
+    released: "2013-09-17",
+    backgroundImage:
+      "https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg",
+    metacritic: 92,
+    rating: 4.47,
+    genres: JSON.stringify(["Action", "Adventure"]),
+    platforms: JSON.stringify([
+      "PC",
+      "PlayStation 5",
+      "Xbox Series S/X",
+      "PlayStation 3",
+      "Xbox 360",
+    ]),
+    developers: JSON.stringify(["Rockstar North"]),
+    publishers: JSON.stringify(["Rockstar Games"]),
+    description:
+      "When a young street hustler, a retired bank robber and a terrifying psychopath find themselves entangled with some of the most frightening and deranged elements of the criminal underworld...",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 4200,
+    title: "Portal 2",
+    released: "2011-04-18",
+    backgroundImage:
+      "https://media.rawg.io/media/games/2ba/2bac0e87cf45e5b508f227d281c9252a.jpg",
+    metacritic: 95,
+    rating: 4.62,
+    genres: JSON.stringify(["Puzzle", "Shooter"]),
+    platforms: JSON.stringify(["PC", "Xbox 360", "PlayStation 3"]),
+    developers: JSON.stringify(["Valve"]),
+    publishers: JSON.stringify(["Valve"]),
+    description:
+      "The Perpetual Testing Initiative has been expanded to allow you to design co-op puzzles for you and your friends!",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 4062,
+    title: "BioShock Infinite",
+    released: "2013-03-26",
+    backgroundImage:
+      "https://media.rawg.io/media/games/fc1/fc1307a2774506b5bd65d7e8424664a7.jpg",
+    metacritic: 94,
+    rating: 4.39,
+    genres: JSON.stringify(["Action", "Shooter"]),
+    platforms: JSON.stringify(["PC", "Xbox 360", "PlayStation 3"]),
+    developers: JSON.stringify(["Irrational Games"]),
+    publishers: JSON.stringify(["2K Games"]),
+    description:
+      "Indebted to the wrong people, with his life on the line, veteran of the U.S. Cavalry and now hired gun, Booker DeWitt has only one opportunity to wipe his slate clean.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 5679,
+    title: "The Elder Scrolls V: Skyrim",
+    released: "2011-11-11",
+    backgroundImage:
+      "https://media.rawg.io/media/games/7cf/7cfc9220b401b7a300e409e539c9afd5.jpg",
+    metacritic: 94,
+    rating: 4.42,
+    genres: JSON.stringify(["Action", "RPG"]),
+    platforms: JSON.stringify([
+      "PC",
+      "Xbox 360",
+      "PlayStation 3",
+      "Nintendo Switch",
+    ]),
+    developers: JSON.stringify(["Bethesda Game Studios"]),
+    publishers: JSON.stringify(["Bethesda Softworks"]),
+    description:
+      "EPIC FANTASY REBORN. The next chapter in the highly anticipated Elder Scrolls saga arrives from the makers of the 2006 and 2008 Games of the Year, Bethesda Game Studios.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 799265,
+    title: "The Last of Us Part I",
+    released: "2022-09-02",
+    backgroundImage:
+      "https://media.rawg.io/media/games/71d/71df9e759b2246f9769126c98ac997fc.jpg",
+    metacritic: 88,
+    rating: 4.54,
+    genres: JSON.stringify(["Action", "Adventure"]),
+    platforms: JSON.stringify(["PlayStation 5", "PC"]),
+    developers: JSON.stringify(["Naughty Dog"]),
+    publishers: JSON.stringify(["Sony Interactive Entertainment"]),
+    description:
+      "Endure and survive. Experience the emotional storytelling and unforgettable characters in The Last of Us.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 4806,
+    title: "Mass Effect 2",
+    released: "2010-01-26",
+    backgroundImage:
+      "https://media.rawg.io/media/games/3cf/3cff89996570cf29a10eb9cd967dcf73.jpg",
+    metacritic: 94,
+    rating: 4.48,
+    genres: JSON.stringify(["Action", "RPG"]),
+    platforms: JSON.stringify(["PC", "Xbox 360", "PlayStation 3"]),
+    developers: JSON.stringify(["BioWare"]),
+    publishers: JSON.stringify(["Electronic Arts"]),
+    description:
+      "Are you prepared to lose everyone to save the galaxy? Mass Effect 2 is the second installment in the epic sci-fi series.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 4544,
+    title: "Red Dead Redemption",
+    released: "2010-05-18",
+    backgroundImage:
+      "https://media.rawg.io/media/games/686/686909717c3aa01518bc42ae2bf4259e.jpg",
+    metacritic: 95,
+    rating: 4.42,
+    genres: JSON.stringify(["Action", "Adventure"]),
+    platforms: JSON.stringify(["Xbox 360", "PlayStation 3", "Nintendo Switch"]),
+    developers: JSON.stringify(["Rockstar San Diego"]),
+    publishers: JSON.stringify(["Rockstar Games"]),
+    description:
+      "America, early 1900's. The era of the cowboy is coming to an end. When federal agents threaten his family, former outlaw John Marston is forced to pick up his guns again.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 3070,
+    title: "Fallout 4",
+    released: "2015-11-10",
+    backgroundImage:
+      "https://media.rawg.io/media/games/d82/d82990b9c67ba0d2d09d4e6fa88885a7.jpg",
+    metacritic: 84,
+    rating: 3.82,
+    genres: JSON.stringify(["Action", "RPG"]),
+    platforms: JSON.stringify(["PC", "PlayStation 4", "Xbox One"]),
+    developers: JSON.stringify(["Bethesda Game Studios"]),
+    publishers: JSON.stringify(["Bethesda Softworks"]),
+    description:
+      "As the sole survivor of Vault 111, you enter a world destroyed by nuclear war. Every second is a fight for survival, and every choice is yours.",
+    screenshots: JSON.stringify([]),
+  },
+  {
+    rawgId: 274755,
+    title: "Hades",
+    released: "2020-09-17",
+    backgroundImage:
+      "https://media.rawg.io/media/games/1f4/1f47a270b8f241e4676b14d39ec620f7.jpg",
+    metacritic: 93,
+    rating: 4.54,
+    genres: JSON.stringify(["Action", "Indie", "RPG"]),
+    platforms: JSON.stringify([
+      "PC",
+      "Nintendo Switch",
+      "PlayStation 5",
+      "Xbox Series S/X",
+    ]),
+    developers: JSON.stringify(["Supergiant Games"]),
+    publishers: JSON.stringify(["Supergiant Games"]),
+    description:
+      "Defy the god of the dead as you hack and slash out of the Underworld in this rogue-like dungeon crawler from the creators of Bastion.",
+    screenshots: JSON.stringify([]),
+  },
 ];
 
 function calculateGK(userRating, metacritic) {

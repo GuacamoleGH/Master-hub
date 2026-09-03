@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calculateLevelAndRank } from "@/lib/ballKnowledge";
 import MovieCard from "@/components/MovieCard";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
+import ExploreMoviesSection from "@/components/movies/ExploreMoviesSection";
 import {
   Film,
   Bookmark,
@@ -52,11 +53,55 @@ export default async function MoviesHomePage() {
     take: 6,
   });
 
-  // 4. Catálogo general para continuar explorando (últimas añadidas a la base)
-  const exploreMovies = await prisma.movie.findMany({
-    take: 6,
-    orderBy: { createdAt: "desc" },
+  // 4. Catálogo general para continuar explorando (priorizando no registradas por el usuario)
+  let exploreMovies = await prisma.movie.findMany({
+    where: {
+      userMovie: null,
+    },
+    orderBy: { imdbRating: "desc" },
     include: { userMovie: true },
+  });
+
+  if (exploreMovies.length === 0) {
+    exploreMovies = await prisma.movie.findMany({
+      take: 12,
+      orderBy: { imdbRating: "desc" },
+      include: { userMovie: true },
+    });
+  }
+
+  const formattedExploreMovies = exploreMovies.map((movie) => {
+    let genres: string[] = [];
+    let streamingPlatforms: string[] = [];
+    try {
+      genres = JSON.parse(movie.genres);
+    } catch {}
+    try {
+      if (movie.streamingPlatforms)
+        streamingPlatforms = JSON.parse(movie.streamingPlatforms);
+    } catch {}
+
+    return {
+      id: movie.id,
+      tmdbId: movie.tmdbId,
+      title: movie.title,
+      originalTitle: movie.originalTitle,
+      year: movie.year,
+      posterPath: movie.posterPath,
+      imdbRating: movie.imdbRating,
+      genres,
+      streamingPlatforms,
+      userMovie: movie.userMovie
+        ? {
+            status: movie.userMovie.status as any,
+            userRating: movie.userMovie.userRating,
+            review: movie.userMovie.review,
+            ballKnowledge: movie.userMovie.ballKnowledge,
+            difference: movie.userMovie.difference,
+            platform: movie.userMovie.platform,
+          }
+        : null,
+    };
   });
 
   // 5. Estadísticas resumidas para la Home
@@ -340,60 +385,8 @@ export default async function MoviesHomePage() {
         </section>
       )}
 
-      {/* Sección: Continuar Explorando */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Compass className="w-5 h-5 text-sky-400" />
-            <h2 className="text-xl font-bold text-white tracking-wide">
-              Continuar Explorando
-            </h2>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {exploreMovies.map((movie) => {
-            let genres: string[] = [];
-            let streamingPlatforms: string[] = [];
-            try {
-              genres = JSON.parse(movie.genres);
-            } catch {}
-            try {
-              if (movie.streamingPlatforms)
-                streamingPlatforms = JSON.parse(movie.streamingPlatforms);
-            } catch {}
-
-            return (
-              <MovieCard
-                key={movie.id}
-                movie={{
-                  id: movie.id,
-                  tmdbId: movie.tmdbId,
-                  title: movie.title,
-                  originalTitle: movie.originalTitle,
-                  year: movie.year,
-                  posterPath: movie.posterPath,
-                  imdbRating: movie.imdbRating,
-                  genres,
-                  streamingPlatforms,
-                }}
-                userMovie={
-                  movie.userMovie
-                    ? {
-                        status: movie.userMovie.status as any,
-                        userRating: movie.userMovie.userRating,
-                        review: movie.userMovie.review,
-                        ballKnowledge: movie.userMovie.ballKnowledge,
-                        difference: movie.userMovie.difference,
-                        platform: movie.userMovie.platform,
-                      }
-                    : null
-                }
-              />
-            );
-          })}
-        </div>
-      </section>
+      {/* Continuar Explorando Películas con Desplegable y Modo Colapsable */}
+      <ExploreMoviesSection movies={formattedExploreMovies} />
     </div>
   );
 }

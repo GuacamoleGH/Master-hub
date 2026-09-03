@@ -1,1 +1,1 @@
-export { default } from './movies/StreamingBadge';
+export { default } from "./movies/StreamingBadge";

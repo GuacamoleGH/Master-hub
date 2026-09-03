@@ -1,1 +1,1 @@
-export { default } from './movies/MovieSearchInput';
+export { default } from "./movies/MovieSearchInput";

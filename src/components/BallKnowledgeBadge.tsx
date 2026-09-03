@@ -1,1 +1,1 @@
-export { default } from './movies/BallKnowledgeBadge';
+export { default } from "./movies/BallKnowledgeBadge";

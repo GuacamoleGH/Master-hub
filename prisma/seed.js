@@ -492,6 +492,372 @@ const CURATED_MOVIES = [
       platform: "HBO Max",
     },
   },
+  // Películas listas para "Continuar Explorando" (sin registro de usuario)
+  {
+    tmdbId: 27205,
+    imdbId: "tt1375666",
+    title: "Origen (Inception)",
+    originalTitle: "Inception",
+    year: 2010,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/s3TBrRGB1iav7gFOCNx3H31MoES.jpg",
+    overview:
+      "Dom Cobb es un ladrón experto en el peligroso arte de la extracción: robar secretos del subconsciente durante el sueño.",
+    runtime: 148,
+    genres: JSON.stringify(["Acción", "Ciencia ficción", "Aventura"]),
+    director: "Christopher Nolan",
+    directorImage:
+      "https://image.tmdb.org/t/p/w185/xuAIuYSmsUzKlUMBFGVZaWsY3Z5.jpg",
+    imdbRating: 8.8,
+    streamingPlatforms: JSON.stringify(["HBO Max", "Movistar Plus+"]),
+    cast: JSON.stringify([
+      {
+        name: "Leonardo DiCaprio",
+        character: "Dom Cobb",
+        profilePath:
+          "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg",
+      },
+      {
+        name: "Joseph Gordon-Levitt",
+        character: "Arthur",
+        profilePath: "https://image.tmdb.org/t/p/w185/dhv9f3A2n41.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 98,
+    imdbId: "tt0172495",
+    title: "Gladiator",
+    originalTitle: "Gladiator",
+    year: 2000,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+    overview:
+      "Un antiguo general romano busca vengarse del corrupto emperador que asesinó a su familia y lo condenó a la esclavitud.",
+    runtime: 155,
+    genres: JSON.stringify(["Acción", "Drama", "Aventura"]),
+    director: "Ridley Scott",
+    directorImage: "https://image.tmdb.org/t/p/w185/kzh1rU2D2.jpg",
+    imdbRating: 8.5,
+    streamingPlatforms: JSON.stringify(["Prime Video", "Netflix"]),
+    cast: JSON.stringify([
+      {
+        name: "Russell Crowe",
+        character: "Maximus Decimus Meridius",
+        profilePath: "https://image.tmdb.org/t/p/w185/crowe.jpg",
+      },
+      {
+        name: "Joaquin Phoenix",
+        character: "Commodus",
+        profilePath: "https://image.tmdb.org/t/p/w185/phoenix.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 807,
+    imdbId: "tt0114388",
+    title: "Seven (Se7en)",
+    originalTitle: "Se7en",
+    year: 1995,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/6yoghtyTpznpBik8EngEmJskVUO.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/ba4CpFFZc5dC9Z983wKecx4k3xV.jpg",
+    overview:
+      "Dos detectives de homicidios van a la caza de un asesino en serie que justifica sus crímenes basándose en los siete pecados capitales.",
+    runtime: 127,
+    genres: JSON.stringify(["Crimen", "Misterio", "Suspense"]),
+    director: "David Fincher",
+    directorImage: "https://image.tmdb.org/t/p/w185/fincher.jpg",
+    imdbRating: 8.6,
+    streamingPlatforms: JSON.stringify(["HBO Max"]),
+    cast: JSON.stringify([
+      {
+        name: "Brad Pitt",
+        character: "David Mills",
+        profilePath: "https://image.tmdb.org/t/p/w185/pitt.jpg",
+      },
+      {
+        name: "Morgan Freeman",
+        character: "William Somerset",
+        profilePath: "https://image.tmdb.org/t/p/w185/freeman.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 278,
+    imdbId: "tt0111161",
+    title: "Cadena perpetua",
+    originalTitle: "The Shawshank Redemption",
+    year: 1994,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/9cqNFs8svA79xfbtv92as9Lsdly.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg",
+    overview:
+      "Acusado injustamente del asesinato de su esposa, el banquero Andy Dufresne comienza una nueva vida en la dura prisión de Shawshank.",
+    runtime: 142,
+    genres: JSON.stringify(["Drama", "Crimen"]),
+    director: "Frank Darabont",
+    directorImage: "https://image.tmdb.org/t/p/w185/darabont.jpg",
+    imdbRating: 9.3,
+    streamingPlatforms: JSON.stringify(["HBO Max", "Movistar Plus+"]),
+    cast: JSON.stringify([
+      {
+        name: "Tim Robbins",
+        character: "Andy Dufresne",
+        profilePath: "https://image.tmdb.org/t/p/w185/robbins.jpg",
+      },
+      {
+        name: "Morgan Freeman",
+        character: "Ellis Boyd 'Red' Redding",
+        profilePath: "https://image.tmdb.org/t/p/w185/freeman.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 769,
+    imdbId: "tt0099685",
+    title: "Uno de los nuestros",
+    originalTitle: "Goodfellas",
+    year: 1990,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/sw7mordbZxgITU877yTpZCud90M.jpg",
+    overview:
+      "Henry Hill, hijo de padre irlandés y madre siciliana, vive fascinado por la vida que llevan los gángsters de su barrio en Brooklyn.",
+    runtime: 145,
+    genres: JSON.stringify(["Drama", "Crimen"]),
+    director: "Martin Scorsese",
+    directorImage: "https://image.tmdb.org/t/p/w185/scorsese.jpg",
+    imdbRating: 8.7,
+    streamingPlatforms: JSON.stringify(["HBO Max", "Prime Video"]),
+    cast: JSON.stringify([
+      {
+        name: "Robert De Niro",
+        character: "James Conway",
+        profilePath: "https://image.tmdb.org/t/p/w185/deniro.jpg",
+      },
+      {
+        name: "Ray Liotta",
+        character: "Henry Hill",
+        profilePath: "https://image.tmdb.org/t/p/w185/liotta.jpg",
+      },
+      {
+        name: "Joe Pesci",
+        character: "Tommy DeVito",
+        profilePath: "https://image.tmdb.org/t/p/w185/pesci.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 274,
+    imdbId: "tt0102926",
+    title: "El silencio de los corderos",
+    originalTitle: "The Silence of the Lambs",
+    year: 1991,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/uS9m8OBk1A8eM9I042bx8XXUNAq.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/mfwq2nMBzArzQ7Y9R5KN8SVj69m.jpg",
+    overview:
+      "Una joven cadete del FBI debe confiar en un encarcelado y manipulador asesino caníbal para capturar a otro asesino en serie.",
+    runtime: 118,
+    genres: JSON.stringify(["Crimen", "Drama", "Suspense"]),
+    director: "Jonathan Demme",
+    directorImage: "https://image.tmdb.org/t/p/w185/demme.jpg",
+    imdbRating: 8.6,
+    streamingPlatforms: JSON.stringify(["Prime Video"]),
+    cast: JSON.stringify([
+      {
+        name: "Jodie Foster",
+        character: "Clarice Starling",
+        profilePath: "https://image.tmdb.org/t/p/w185/foster.jpg",
+      },
+      {
+        name: "Anthony Hopkins",
+        character: "Dr. Hannibal Lecter",
+        profilePath: "https://image.tmdb.org/t/p/w185/hopkins.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 872585,
+    imdbId: "tt15398776",
+    title: "Oppenheimer",
+    originalTitle: "Oppenheimer",
+    year: 2023,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/ncKCQVXgk4BcY5xsSa1m829YvOP.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/fm6K9vYI02nG9LHaZCLMTe69pn0.jpg",
+    overview:
+      "La historia del físico teórico J. Robert Oppenheimer, su liderazgo en el Proyecto Manhattan y el desarrollo de la bomba atómica.",
+    runtime: 180,
+    genres: JSON.stringify(["Drama", "Historia"]),
+    director: "Christopher Nolan",
+    directorImage:
+      "https://image.tmdb.org/t/p/w185/xuAIuYSmsUzKlUMBFGVZaWsY3Z5.jpg",
+    imdbRating: 8.8,
+    streamingPlatforms: JSON.stringify(["SkyShowtime", "Movistar Plus+"]),
+    cast: JSON.stringify([
+      {
+        name: "Cillian Murphy",
+        character: "J. Robert Oppenheimer",
+        profilePath: "https://image.tmdb.org/t/p/w185/murphy.jpg",
+      },
+      {
+        name: "Emily Blunt",
+        character: "Katherine Oppenheimer",
+        profilePath: "https://image.tmdb.org/t/p/w185/blunt.jpg",
+      },
+      {
+        name: "Robert Downey Jr.",
+        character: "Lewis Strauss",
+        profilePath: "https://image.tmdb.org/t/p/w185/downey.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 129,
+    imdbId: "tt0245429",
+    title: "El viaje de Chihiro",
+    originalTitle: "Sen to Chihiro no kamikakushi",
+    year: 2001,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/393rwsUqA07d8fVyfOovO7jWq22.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/Ab8mkHmkYADjU7wQiOkia9BzGvS.jpg",
+    overview:
+      "Chihiro, una niña de diez años, se adentra en un mundo mágico gobernado por dioses y brujas donde sus padres son transformados en cerdos.",
+    runtime: 125,
+    genres: JSON.stringify(["Animación", "Familia", "Fantasía"]),
+    director: "Hayao Miyazaki",
+    directorImage: "https://image.tmdb.org/t/p/w185/miyazaki.jpg",
+    imdbRating: 8.6,
+    streamingPlatforms: JSON.stringify(["Netflix"]),
+    cast: JSON.stringify([
+      {
+        name: "Rumi Hiiragi",
+        character: "Chihiro Ogino (voz)",
+        profilePath: "",
+      },
+      { name: "Miyu Irino", character: "Haku (voz)", profilePath: "" },
+    ]),
+  },
+  {
+    tmdbId: 693134,
+    imdbId: "tt15239678",
+    title: "Dune: Parte Dos",
+    originalTitle: "Dune: Part Two",
+    year: 2024,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s520bNe.jpg",
+    overview:
+      "Paul Atreides se une a Chani y a los Fremen mientras busca venganza contra los conspiradores que destruyeron a su familia.",
+    runtime: 166,
+    genres: JSON.stringify(["Ciencia ficción", "Aventura"]),
+    director: "Denis Villeneuve",
+    directorImage: "https://image.tmdb.org/t/p/w185/villeneuve.jpg",
+    imdbRating: 8.5,
+    streamingPlatforms: JSON.stringify(["HBO Max"]),
+    cast: JSON.stringify([
+      {
+        name: "Timothée Chalamet",
+        character: "Paul Atreides",
+        profilePath: "https://image.tmdb.org/t/p/w185/chalamet.jpg",
+      },
+      {
+        name: "Zendaya",
+        character: "Chani",
+        profilePath: "https://image.tmdb.org/t/p/w185/zendaya.jpg",
+      },
+    ]),
+  },
+  {
+    tmdbId: 569094,
+    imdbId: "tt9362722",
+    title: "Spider-Man: Cruzando el Multiverso",
+    originalTitle: "Spider-Man: Across the Spider-Verse",
+    year: 2023,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg",
+    overview:
+      "Miles Morales es catapultado a través del Multiverso, donde se encuentra con un equipo de Spider-Gente encargado de proteger su propia existencia.",
+    runtime: 140,
+    genres: JSON.stringify(["Animación", "Acción", "Aventura"]),
+    director: "Joaquim Dos Santos, Kemp Powers",
+    directorImage: "",
+    imdbRating: 8.6,
+    streamingPlatforms: JSON.stringify(["Movistar Plus+", "Prime Video"]),
+    cast: JSON.stringify([
+      {
+        name: "Shameik Moore",
+        character: "Miles Morales (voz)",
+        profilePath: "",
+      },
+      {
+        name: "Hailee Steinfeld",
+        character: "Gwen Stacy (voz)",
+        profilePath: "",
+      },
+    ]),
+  },
+  {
+    tmdbId: 28,
+    imdbId: "tt0078788",
+    title: "Apocalypse Now",
+    originalTitle: "Apocalypse Now",
+    year: 1979,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/gQB8Y5RCMkv2zwzFHbUJX3kAhvA.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/iBmsZ7e69K6x9kL4r9iZgqF8QpA.jpg",
+    overview:
+      "Durante la guerra de Vietnam, el capitán Willard es enviado en una peligrosa misión por el río hasta Camboya para eliminar a un coronel rebelde.",
+    runtime: 147,
+    genres: JSON.stringify(["Drama", "Guerra"]),
+    director: "Francis Ford Coppola",
+    directorImage: "https://image.tmdb.org/t/p/w185/coppola.jpg",
+    imdbRating: 8.4,
+    streamingPlatforms: JSON.stringify(["Filmin", "Movistar Plus+"]),
+    cast: JSON.stringify([
+      { name: "Martin Sheen", character: "Capitán Willard", profilePath: "" },
+      { name: "Marlon Brando", character: "Coronel Kurtz", profilePath: "" },
+    ]),
+  },
+  {
+    tmdbId: 120467,
+    imdbId: "tt2278388",
+    title: "El Gran Hotel Budapest",
+    originalTitle: "The Grand Budapest Hotel",
+    year: 2014,
+    posterPath:
+      "https://image.tmdb.org/t/p/w500/eWdyYQreja6JGCzqHWX9ne3rNfg.jpg",
+    backdropPath:
+      "https://image.tmdb.org/t/p/original/71R375zT36l1w9M6k7oH8uP2Gsm.jpg",
+    overview:
+      "Las aventuras de Gustave H, un legendario conserje de un famoso hotel europeo de entreguerras, y Zero Moustafa, el botones que se convierte en su amigo de confianza.",
+    runtime: 100,
+    genres: JSON.stringify(["Comedia", "Aventura"]),
+    director: "Wes Anderson",
+    directorImage: "https://image.tmdb.org/t/p/w185/anderson.jpg",
+    imdbRating: 8.1,
+    streamingPlatforms: JSON.stringify(["Disney+"]),
+    cast: JSON.stringify([
+      { name: "Ralph Fiennes", character: "M. Gustave", profilePath: "" },
+      { name: "Tony Revolori", character: "Zero Moustafa", profilePath: "" },
+    ]),
+  },
 ];
 
 function calculateBK(userRating, imdbRating) {

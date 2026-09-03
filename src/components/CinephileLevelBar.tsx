@@ -1,1 +1,1 @@
-export { default } from './movies/CinephileLevelBar';
+export { default } from "./movies/CinephileLevelBar";

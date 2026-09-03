@@ -1,1 +1,1 @@
-export { default } from './shared/DynamicFooter';
+export { default } from "./shared/DynamicFooter";
