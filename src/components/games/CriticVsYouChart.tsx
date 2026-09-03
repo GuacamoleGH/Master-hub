@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
-} from 'recharts';
+} from "recharts";
 
 interface CriticVsYouChartProps {
   data: Array<{
@@ -34,8 +34,8 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
   const chartData = data.slice(0, 10).map((d) => ({
     name: d.title.length > 16 ? `${d.title.substring(0, 15)}…` : d.title,
     fullName: d.title,
-    'Tu Nota': d.userRating,
-    'Metacritic (Crítica)': d.criticRating,
+    "Tu Nota": d.userRating,
+    "Metacritic (Crítica)": d.criticRating,
     gk: d.gameKnowledge,
   }));
 
@@ -46,7 +46,11 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
           data={chartData}
           margin={{ top: 15, right: 15, left: -15, bottom: 65 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#27272a"
+            vertical={false}
+          />
           <XAxis
             dataKey="name"
             stroke="#71717a"
@@ -56,7 +60,7 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
             angle={-32}
             textAnchor="end"
             height={65}
-            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 500 }}
+            tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 500 }}
           />
           <YAxis
             domain={[0, 10]}
@@ -76,11 +80,15 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
                     </p>
                     <div className="flex items-center justify-between gap-4 text-purple-300">
                       <span>Tu Veredicto:</span>
-                      <strong className="font-mono text-sm">{item['Tu Nota']} / 10</strong>
+                      <strong className="font-mono text-sm">
+                        {item["Tu Nota"]} / 10
+                      </strong>
                     </div>
                     <div className="flex items-center justify-between gap-4 text-cyan-300">
                       <span>Metacritic:</span>
-                      <strong className="font-mono text-sm">{item['Metacritic (Crítica)']} / 10</strong>
+                      <strong className="font-mono text-sm">
+                        {item["Metacritic (Crítica)"]} / 10
+                      </strong>
                     </div>
                     <div className="flex items-center justify-between gap-4 text-cine-400 pt-1 border-t border-cine-800 font-mono">
                       <span>Game Knowledge:</span>
@@ -96,7 +104,7 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
             verticalAlign="top"
             align="right"
             iconType="circle"
-            wrapperStyle={{ paddingBottom: '16px', fontSize: '12px' }}
+            wrapperStyle={{ paddingBottom: "16px", fontSize: "12px" }}
           />
           <Bar
             dataKey="Tu Nota"

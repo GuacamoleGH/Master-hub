@@ -1,12 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { calculateGamerLevelAndRank, classifyHotTake } from '@/lib/gameKnowledge';
-import { GamerStats, HotTake } from '@/types/game';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import {
+  calculateGamerLevelAndRank,
+  classifyHotTake,
+} from "@/lib/gameKnowledge";
+import { GamerStats, HotTake } from "@/types/game";
 
 export async function GET() {
   try {
     const profile = await prisma.gamerProfile.findUnique({
-      where: { id: 'gamer-default' },
+      where: { id: "gamer-default" },
     });
 
     const userGames = await prisma.userGame.findMany({
@@ -34,27 +37,36 @@ export async function GET() {
     const platformHoursMap: Record<string, number> = {};
     const genreHoursMap: Record<string, number> = {};
     const ratingDistribution: Record<number, number> = {
-      1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
     };
 
     const hotTakes: HotTake[] = [];
-    const criticVsYou: GamerStats['criticVsYou'] = [];
+    const criticVsYou: GamerStats["criticVsYou"] = [];
 
     for (const ug of userGames) {
       if (ug.hoursPlayed) {
         totalHours += ug.hoursPlayed;
       }
 
-      if (ug.status === 'COMPLETED') totalCompleted++;
-      else if (ug.status === 'PLATINUM') {
+      if (ug.status === "COMPLETED") totalCompleted++;
+      else if (ug.status === "PLATINUM") {
         totalCompleted++;
         totalPlatinum++;
-      } else if (ug.status === 'BACKLOG') totalBacklog++;
-      else if (ug.status === 'PLAYING') totalPlaying++;
+      } else if (ug.status === "BACKLOG") totalBacklog++;
+      else if (ug.status === "PLAYING") totalPlaying++;
 
       if (ug.review && ug.review.trim().length > 0) totalReviews++;
 
-      if (typeof ug.userRating === 'number') {
+      if (typeof ug.userRating === "number") {
         totalUserRatingSum += ug.userRating;
         ratedCount++;
 
@@ -63,13 +75,15 @@ export async function GET() {
       }
 
       let parsedGenres: string[] = [];
-      try { parsedGenres = JSON.parse(ug.game.genres); } catch {}
+      try {
+        parsedGenres = JSON.parse(ug.game.genres);
+      } catch {}
 
       // Mapear horas por plataforma individual (desglosando plataformas combinadas)
-      const rawPlatform = ug.platform || 'General';
+      const rawPlatform = ug.platform || "General";
       const hours = ug.hoursPlayed || 0;
       const individualPlats = rawPlatform
-        .split(',')
+        .split(",")
         .map((p) => p.trim())
         .filter(Boolean);
 
@@ -85,8 +99,8 @@ export async function GET() {
 
       // Hot Takes y Critic vs You
       if (
-        typeof ug.userRating === 'number' &&
-        typeof ug.game.metacritic === 'number' &&
+        typeof ug.userRating === "number" &&
+        typeof ug.game.metacritic === "number" &&
         ug.gameKnowledge !== null &&
         ug.difference !== null
       ) {
@@ -134,7 +148,7 @@ export async function GET() {
       .sort((a, b) => b.hours - a.hours);
 
     const ratingDistributionList = Object.entries(ratingDistribution).map(
-      ([rating, count]) => ({ rating: Number(rating), count })
+      ([rating, count]) => ({ rating: Number(rating), count }),
     );
 
     const stats: GamerStats = {
@@ -144,9 +158,16 @@ export async function GET() {
       totalPlaying,
       totalPlatinum,
       totalReviews,
-      averageRating: ratedCount > 0 ? Number((totalUserRatingSum / ratedCount).toFixed(1)) : null,
-      averageMetacritic: metacriticCount > 0 ? Number((totalMetacriticSum / metacriticCount).toFixed(1)) : null,
-      globalGameKnowledge: gkCount > 0 ? Number((totalGkSum / gkCount).toFixed(1)) : null,
+      averageRating:
+        ratedCount > 0
+          ? Number((totalUserRatingSum / ratedCount).toFixed(1))
+          : null,
+      averageMetacritic:
+        metacriticCount > 0
+          ? Number((totalMetacriticSum / metacriticCount).toFixed(1))
+          : null,
+      globalGameKnowledge:
+        gkCount > 0 ? Number((totalGkSum / gkCount).toFixed(1)) : null,
       totalXp,
       level: levelInfo.level,
       rankTitle: levelInfo.rankTitle,
@@ -156,7 +177,8 @@ export async function GET() {
       currentLevelBaseXp: levelInfo.currentLevelBaseXp,
       xpProgressPercent: levelInfo.xpProgressPercent,
       topGenre: hoursByGenre.length > 0 ? hoursByGenre[0].genre : null,
-      topPlatform: hoursByPlatform.length > 0 ? hoursByPlatform[0].platform : null,
+      topPlatform:
+        hoursByPlatform.length > 0 ? hoursByPlatform[0].platform : null,
       hotTakes,
       criticVsYou,
       hoursByPlatform,
@@ -166,16 +188,19 @@ export async function GET() {
 
     return NextResponse.json({
       profile: {
-        id: profile?.id || 'gamer-default',
-        displayName: profile?.displayName || 'Gamer',
+        id: profile?.id || "gamer-default",
+        displayName: profile?.displayName || "Gamer",
         avatarUrl: profile?.avatarUrl || null,
         bio: profile?.bio || null,
       },
       stats,
     });
   } catch (error) {
-    console.error('Error en /api/games/profile:', error);
-    return NextResponse.json({ error: 'Error al calcular estadísticas gamer' }, { status: 500 });
+    console.error("Error en /api/games/profile:", error);
+    return NextResponse.json(
+      { error: "Error al calcular estadísticas gamer" },
+      { status: 500 },
+    );
   }
 }
 
@@ -185,15 +210,15 @@ export async function PATCH(request: NextRequest) {
     const { displayName, bio, avatarUrl } = body;
 
     const updated = await prisma.gamerProfile.upsert({
-      where: { id: 'gamer-default' },
+      where: { id: "gamer-default" },
       update: {
         ...(displayName !== undefined && { displayName: displayName.trim() }),
         ...(bio !== undefined && { bio: bio.trim() }),
         ...(avatarUrl !== undefined && { avatarUrl: avatarUrl.trim() || null }),
       },
       create: {
-        id: 'gamer-default',
-        displayName: displayName ? displayName.trim() : 'Gamer',
+        id: "gamer-default",
+        displayName: displayName ? displayName.trim() : "Gamer",
         bio: bio ? bio.trim() : null,
         avatarUrl: avatarUrl ? avatarUrl.trim() : null,
         totalXp: 0,
@@ -202,7 +227,10 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, profile: updated });
   } catch (error) {
-    console.error('Error en PATCH /api/games/profile:', error);
-    return NextResponse.json({ error: 'Error al actualizar perfil gamer' }, { status: 500 });
+    console.error("Error en PATCH /api/games/profile:", error);
+    return NextResponse.json(
+      { error: "Error al actualizar perfil gamer" },
+      { status: 500 },
+    );
   }
 }

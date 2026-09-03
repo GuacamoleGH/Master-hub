@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { X, User, Image, FileText, Loader2, Check } from 'lucide-react';
+import React, { useState } from "react";
+import { X, User, Image, FileText, Loader2, Check } from "lucide-react";
 
 interface EditGamerProfileModalProps {
   isOpen: boolean;
@@ -13,12 +13,12 @@ interface EditGamerProfileModalProps {
 }
 
 const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=80',
+  "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=80",
 ];
 
 export default function EditGamerProfileModal({
@@ -30,8 +30,8 @@ export default function EditGamerProfileModal({
   initialAvatar,
 }: EditGamerProfileModalProps) {
   const [displayName, setDisplayName] = useState(initialName);
-  const [bio, setBio] = useState(initialBio || '');
-  const [avatarUrl, setAvatarUrl] = useState(initialAvatar || '');
+  const [bio, setBio] = useState(initialBio || "");
+  const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -41,9 +41,9 @@ export default function EditGamerProfileModal({
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/games/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/games/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           displayName,
           bio,
@@ -56,7 +56,7 @@ export default function EditGamerProfileModal({
         onClose();
       }
     } catch (err) {
-      console.error('Error al actualizar perfil gamer:', err);
+      console.error("Error al actualizar perfil gamer:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -71,7 +71,9 @@ export default function EditGamerProfileModal({
             <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
               <User className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-white">Editar Perfil Gamer</h2>
+            <h2 className="text-lg font-bold text-white">
+              Editar Perfil Gamer
+            </h2>
           </div>
 
           <button
@@ -127,7 +129,9 @@ export default function EditGamerProfileModal({
                   placeholder="URL de imagen externa..."
                   className="w-full px-3 py-1.5 bg-cine-900 border border-cine-700 rounded-xl text-xs text-white placeholder-cine-500 focus:outline-none focus:border-cyan-400"
                 />
-                <span className="text-[10px] text-cine-500 block">O elige un avatar predeterminado:</span>
+                <span className="text-[10px] text-cine-500 block">
+                  O elige un avatar predeterminado:
+                </span>
               </div>
             </div>
 
@@ -140,11 +144,15 @@ export default function EditGamerProfileModal({
                   onClick={() => setAvatarUrl(url)}
                   className={`relative w-10 h-10 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
                     avatarUrl === url
-                      ? 'border-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)] scale-105'
-                      : 'border-transparent hover:border-purple-400'
+                      ? "border-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)] scale-105"
+                      : "border-transparent hover:border-purple-400"
                   }`}
                 >
-                  <img src={url} alt={`Preset ${i}`} className="w-full h-full object-cover" />
+                  <img
+                    src={url}
+                    alt={`Preset ${i}`}
+                    className="w-full h-full object-cover"
+                  />
                   {avatarUrl === url && (
                     <div className="absolute inset-0 bg-cyan-500/20 flex items-center justify-center">
                       <Check className="w-4 h-4 text-cyan-300 stroke-[3]" />
@@ -158,7 +166,8 @@ export default function EditGamerProfileModal({
           {/* Biografía */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-purple-400" /> Biografía Gamer
+              <FileText className="w-3.5 h-3.5 text-purple-400" /> Biografía
+              Gamer
             </label>
             <textarea
               value={bio}
@@ -189,7 +198,7 @@ export default function EditGamerProfileModal({
                   <Loader2 className="w-3.5 h-3.5 animate-spin" /> Guardando...
                 </>
               ) : (
-                'Guardar Cambios'
+                "Guardar Cambios"
               )}
             </button>
           </div>
