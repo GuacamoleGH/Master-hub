@@ -82,7 +82,10 @@ export default function ExploreMoviesSection({
 
         {/* Desplegable de Géneros */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="relative inline-flex items-center bg-cine-900 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200">
+          <div
+            className="relative inline-flex items-center bg-cine-900 border border-amber-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200"
+            title="Filtra las películas recomendadas por género cinematográfico"
+          >
             <Filter className="w-3.5 h-3.5 text-amber-400 mr-2" />
             <select
               value={selectedGenre}
@@ -90,6 +93,7 @@ export default function ExploreMoviesSection({
                 setSelectedGenre(e.target.value);
                 if (e.target.value !== "all") setIsExpanded(true);
               }}
+              title="Selecciona un género para filtrar"
               className="bg-transparent focus:outline-none cursor-pointer text-white font-medium pr-2"
             >
               <option value="all" className="bg-cine-900 text-white">
@@ -106,6 +110,11 @@ export default function ExploreMoviesSection({
           {hasMore && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
+              title={
+                isExpanded
+                  ? "Plegar sección para mostrar solo 6 películas destacadas"
+                  : `Desplegar catálogo completo (${filteredMovies.length} películas disponibles)`
+              }
               className="px-3.5 py-1.5 bg-cine-800 hover:bg-cine-700 border border-cine-700 text-amber-400 font-semibold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm"
             >
               {isExpanded ? (

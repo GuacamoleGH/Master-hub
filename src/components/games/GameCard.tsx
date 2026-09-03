@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Clock, Star } from "lucide-react";
+import { Clock, Star, Quote } from "lucide-react";
 import GameKnowledgeBadge from "./GameKnowledgeBadge";
 import GameReviewModal from "./GameReviewModal";
 import GamePoster from "./GamePoster";
@@ -92,7 +92,10 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
           {/* Metacritic Badge */}
           {game.metacritic && (
             <div className="absolute top-2.5 right-2.5">
-              <span className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 text-white border border-purple-400 shadow-md">
+              <span
+                className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 text-white border border-purple-400 shadow-md cursor-help"
+                title={`Puntuación de la crítica especializada en Metacritic: ${game.metacritic} / 100`}
+              >
                 MC {game.metacritic}
               </span>
             </div>
@@ -103,7 +106,10 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
             userGame?.hoursPlayed !== undefined &&
             userGame.hoursPlayed > 0 && (
               <div className="absolute bottom-2.5 left-2.5">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-cine-950/80 text-cyan-300 border border-cyan-500/30 backdrop-blur-md">
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-cine-950/80 text-cyan-300 border border-cyan-500/30 backdrop-blur-md cursor-help"
+                  title={`Tiempo total dedicado: ${userGame.hoursPlayed} horas`}
+                >
                   <Clock className="w-2.5 h-2.5 text-cyan-400" />
                   {userGame.hoursPlayed}h
                 </span>
@@ -115,28 +121,52 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
         <div className="p-3.5 flex flex-col flex-1 justify-between gap-2.5">
           <div>
             <Link href={`/games/${game.rawgId}`}>
-              <h3 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1 leading-snug">
+              <h3
+                className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1 leading-snug"
+                title={`Ver ficha completa de ${game.title}`}
+              >
                 {game.title}
               </h3>
             </Link>
 
             <div className="flex items-center justify-between text-xs text-cine-400 mt-1">
-              <span>{releaseYear || "—"}</span>
+              <span title={`Año de lanzamiento: ${releaseYear || "Desconocido"}`}>
+                {releaseYear || "—"}
+              </span>
             </div>
 
             {/* Plataformas donde se jugó */}
             {userGame?.platform && (
-              <div className="mt-1.5">
+              <div className="mt-1.5" title={`Plataforma: ${userGame.platform}`}>
                 <PlatformBadge platform={userGame.platform} size="xs" />
               </div>
             )}
           </div>
 
+          {/* Reseña snippet si existe */}
+          {userGame?.review && (
+            <div
+              onClick={() => setIsReviewOpen(true)}
+              className="cursor-pointer group/review bg-cine-950/80 hover:bg-cine-950 p-2.5 rounded-xl border border-purple-500/15 hover:border-purple-400/30 transition-all shadow-inner"
+              title={`Tu veredicto: "${userGame.review}". Haz clic para ampliar o editar.`}
+            >
+              <div className="flex items-start gap-1.5">
+                <Quote className="w-3 h-3 text-purple-400/80 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-cine-300 leading-snug line-clamp-2 italic font-normal">
+                  {userGame.review}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Mi Puntuación y Game Knowledge */}
           {userGame?.userRating !== null &&
           userGame?.userRating !== undefined ? (
-            <div className="pt-2 border-t border-cine-800/80 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1 text-xs">
+            <div className="pt-2 border-t border-cine-800/80 flex items-center justify-between gap-1.5 min-w-0">
+              <div
+                className="flex items-center gap-1 text-xs cursor-help"
+                title={`Tu valoración personal: ${userGame.userRating.toFixed(1)} / 10`}
+              >
                 <Star className="w-3.5 h-3.5 text-purple-400 fill-purple-400" />
                 <span className="font-mono font-bold text-white text-sm">
                   {userGame.userRating.toFixed(1)}
@@ -153,6 +183,7 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
             <div className="pt-2 border-t border-cine-800/80">
               <button
                 onClick={() => setIsReviewOpen(true)}
+                title="Añade tu puntuación, horas y veredicto personal"
                 className="w-full py-1.5 text-[11px] font-semibold text-purple-300 hover:text-white bg-purple-950/30 hover:bg-purple-900/50 border border-purple-500/20 rounded-lg transition-colors text-center"
               >
                 + Registrar Veredicto

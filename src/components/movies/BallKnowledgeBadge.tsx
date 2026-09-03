@@ -46,8 +46,12 @@ export default function BallKnowledgeBadge({
 
   return (
     <div
-      className={`inline-flex items-center rounded-full border backdrop-blur-md shadow-sm font-medium transition-all ${sizeClasses} ${colorClasses}`}
-      title={`Ball Knowledge: ${score}%. ${difference !== undefined && difference !== null ? `Diferencia con IMDb: ${difference > 0 ? "+" : ""}${difference}` : ""}`}
+      className={`inline-flex items-center rounded-full border backdrop-blur-md shadow-sm font-medium transition-all cursor-help ${sizeClasses} ${colorClasses}`}
+      title={`Ball Knowledge: ${score.toFixed(1)}% de afinidad cultural con la crítica de IMDb. ${
+        difference !== undefined && difference !== null
+          ? `Diferencia de criterio con IMDb: ${difference > 0 ? `+${difference.toFixed(1)}` : difference.toFixed(1)} puntos.`
+          : ""
+      }`}
     >
       <span className="font-mono font-bold tracking-tight">
         🏀 {score.toFixed(0)}%

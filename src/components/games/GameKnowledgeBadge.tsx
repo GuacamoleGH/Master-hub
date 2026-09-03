@@ -72,14 +72,19 @@ export default function GameKnowledgeBadge({
 
   return (
     <div
-      className={`inline-flex items-center font-mono font-bold rounded-xl border ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.text} ${sizeClasses} shadow-sm backdrop-blur-md whitespace-nowrap flex-nowrap flex-shrink-0`}
+      title={`Game Knowledge: ${score.toFixed(1)}% de afinidad con la crítica especializada (Metacritic). ${
+        difference !== null && difference !== undefined
+          ? `Diferencia con la crítica: ${difference > 0 ? `+${difference.toFixed(1)}` : difference.toFixed(1)} puntos.`
+          : ""
+      }`}
+      className={`inline-flex items-center font-mono font-bold rounded-xl border cursor-help ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.text} ${sizeClasses} shadow-sm backdrop-blur-md whitespace-nowrap flex-nowrap`}
     >
       {badgeStyle.icon}
-      <span className="whitespace-nowrap">{score.toFixed(1)}% GK</span>
+      <span className="whitespace-nowrap">{score.toFixed(size === "sm" ? 0 : 1)}% GK</span>
 
       {showDiff && difference !== null && difference !== undefined && (
         <span
-          className={`ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded flex items-center whitespace-nowrap flex-shrink-0 ${
+          className={`ml-1 text-[10px] font-mono px-1 py-0.5 rounded flex items-center whitespace-nowrap ${
             Math.abs(difference) <= 0.3
               ? "text-cyan-300 bg-cyan-950/80"
               : difference > 0

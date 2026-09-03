@@ -46,7 +46,7 @@ export default function Header() {
 
           <Link href="/movies" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform shadow-gold-glow">
-              <Film className="w-5 h-5 fill-amber-400" />
+              <Film className="w-5 h-5 text-amber-400" />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-1">

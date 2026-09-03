@@ -81,7 +81,10 @@ export default function ExploreGamesSection({
 
         {/* Desplegable de Géneros y Botón de Plegado */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="relative inline-flex items-center bg-cine-900 border border-purple-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200">
+          <div
+            className="relative inline-flex items-center bg-cine-900 border border-purple-500/30 rounded-xl px-3 py-1.5 text-xs text-cine-200"
+            title="Filtra los videojuegos recomendados por género"
+          >
             <Filter className="w-3.5 h-3.5 text-cyan-400 mr-2" />
             <select
               value={selectedGenre}
@@ -89,6 +92,7 @@ export default function ExploreGamesSection({
                 setSelectedGenre(e.target.value);
                 if (e.target.value !== "all") setIsExpanded(true);
               }}
+              title="Selecciona un género de videojuego para filtrar"
               className="bg-transparent focus:outline-none cursor-pointer text-white font-medium pr-2"
             >
               <option value="all" className="bg-cine-900 text-white">
@@ -105,6 +109,11 @@ export default function ExploreGamesSection({
           {hasMore && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
+              title={
+                isExpanded
+                  ? "Plegar sección para mostrar solo 4 juegos destacados"
+                  : `Desplegar catálogo completo (${filteredGames.length} juegos disponibles)`
+              }
               className="px-3.5 py-1.5 bg-cine-800 hover:bg-purple-900/40 border border-purple-500/30 text-purple-300 font-semibold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm"
             >
               {isExpanded ? (

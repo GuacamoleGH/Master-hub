@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Star, Bookmark, CheckCircle2 } from "lucide-react";
+import { Star, Bookmark, CheckCircle2, Quote } from "lucide-react";
 import BallKnowledgeBadge from "./BallKnowledgeBadge";
 import ReviewModal from "./ReviewModal";
 import MoviePoster from "./MoviePoster";
@@ -103,7 +103,10 @@ export default function MovieCard({
           {/* Calificaciones superpuestas arriba */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10">
             {movie.imdbRating ? (
-              <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 shadow">
+              <div
+                className="flex items-center gap-1 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 shadow cursor-help"
+                title={`Nota media en IMDb: ${movie.imdbRating.toFixed(1)} / 10`}
+              >
                 <Star className="w-3 h-3 fill-amber-400" />
                 <span>{movie.imdbRating.toFixed(1)}</span>
               </div>
@@ -117,7 +120,9 @@ export default function MovieCard({
                 onClick={handleToggleWatchlist}
                 disabled={isUpdating}
                 title={
-                  isWatchlist ? "Quitar de Watchlist" : "Añadir a Watchlist"
+                  isWatchlist
+                    ? "En tu Watchlist (haz clic para quitar)"
+                    : "Guardar en tu Watchlist de pendientes"
                 }
                 className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
                   isWatchlist
@@ -130,7 +135,11 @@ export default function MovieCard({
 
               <button
                 onClick={handleOpenReview}
-                title={isWatched ? "Editar reseña y nota" : "Marcar como vista"}
+                title={
+                  isWatched
+                    ? "Película vista (haz clic para editar nota o reseña)"
+                    : "Marcar como vista y añadir tu valoración"
+                }
                 className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 border-emerald-400 font-bold shadow"
@@ -147,7 +156,10 @@ export default function MovieCard({
             {isWatched &&
             userMovie?.userRating !== undefined &&
             userMovie.userRating !== null ? (
-              <div className="flex items-center gap-1 bg-amber-500/90 text-cine-950 px-2 py-0.5 rounded-lg text-xs font-bold shadow">
+              <div
+                className="flex items-center gap-1 bg-amber-500/90 text-cine-950 px-2 py-0.5 rounded-lg text-xs font-bold shadow cursor-help"
+                title={`Tu valoración personal: ${userMovie.userRating.toFixed(1)} / 10`}
+              >
                 <Star className="w-3 h-3 fill-cine-950 text-cine-950" />
                 <span>{userMovie.userRating.toFixed(1)}</span>
               </div>
@@ -162,6 +174,7 @@ export default function MovieCard({
               userMovie.ballKnowledge !== null && (
                 <BallKnowledgeBadge
                   score={userMovie.ballKnowledge}
+                  difference={userMovie.difference}
                   size="sm"
                   showLabel={false}
                 />
@@ -170,21 +183,30 @@ export default function MovieCard({
         </Link>
 
         {/* Información de la película */}
-        <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
+        <div className="p-3.5 flex flex-col flex-1 justify-between gap-2.5">
           <div>
             <Link
               href={`/movie/${movie.tmdbId}`}
               className="font-bold text-sm text-cine-100 hover:text-amber-400 transition-colors line-clamp-1"
-              title={movie.title}
+              title={`Ver detalles de ${movie.title}`}
             >
               {movie.title}
             </Link>
             <div className="flex items-center gap-2 text-xs text-cine-400 mt-0.5">
-              {movie.year && <span>{movie.year}</span>}
+              {movie.year && (
+                <span title={`Año de estreno: ${movie.year}`}>
+                  {movie.year}
+                </span>
+              )}
               {movie.genres && movie.genres.length > 0 && (
                 <>
                   <span>•</span>
-                  <span className="truncate">{movie.genres[0]}</span>
+                  <span
+                    className="truncate"
+                    title={`Género principal: ${movie.genres[0]}`}
+                  >
+                    {movie.genres[0]}
+                  </span>
                 </>
               )}
             </div>
@@ -192,9 +214,18 @@ export default function MovieCard({
 
           {/* Reseña snippet si existe */}
           {userMovie?.review && (
-            <p className="text-[11px] text-cine-400 line-clamp-2 italic bg-cine-950/60 p-2 rounded-lg border border-white/5">
-              &quot;{userMovie.review}&quot;
-            </p>
+            <div
+              onClick={handleOpenReview}
+              className="cursor-pointer group/review bg-cine-950/80 hover:bg-cine-950 p-2.5 rounded-xl border border-white/5 hover:border-amber-500/30 transition-all shadow-inner"
+              title={`Tu reseña: "${userMovie.review}". Haz clic para ampliar o editar.`}
+            >
+              <div className="flex items-start gap-1.5">
+                <Quote className="w-3 h-3 text-amber-400/80 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-cine-300 leading-snug line-clamp-2 italic font-normal">
+                  {userMovie.review}
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>

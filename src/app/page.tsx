@@ -103,7 +103,7 @@ export default async function MasterHubPage() {
           <div className="relative z-10 space-y-6">
             <div className="flex items-center justify-between">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl shadow-gold-glow">
-                <Film className="w-7 h-7 fill-amber-400" />
+                <Film className="w-7 h-7 text-amber-400" />
               </div>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                 Cine & Series

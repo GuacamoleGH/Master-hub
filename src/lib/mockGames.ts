@@ -1,7 +1,27 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+export interface SeedGame {
+  rawgId: number;
+  title: string;
+  released: string;
+  backgroundImage: string;
+  metacritic: number;
+  rating: number;
+  genres: string[];
+  platforms: string[];
+  developers: string[];
+  publishers: string[];
+  description: string;
+  screenshots: string[];
+  userGame?: {
+    status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+    userRating?: number | null;
+    hoursPlayed?: number | null;
+    platform?: string | null;
+    review?: string | null;
+    completedDate?: string | null;
+  };
+}
 
-const CURATED_GAMES = [
+export const CURATED_GAMES: SeedGame[] = [
   {
     "rawgId": 3328,
     "title": "The Witcher 3: Wild Hunt",
@@ -977,95 +997,3 @@ const CURATED_GAMES = [
     "screenshots": []
   }
 ];
-
-function calculateGK(userRating, metacritic) {
-  if (userRating === null || userRating === undefined || metacritic === null || metacritic === undefined) {
-    return { gameKnowledge: null, difference: null };
-  }
-  const criticNormalized = Number((metacritic / 10).toFixed(1));
-  const diff = Number((userRating - criticNormalized).toFixed(1));
-  const absDiff = Math.abs(diff);
-  const score = Math.max(0, Math.min(100, 100 - absDiff * 10));
-  return {
-    gameKnowledge: Number(score.toFixed(1)),
-    difference: diff,
-  };
-}
-
-async function seedGames() {
-  console.log("🎮 Sembrando base de datos gamer con catálogo ampliado y verificado...");
-  await prisma.userGame.deleteMany();
-  await prisma.game.deleteMany();
-  await prisma.gamerProfile.deleteMany();
-
-  let totalXp = 0;
-
-  for (const item of CURATED_GAMES) {
-    const game = await prisma.game.create({
-      data: {
-        rawgId: item.rawgId,
-        title: item.title,
-        released: item.released,
-        backgroundImage: item.backgroundImage,
-        metacritic: item.metacritic,
-        rating: item.rating,
-        genres: JSON.stringify(item.genres),
-        platforms: JSON.stringify(item.platforms),
-        developers: JSON.stringify(item.developers),
-        publishers: JSON.stringify(item.publishers),
-        description: item.description,
-        screenshots: JSON.stringify(item.screenshots),
-      },
-    });
-
-    if (item.userGame) {
-      const { gameKnowledge, difference } = calculateGK(item.userGame.userRating, item.metacritic);
-
-      await prisma.userGame.create({
-        data: {
-          gameId: game.id,
-          status: item.userGame.status,
-          userRating: item.userGame.userRating ?? null,
-          hoursPlayed: item.userGame.hoursPlayed ?? null,
-          platform: item.userGame.platform ?? null,
-          review: item.userGame.review ?? null,
-          completedDate: item.userGame.completedDate ? new Date(item.userGame.completedDate) : null,
-          gameKnowledge,
-          difference,
-        },
-      });
-
-      if (item.userGame.status === "COMPLETED") totalXp += 150;
-      else if (item.userGame.status === "PLATINUM") totalXp += 250;
-      else if (item.userGame.status === "PLAYING") totalXp += 35;
-      else if (item.userGame.status === "BACKLOG") totalXp += 15;
-
-      if (item.userGame.review) totalXp += 50;
-      if (gameKnowledge !== null && gameKnowledge >= 95) totalXp += 30;
-      if (item.userGame.hoursPlayed) {
-        totalXp += Math.min(200, Math.floor(item.userGame.hoursPlayed / 10) * 10);
-      }
-    }
-  }
-
-  await prisma.gamerProfile.create({
-    data: {
-      id: "gamer-default",
-      displayName: "Jose",
-      avatarUrl: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&auto=format&fit=crop&q=80",
-      bio: "Completista empedernido. Fan de FromSoftware, los RPGs densos y los indies con alma.",
-      totalXp,
-    },
-  });
-
-  console.log(`✅ Base de datos Gamer sembrada con éxito. Juegos: ${CURATED_GAMES.length}. XP: ${totalXp}`);
-}
-
-seedGames()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

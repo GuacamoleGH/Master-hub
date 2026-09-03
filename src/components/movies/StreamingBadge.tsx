@@ -35,7 +35,8 @@ export default function StreamingBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md border font-medium tracking-wide shadow-sm ${sizeClasses} ${styleClasses}`}
+      title={`Disponible en streaming en ${platform}`}
+      className={`inline-flex items-center gap-1 rounded-md border font-medium tracking-wide shadow-sm cursor-help ${sizeClasses} ${styleClasses}`}
     >
       {clean.includes("pirata") ? "🏴‍☠️" : null} {platform}
     </span>

@@ -33,8 +33,8 @@ export default function PlatformBadge({
         return (
           <span
             key={idx}
-            className={`font-mono border backdrop-blur-sm shadow-sm truncate max-w-[120px] ${sizeClasses} ${badgeStyle}`}
-            title={p}
+            className={`font-mono border backdrop-blur-sm shadow-sm truncate max-w-[120px] cursor-help ${sizeClasses} ${badgeStyle}`}
+            title={`Plataforma de juego: ${p}`}
           >
             {p}
           </span>
