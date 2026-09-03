@@ -4,9 +4,14 @@ import DynamicNavHeader from "@/components/DynamicNavHeader";
 import DynamicFooter from "@/components/DynamicFooter";
 
 export const metadata: Metadata = {
-  title: "Entertainment Command Center | Cinephile & Gamer Hub",
+  title: "Cinephile & Gamer Hub",
   description:
     "Centro de mando personal para cine y videojuegos con Ball Knowledge y Game Knowledge.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
