@@ -65,32 +65,36 @@ prueba/
 ## ✨ Características Principales
 
 ### 1. 🛸 Launcher Genérico (`/`)
-* Pantalla de bienvenida modular para acceder a cualquier universo activo.
-* Tarjeta con estadísticas en vivo de Cinephile Hub.
-* Tarjeta con estadísticas en vivo de Gamer Hub.
-* Espacio modular ("Próximamente...") para futuros módulos (Anime, Libros, etc.).
+
+- Pantalla de bienvenida modular para acceder a cualquier universo activo.
+- Tarjeta con estadísticas en vivo de Cinephile Hub.
+- Tarjeta con estadísticas en vivo de Gamer Hub.
+- Espacio modular ("Próximamente...") para futuros módulos (Anime, Libros, etc.).
 
 ### 2. 🎮 Gamer Hub (`/games/...`)
-* **Integración RAWG API:** Catálogo de más de 500.000 videojuegos con carátulas, screenshots y trailers oficiales.
-* **Soporte Multi-Plataforma:** Posibilidad de registrar un juego completado en varias consolas/tiendas (ej. *PC (Steam)* y *PlayStation 5*).
-* **Catálogo Retro & Old Gen:** Soporte para PC (Steam, Epic, GOG, Game Pass), Xbox (Xbox 360, One, Series, Clásica), PlayStation (PS5, PS4, PS3, PS2, PS1, Vita), Nintendo (Switch, Wii, GameCube, N64, 3DS, GBA) y Steam Deck.
-* **Seguimiento de Horas Jugadas:** Registro de horas totales acumuladas en tu vida.
-* **Motor Game Knowledge (GK):**
+
+- **Integración RAWG API:** Catálogo de más de 500.000 videojuegos con carátulas, screenshots y trailers oficiales.
+- **Soporte Multi-Plataforma:** Posibilidad de registrar un juego completado en varias consolas/tiendas (ej. _PC (Steam)_ y _PlayStation 5_).
+- **Catálogo Retro & Old Gen:** Soporte para PC (Steam, Epic, GOG, Game Pass), Xbox (Xbox 360, One, Series, Clásica), PlayStation (PS5, PS4, PS3, PS2, PS1, Vita), Nintendo (Switch, Wii, GameCube, N64, 3DS, GBA) y Steam Deck.
+- **Seguimiento de Horas Jugadas:** Registro de horas totales acumuladas en tu vida.
+- **Motor Game Knowledge (GK):**
   $$\text{Game Knowledge (\%)} = \max\left(0,\, 100 - (|\text{Tu Nota} - \text{Nota Metacritic}| \times 10)\right)$$
-* **Tus Hot Takes 🔥:** Detección de títulos sobrevalorados por la prensa (*Biggest Overrated*) y joyas ocultas (*Hidden Gems*).
-* **Perfil Gamer Editable:** Cambia tu nombre de jugador, biografía y avatar con vista previa inmediata.
+- **Tus Hot Takes 🔥:** Detección de títulos sobrevalorados por la prensa (_Biggest Overrated_) y joyas ocultas (_Hidden Gems_).
+- **Perfil Gamer Editable:** Cambia tu nombre de jugador, biografía y avatar con vista previa inmediata.
 
 ### 3. 🎬 Cinephile Hub (`/movies/...`)
-* Catálogo cinematográfico conectado a **TMDB**.
-* Selección de plataformas de streaming donde la viste (Netflix, HBO Max, Prime Video, Disney+, Apple TV+, Movistar Plus+, Filmin o **🏴‍☠️ Pirata**).
-* Motor de **Ball Knowledge** frente al consenso de IMDb.
-* Historial de películas vistas y Watchlist con filtros por plataforma y género.
+
+- Catálogo cinematográfico conectado a **TMDB**.
+- Selección de plataformas de streaming donde la viste (Netflix, HBO Max, Prime Video, Disney+, Apple TV+, Movistar Plus+, Filmin o **🏴‍☠️ Pirata**).
+- Motor de **Ball Knowledge** frente al consenso de IMDb.
+- Historial de películas vistas y Watchlist con filtros por plataforma y género.
 
 ---
 
 ## 🛠️ Comandos Útiles
 
 ### Iniciar en local:
+
 ```bash
 npm run dev
 # o para producción:
@@ -99,6 +103,7 @@ npm run start
 ```
 
 ### Sembrar datos en Supabase:
+
 ```bash
 npm run db:seed:all     # Siembra cine y videojuegos
 npm run db:seed         # Solo cine
@@ -106,6 +111,7 @@ npm run db:seed:games   # Solo videojuegos
 ```
 
 ### 🌿 Crear una nueva rama en GitHub para esta actualización:
+
 Si deseas crear una nueva rama limpia en tu repositorio con todo este código organizado:
 
 ```bash
@@ -117,7 +123,9 @@ git push -u origin v2-master-hub
 ```
 
 ### 🩹 Reparar el error de índice de Git en Windows (`repair-git.bat`):
+
 Si en tu consola de Windows alguna vez te sale `fatal: .git/index: index file smaller than expected`, simplemente ejecuta en la raíz del proyecto:
+
 ```bash
 repair-git.bat
 ```

@@ -1,0 +1,224 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { Star, Bookmark, CheckCircle2 } from "lucide-react";
+import BallKnowledgeBadge from "./BallKnowledgeBadge";
+import ReviewModal from "./ReviewModal";
+import MoviePoster from "./MoviePoster";
+import StreamingBadge from "./StreamingBadge";
+
+interface MovieCardProps {
+  movie: {
+    id: string | number;
+    tmdbId: number;
+    title: string;
+    originalTitle?: string | null;
+    year?: number | null;
+    posterPath?: string | null;
+    imdbRating?: number | null;
+    genres?: string[];
+    streamingPlatforms?: string[];
+  };
+  userMovie?: {
+    status: "WATCHLIST" | "WATCHED";
+    userRating?: number | null;
+    review?: string | null;
+    watchedDate?: string | null;
+    platform?: string | null;
+    ballKnowledge?: number | null;
+    difference?: number | null;
+  } | null;
+  onUpdate?: () => void;
+}
+
+export default function MovieCard({
+  movie,
+  userMovie,
+  onUpdate,
+}: MovieCardProps) {
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const isWatchlist = userMovie?.status === "WATCHLIST";
+  const isWatched = userMovie?.status === "WATCHED";
+
+  const handleToggleWatchlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsUpdating(true);
+
+    try {
+      if (isWatchlist) {
+        await fetch(`/api/user-movies?movieId=${movie.id}`, {
+          method: "DELETE",
+        });
+      } else {
+        await fetch("/api/user-movies", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tmdbId: movie.tmdbId,
+            status: "WATCHLIST",
+          }),
+        });
+      }
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleOpenReview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsReviewModalOpen(true);
+  };
+
+  const currentPlatform =
+    userMovie?.platform ||
+    (movie.streamingPlatforms && movie.streamingPlatforms.length > 0
+      ? movie.streamingPlatforms[0]
+      : null);
+
+  return (
+    <>
+      <div className="group relative glass-card rounded-2xl overflow-hidden flex flex-col bg-cine-900/60 border border-cine-800">
+        {/* Póster con enlace */}
+        <Link
+          href={`/movie/${movie.tmdbId}`}
+          className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950 block"
+        >
+          <MoviePoster
+            src={movie.posterPath}
+            alt={movie.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          />
+
+          {/* Gradiente superior/inferior para legibilidad */}
+          <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/50 opacity-70 group-hover:opacity-50 transition-opacity pointer-events-none" />
+
+          {/* Calificaciones superpuestas arriba */}
+          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10">
+            {movie.imdbRating ? (
+              <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 shadow">
+                <Star className="w-3 h-3 fill-amber-400" />
+                <span>{movie.imdbRating.toFixed(1)}</span>
+              </div>
+            ) : (
+              <div />
+            )}
+
+            {/* Acciones rápidas flotantes */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleToggleWatchlist}
+                disabled={isUpdating}
+                title={
+                  isWatchlist ? "Quitar de Watchlist" : "Añadir a Watchlist"
+                }
+                className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
+                  isWatchlist
+                    ? "bg-amber-500 text-cine-950 border-amber-400 font-bold shadow-gold-glow"
+                    : "bg-black/60 text-cine-300 hover:text-white border-white/10 hover:bg-black/80"
+                }`}
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={handleOpenReview}
+                title={isWatched ? "Editar reseña y nota" : "Marcar como vista"}
+                className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
+                  isWatched
+                    ? "bg-emerald-500 text-cine-950 border-emerald-400 font-bold shadow"
+                    : "bg-black/60 text-cine-300 hover:text-white border-white/10 hover:bg-black/80"
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Indicador de Ball Knowledge o Nota del usuario en la parte inferior del póster */}
+          <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between z-10">
+            {isWatched &&
+            userMovie?.userRating !== undefined &&
+            userMovie.userRating !== null ? (
+              <div className="flex items-center gap-1 bg-amber-500/90 text-cine-950 px-2 py-0.5 rounded-lg text-xs font-bold shadow">
+                <Star className="w-3 h-3 fill-cine-950 text-cine-950" />
+                <span>{userMovie.userRating.toFixed(1)}</span>
+              </div>
+            ) : currentPlatform ? (
+              <StreamingBadge platform={currentPlatform} size="xs" />
+            ) : (
+              <div />
+            )}
+
+            {isWatched &&
+              userMovie?.ballKnowledge !== undefined &&
+              userMovie.ballKnowledge !== null && (
+                <BallKnowledgeBadge
+                  score={userMovie.ballKnowledge}
+                  size="sm"
+                  showLabel={false}
+                />
+              )}
+          </div>
+        </Link>
+
+        {/* Información de la película */}
+        <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
+          <div>
+            <Link
+              href={`/movie/${movie.tmdbId}`}
+              className="font-bold text-sm text-cine-100 hover:text-amber-400 transition-colors line-clamp-1"
+              title={movie.title}
+            >
+              {movie.title}
+            </Link>
+            <div className="flex items-center gap-2 text-xs text-cine-400 mt-0.5">
+              {movie.year && <span>{movie.year}</span>}
+              {movie.genres && movie.genres.length > 0 && (
+                <>
+                  <span>•</span>
+                  <span className="truncate">{movie.genres[0]}</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Reseña snippet si existe */}
+          {userMovie?.review && (
+            <p className="text-[11px] text-cine-400 line-clamp-2 italic bg-cine-950/60 p-2 rounded-lg border border-white/5">
+              &quot;{userMovie.review}&quot;
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Modal para puntuar y reseñar */}
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onSaved={() => {
+          if (onUpdate) onUpdate();
+        }}
+        movie={{
+          tmdbId: movie.tmdbId,
+          title: movie.title,
+          year: movie.year,
+          posterPath: movie.posterPath,
+          imdbRating: movie.imdbRating,
+          streamingPlatforms: movie.streamingPlatforms,
+        }}
+        initialRating={userMovie?.userRating}
+        initialReview={userMovie?.review}
+        initialDate={userMovie?.watchedDate}
+        initialPlatform={userMovie?.platform}
+      />
+    </>
+  );
+}
