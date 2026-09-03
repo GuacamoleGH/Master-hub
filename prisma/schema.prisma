@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Movie {
+  id                 String     @id @default(cuid())
+  tmdbId             Int        @unique
+  imdbId             String?
+  title              String
+  originalTitle      String?
+  year               Int?
+  posterPath         String?
+  backdropPath       String?
+  overview           String?
+  runtime            Int?
+  genres             String     // JSON array de strings
+  director           String?
+  directorImage      String?
+  cast               String     // JSON array de { name, character, profilePath }
+  imdbRating         Float?
+  streamingPlatforms String?    // JSON array de plataformas e.g. ["Netflix", "HBO Max"] o ["Pirata"]
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  userMovie          UserMovie?
+}
+
+model UserMovie {
+  id            String    @id @default(cuid())
+  movieId       String    @unique
+  movie         Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  status        String    // "WATCHLIST" | "WATCHED"
+  userRating    Float?    // 0.0 a 10.0
+  review        String?
+  watchedDate   DateTime?
+  platform      String?   // "Netflix" | "HBO Max" | "Prime Video" | "Disney+" | "Pirata"
+  ballKnowledge Float?    // 0 a 100 percentage
+  difference    Float?    // userRating - imdbRating
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model UserProfile {
+  id          String   @id @default("user-default")
+  displayName String   @default("Cinéfilo")
+  avatarUrl   String?
+  bio         String?  @default("Explorador y analista del séptimo arte.")
+  totalXp     Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
