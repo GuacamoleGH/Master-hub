@@ -7,11 +7,13 @@ export interface GameSearchResult {
   metacritic?: number | null; // 0 a 100
   platforms: string[];
   genres: string[];
+  slug?: string | null;
 }
 
 export interface GameDetail {
   id: string; // ID interno o string de rawgId
   rawgId: number;
+  slug?: string | null;
   title: string;
   released: string | null;
   backgroundImage: string | null;
@@ -52,6 +54,7 @@ export interface UserGameItem {
   game: {
     id: string;
     rawgId: number;
+    slug?: string | null;
     title: string;
     released: string | null;
     backgroundImage: string | null;

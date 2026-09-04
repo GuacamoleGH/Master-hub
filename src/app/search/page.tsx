@@ -2,9 +2,18 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Loader2, Film, Star, ArrowLeft } from "lucide-react";
-import { MovieSearchResult } from "@/types/movie";
+import { Search, Loader2, Film, Tv, Star, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
+interface SearchItem {
+  id: number;
+  title: string;
+  originalTitle?: string;
+  year?: number;
+  posterPath: string | null;
+  voteAverage: number;
+  mediaType: "movie" | "tv";
+}
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -12,26 +21,60 @@ function SearchContent() {
   const query = searchParams.get("q") || "";
 
   const [inputVal, setInputVal] = useState(query);
-  const [results, setResults] = useState<MovieSearchResult[]>([]);
+  const [filterTab, setFilterTab] = useState<"all" | "movie" | "tv">("all");
+  const [movieResults, setMovieResults] = useState<SearchItem[]>([]);
+  const [seriesResults, setSeriesResults] = useState<SearchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setInputVal(query);
     if (query.trim()) {
-      fetchResults(query);
+      fetchAllResults(query);
     } else {
-      setResults([]);
+      setMovieResults([]);
+      setSeriesResults([]);
     }
   }, [query]);
 
-  const fetchResults = async (q: string) => {
+  const fetchAllResults = async (q: string) => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/movies/search?q=${encodeURIComponent(q)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.results || []);
-      }
+      const [moviesRes, seriesRes] = await Promise.all([
+        fetch(`/api/movies/search?q=${encodeURIComponent(q)}`),
+        fetch(`/api/series/search?q=${encodeURIComponent(q)}`),
+      ]);
+
+      const movieData = moviesRes.ok ? await moviesRes.json() : { results: [] };
+      const seriesData = seriesRes.ok
+        ? await seriesRes.json()
+        : { results: [] };
+
+      const movies: SearchItem[] = (movieData.results || []).map(
+        (item: any) => ({
+          id: item.id,
+          title: item.title,
+          originalTitle: item.originalTitle,
+          year: item.year,
+          posterPath: item.posterPath,
+          voteAverage: item.voteAverage,
+          mediaType: "movie" as const,
+        }),
+      );
+
+      const series: SearchItem[] = (seriesData.results || []).map(
+        (item: any) => ({
+          id: item.id,
+          title: item.name,
+          originalTitle: item.originalName,
+          year: item.firstAirYear,
+          posterPath: item.posterPath,
+          voteAverage: item.voteAverage,
+          mediaType: "tv" as const,
+        }),
+      );
+
+      setMovieResults(movies);
+      setSeriesResults(series);
     } catch (err) {
       console.error(err);
     } finally {
@@ -46,24 +89,81 @@ function SearchContent() {
     }
   };
 
+  // Combinar resultados
+  const cleanQ = query.trim().toLowerCase();
+  const allResults = [...movieResults, ...seriesResults].sort((a, b) => {
+    const aExact = a.title.toLowerCase() === cleanQ ? 1 : 0;
+    const bExact = b.title.toLowerCase() === cleanQ ? 1 : 0;
+    if (aExact !== bExact) return bExact - aExact;
+    return (b.voteAverage || 0) - (a.voteAverage || 0);
+  });
+
+  const displayedResults =
+    filterTab === "movie"
+      ? movieResults
+      : filterTab === "tv"
+        ? seriesResults
+        : allResults;
+
   return (
     <div className="space-y-8 pb-16">
       {/* Barra de búsqueda dedicada */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-cine-800 space-y-4">
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-xs text-cine-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Volver atrás
-        </button>
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-cine-800 space-y-5">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-1.5 text-xs text-cine-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Volver atrás
+          </button>
 
-        <form onSubmit={handleSubmit} className="relative max-w-2xl">
+          {/* Filtros opcionales de vista */}
+          <div className="flex items-center gap-1 p-1 bg-cine-900 border border-cine-700/80 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setFilterTab("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                filterTab === "all"
+                  ? "bg-cine-700 text-white shadow-sm"
+                  : "text-cine-400 hover:text-white"
+              }`}
+            >
+              Todo ({allResults.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterTab("movie")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filterTab === "movie"
+                  ? "bg-amber-500 text-cine-950 shadow-gold-glow"
+                  : "text-cine-400 hover:text-white"
+              }`}
+            >
+              <Film className="w-3.5 h-3.5" />
+              <span>Películas ({movieResults.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterTab("tv")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filterTab === "tv"
+                  ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                  : "text-cine-400 hover:text-white"
+              }`}
+            >
+              <Tv className="w-3.5 h-3.5" />
+              <span>Series ({seriesResults.length})</span>
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="relative max-w-3xl">
           <Search className="absolute left-4 w-5 h-5 text-cine-400 pointer-events-none top-3.5" />
           <input
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder="Buscar por título (ej. Atrápame si puedes, The Prestige, Fight Club)..."
+            placeholder="Buscar películas o series (ej. Élite, El truco final, Prison Break, Star vs)..."
             className="w-full pl-12 pr-28 py-3.5 bg-cine-900 border border-cine-700 rounded-2xl text-base text-white placeholder-cine-500 focus:outline-none focus:border-amber-500 shadow-inner"
           />
           <button
@@ -75,10 +175,10 @@ function SearchContent() {
         </form>
 
         {query && (
-          <div className="text-xs text-cine-400">
-            Resultados de búsqueda para:{" "}
+          <div className="text-xs text-cine-400 flex items-center gap-2">
+            <span>Resultados de búsqueda para:</span>
             <strong className="text-amber-400">&quot;{query}&quot;</strong>
-            {!isLoading && ` (${results.length} títulos encontrados)`}
+            {!isLoading && ` (${displayedResults.length} títulos encontrados)`}
           </div>
         )}
       </div>
@@ -87,13 +187,15 @@ function SearchContent() {
       {isLoading ? (
         <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3">
           <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-          <p className="text-xs text-cine-400">Consultando catálogo...</p>
+          <p className="text-xs text-cine-400">
+            Consultando películas y series...
+          </p>
         </div>
-      ) : results.length === 0 && query ? (
+      ) : displayedResults.length === 0 && query ? (
         <div className="glass-panel p-12 rounded-3xl border border-cine-800 text-center flex flex-col items-center justify-center gap-3 max-w-md mx-auto">
           <Film className="w-12 h-12 text-cine-600" />
           <h3 className="text-base font-bold text-white">
-            No se encontraron películas
+            No se encontraron resultados
           </h3>
           <p className="text-xs text-cine-400">
             Intenta con otro título o revisa la ortografía.
@@ -101,52 +203,73 @@ function SearchContent() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {results.map((movie) => (
+          {displayedResults.map((item) => (
             <Link
-              key={movie.id}
-              href={`/movie/${movie.id}`}
-              className="group glass-card rounded-2xl overflow-hidden flex flex-col bg-cine-900/60 border border-cine-800"
+              key={`${item.mediaType}-${item.id}`}
+              href={
+                item.mediaType === "tv"
+                  ? `/series/${item.id}`
+                  : `/movie/${item.id}`
+              }
+              className="group glass-card rounded-2xl overflow-hidden flex flex-col bg-cine-900/60 border border-cine-800 hover:border-amber-500/40 transition-all"
             >
               <div className="relative aspect-[2/3] w-full overflow-hidden bg-cine-950">
-                {movie.posterPath ? (
+                {item.posterPath ? (
                   <img
-                    src={movie.posterPath}
-                    alt={movie.title}
+                    src={item.posterPath}
+                    alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-cine-600 gap-2">
-                    <Film className="w-10 h-10" />
+                    {item.mediaType === "tv" ? (
+                      <Tv className="w-10 h-10" />
+                    ) : (
+                      <Film className="w-10 h-10" />
+                    )}
                     <span className="text-xs">Sin póster</span>
                   </div>
                 )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/40 opacity-70 group-hover:opacity-40 transition-opacity" />
 
-                {movie.voteAverage > 0 && (
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 shadow">
-                    <Star className="w-3 h-3 fill-amber-400" />
-                    <span>{movie.voteAverage.toFixed(1)}</span>
-                  </div>
-                )}
+                <div className="absolute top-2.5 left-2.5 flex items-center gap-1">
+                  <span
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                      item.mediaType === "tv"
+                        ? "bg-purple-950/80 text-purple-300 border-purple-500/30"
+                        : "bg-amber-950/80 text-amber-300 border-amber-500/30"
+                    }`}
+                  >
+                    {item.mediaType === "tv" ? "SERIE" : "PELÍCULA"}
+                  </span>
+                  {item.voteAverage > 0 && (
+                    <div className="flex items-center gap-1 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-xs font-semibold text-amber-400 border border-amber-500/20 shadow">
+                      <Star className="w-3 h-3 fill-amber-400" />
+                      <span>{item.voteAverage.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="p-3 flex-1 flex flex-col justify-between">
                 <div>
                   <h4 className="font-bold text-xs sm:text-sm text-white group-hover:text-amber-400 transition-colors line-clamp-1">
-                    {movie.title}
+                    {item.title}
                   </h4>
-                  {movie.originalTitle &&
-                    movie.originalTitle !== movie.title && (
-                      <p className="text-[11px] text-cine-400 italic line-clamp-1">
-                        {movie.originalTitle}
-                      </p>
-                    )}
+                  {item.originalTitle && item.originalTitle !== item.title && (
+                    <p className="text-[11px] text-cine-400 italic line-clamp-1">
+                      {item.originalTitle}
+                    </p>
+                  )}
                 </div>
-                {movie.year && (
+                {item.year && (
                   <span className="text-xs text-cine-500 font-medium mt-1">
-                    {movie.year}
+                    {item.year}
                   </span>
                 )}
               </div>

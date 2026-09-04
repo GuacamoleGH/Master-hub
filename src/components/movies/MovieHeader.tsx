@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Film,
+  Tv,
   Bookmark,
   CheckCircle2,
   User,
@@ -19,7 +20,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "/movies", label: "Inicio", icon: Film },
+    { href: "/movies", label: "Películas", icon: Film },
+    { href: "/series", label: "Series", icon: Tv },
     { href: "/watchlist", label: "Watchlist", icon: Bookmark },
     { href: "/watched", label: "Vistas", icon: CheckCircle2 },
     { href: "/profile", label: "Mi Perfil", icon: User },
@@ -27,6 +29,8 @@ export default function Header() {
 
   const isActive = (href: string) => {
     if (href === "/movies") return pathname === "/movies";
+    if (href === "/series")
+      return pathname === "/series" || pathname.startsWith("/series/");
     return pathname === href || pathname.startsWith(href + "/");
   };
 

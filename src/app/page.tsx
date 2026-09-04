@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
   Film,
+  Tv,
   Gamepad2,
   Sparkles,
   ArrowRight,
@@ -17,24 +18,34 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function MasterHubPage() {
-  // Estadísticas rápidas de Cine
+  // Estadísticas rápidas de Cine & Series
   let movieCount = 0;
+  let seriesCount = 0;
   let movieWatchedCount = 0;
+  let seriesWatchedCount = 0;
   let avgBallKnowledge: number | null = null;
 
   try {
     movieCount = await prisma.movie.count();
+    seriesCount = await prisma.series.count();
     const watched = await prisma.userMovie.findMany({
       where: { status: "WATCHED" },
       select: { ballKnowledge: true },
     });
+    const watchedSeries = await prisma.userSeries.findMany({
+      where: { status: "WATCHED" },
+      select: { ballKnowledge: true },
+    });
     movieWatchedCount = watched.length;
-    const withBk = watched.filter((w) => typeof w.ballKnowledge === "number");
-    if (withBk.length > 0) {
+    seriesWatchedCount = watchedSeries.length;
+    const allWithBk = [...watched, ...watchedSeries].filter(
+      (w) => typeof w.ballKnowledge === "number",
+    );
+    if (allWithBk.length > 0) {
       avgBallKnowledge = Number(
         (
-          withBk.reduce((acc, c) => acc + (c.ballKnowledge || 0), 0) /
-          withBk.length
+          allWithBk.reduce((acc, c) => acc + (c.ballKnowledge || 0), 0) /
+          allWithBk.length
         ).toFixed(1),
       );
     }
@@ -129,7 +140,7 @@ export default async function MasterHubPage() {
                   Vistas
                 </div>
                 <div className="text-lg font-mono font-black text-white mt-0.5">
-                  {movieWatchedCount}
+                  {movieWatchedCount + seriesWatchedCount}
                 </div>
               </div>
 
@@ -138,7 +149,7 @@ export default async function MasterHubPage() {
                   Catálogo
                 </div>
                 <div className="text-lg font-mono font-black text-amber-400 mt-0.5">
-                  {movieCount}
+                  {movieCount + seriesCount}
                 </div>
               </div>
 
@@ -153,13 +164,20 @@ export default async function MasterHubPage() {
             </div>
           </div>
 
-          <div className="relative z-10 pt-6 mt-6 border-t border-cine-800/80">
+          <div className="relative z-10 pt-6 mt-6 border-t border-cine-800/80 grid grid-cols-2 gap-3">
             <Link
               href="/movies"
-              className="w-full py-3.5 px-6 rounded-2xl bg-amber-500 hover:bg-amber-400 text-cine-950 font-black text-sm transition-all shadow-gold-glow flex items-center justify-center gap-2 group-hover:gap-3"
+              className="py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-cine-950 font-black text-xs sm:text-sm transition-all shadow-gold-glow flex items-center justify-center gap-1.5"
             >
-              <span>Entrar a Cinephile Hub</span>
-              <ArrowRight className="w-4 h-4 transition-transform" />
+              <Film className="w-4 h-4" />
+              <span>Películas</span>
+            </Link>
+            <Link
+              href="/series"
+              className="py-3 px-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs sm:text-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] flex items-center justify-center gap-1.5"
+            >
+              <Tv className="w-4 h-4" />
+              <span>Series</span>
             </Link>
           </div>
         </div>

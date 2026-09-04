@@ -4,43 +4,43 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Star,
-  Clock,
   Calendar,
   Bookmark,
   CheckCircle2,
   Edit3,
   Loader2,
-  Film,
+  Tv,
   Sparkles,
   ArrowLeft,
   User as UserIcon,
-  Tv,
+  Layers,
+  Film,
   ExternalLink,
 } from "lucide-react";
-import { MovieDetail } from "@/types/movie";
+import { SeriesDetail } from "@/types/series";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
 import ReviewModal from "@/components/ReviewModal";
 import MoviePoster from "@/components/MoviePoster";
 import StreamingBadge from "@/components/StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
 
-export default function MovieDetailPage() {
+export default function SeriesDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const movieId = params.id as string;
+  const seriesId = params.id as string;
 
-  const [movie, setMovie] = useState<MovieDetail | null>(null);
+  const [series, setSeries] = useState<SeriesDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isUpdatingWatchlist, setIsUpdatingWatchlist] = useState(false);
 
-  const fetchMovie = async () => {
+  const fetchSeries = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/movies/${movieId}`);
+      const res = await fetch(`/api/series/${seriesId}`);
       if (res.ok) {
         const data = await res.json();
-        setMovie(data.movie);
+        setSeries(data.series);
       }
     } catch (err) {
       console.error(err);
@@ -50,27 +50,27 @@ export default function MovieDetailPage() {
   };
 
   useEffect(() => {
-    if (movieId) {
-      fetchMovie();
+    if (seriesId) {
+      fetchSeries();
     }
-  }, [movieId]);
+  }, [seriesId]);
 
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
         <p className="text-sm text-cine-400 font-medium">
-          Cargando detalles cinematográficos...
+          Cargando detalles de la serie...
         </p>
       </div>
     );
   }
 
-  if (!movie) {
+  if (!series) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center gap-4">
-        <Film className="w-12 h-12 text-cine-600" />
-        <h2 className="text-xl font-bold text-white">Película no encontrada</h2>
+        <Tv className="w-12 h-12 text-cine-600" />
+        <h2 className="text-xl font-bold text-white">Serie no encontrada</h2>
         <button
           onClick={() => router.back()}
           className="px-4 py-2 bg-cine-800 hover:bg-cine-700 text-sm rounded-xl transition-colors"
@@ -81,39 +81,32 @@ export default function MovieDetailPage() {
     );
   }
 
-  const isWatchlist = movie.userMovie?.status === "WATCHLIST";
-  const isWatched = movie.userMovie?.status === "WATCHED";
+  const isWatchlist = series.userSeries?.status === "WATCHLIST";
+  const isWatched = series.userSeries?.status === "WATCHED";
 
   const handleToggleWatchlist = async () => {
     setIsUpdatingWatchlist(true);
     try {
       if (isWatchlist) {
-        await fetch(`/api/user-movies?movieId=${movie.id}`, {
+        await fetch(`/api/user-series?seriesId=${series.id}`, {
           method: "DELETE",
         });
       } else {
-        await fetch("/api/user-movies", {
+        await fetch("/api/user-series", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            tmdbId: movie.tmdbId,
+            tmdbId: series.tmdbId,
             status: "WATCHLIST",
           }),
         });
       }
-      await fetchMovie();
+      await fetchSeries();
     } catch (err) {
       console.error(err);
     } finally {
       setIsUpdatingWatchlist(false);
     }
-  };
-
-  const formatRuntime = (mins: number | null) => {
-    if (!mins) return null;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return `${h}h ${m}m`;
   };
 
   const formatSpanishDate = (isoStr: string | null) => {
@@ -126,7 +119,13 @@ export default function MovieDetailPage() {
     });
   };
 
-  const imdbUrl = movie ? getImdbUrl(movie.imdbId, movie.title) : null;
+  const yearRange = series.firstAirYear
+    ? series.lastAirYear && series.lastAirYear !== series.firstAirYear
+      ? `${series.firstAirYear} – ${series.lastAirYear}`
+      : `${series.firstAirYear}`
+    : null;
+
+  const imdbUrl = series ? getImdbUrl(series.imdbId, series.name) : null;
 
   return (
     <div className="space-y-10 pb-16">
@@ -135,64 +134,80 @@ export default function MovieDetailPage() {
         onClick={() => router.back()}
         className="inline-flex items-center gap-2 text-xs font-semibold text-cine-400 hover:text-white transition-colors"
       >
-        <ArrowLeft className="w-4 h-4" /> Volver al catálogo
+        <ArrowLeft className="w-4 h-4" /> Volver atrás
       </button>
 
       {/* Cabecera Inmersiva con Backdrop */}
       <div className="relative rounded-3xl overflow-hidden glass-panel border border-cine-800 shadow-2xl bg-cine-950">
         {/* Imagen de Backdrop grande */}
-        {movie.backdropPath && (
+        {series.backdropPath && (
           <div className="absolute inset-0 z-0">
             <img
-              src={movie.backdropPath}
-              alt={movie.title}
-              className="w-full h-full object-cover opacity-25 filter blur-sm scale-105"
+              src={series.backdropPath}
+              alt={series.name}
+              className="w-full h-full object-cover object-top opacity-25 filter blur-[1px]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-cine-950/80 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-cine-950 via-cine-950/70 to-transparent" />
           </div>
         )}
 
-        {/* Contenido Principal de Cabecera */}
+        {/* Contenido de la cabecera */}
         <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
-          {/* Póster Oficial */}
-          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 shadow-2xl rounded-2xl overflow-hidden border border-white/10 glass-card">
+          {/* Póster Grande */}
+          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[2/3] rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900">
             <MoviePoster
-              src={movie.posterPath}
-              alt={movie.title}
-              className="w-full h-auto object-cover"
+              src={series.posterPath}
+              alt={series.name}
+              className="w-full h-full object-cover"
             />
           </div>
 
-          {/* Información y Títulos */}
-          <div className="flex-1 space-y-4">
+          {/* Ficha técnica y Acciones */}
+          <div className="flex-1 space-y-5">
             <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                {movie.title}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold mb-2">
+                <Tv className="w-3.5 h-3.5" />
+                <span>Serie de Televisión</span>
+                {series.seriesStatus && (
+                  <>
+                    <span>•</span>
+                    <span>{series.seriesStatus}</span>
+                  </>
+                )}
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                {series.name}
               </h1>
-              {movie.originalTitle && movie.originalTitle !== movie.title && (
+              {series.originalName && series.originalName !== series.name && (
                 <p className="text-base text-cine-400 italic mt-0.5">
-                  Título original: {movie.originalTitle}
+                  Título original: {series.originalName}
                 </p>
               )}
             </div>
 
-            {/* Metadatos rápidos: Año, Duración, Géneros, IMDb */}
+            {/* Metadatos rápidos: Años, Temporadas, Episodios, IMDb */}
             <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-              {movie.year && (
+              {yearRange && (
                 <div className="flex items-center gap-1 text-cine-300 font-medium">
                   <Calendar className="w-4 h-4 text-cine-500" />
-                  <span>{movie.year}</span>
+                  <span>{yearRange}</span>
                 </div>
               )}
 
-              {movie.runtime && (
+              {series.numberOfSeasons && (
                 <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Clock className="w-4 h-4 text-cine-500" />
-                  <span>{formatRuntime(movie.runtime)}</span>
+                  <Layers className="w-4 h-4 text-cine-500" />
+                  <span>
+                    {series.numberOfSeasons}{" "}
+                    {series.numberOfSeasons === 1 ? "Temporada" : "Temporadas"}
+                    {series.numberOfEpisodes &&
+                      ` (${series.numberOfEpisodes} eps)`}
+                  </span>
                 </div>
               )}
 
-              {movie.imdbRating && (
+              {series.imdbRating && (
                 <a
                   href={imdbUrl || undefined}
                   target="_blank"
@@ -201,16 +216,16 @@ export default function MovieDetailPage() {
                   title="Ver ficha oficial en IMDb"
                 >
                   <Star className="w-4 h-4 fill-amber-400" />
-                  <span>IMDb {movie.imdbRating.toFixed(1)} / 10</span>
+                  <span>IMDb {series.imdbRating.toFixed(1)} / 10</span>
                   <ExternalLink className="w-3 h-3 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
                 </a>
               )}
             </div>
 
             {/* Pills de Géneros */}
-            {movie.genres && movie.genres.length > 0 && (
+            {series.genres && series.genres.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {movie.genres.map((genre) => (
+                {series.genres.map((genre) => (
                   <span
                     key={genre}
                     className="px-3 py-1 rounded-lg text-xs font-semibold bg-cine-800/80 border border-cine-700 text-cine-200"
@@ -222,15 +237,15 @@ export default function MovieDetailPage() {
             )}
 
             {/* Plataformas de Streaming Disponibles */}
-            {movie.streamingPlatforms &&
-              movie.streamingPlatforms.length > 0 && (
+            {series.streamingPlatforms &&
+              series.streamingPlatforms.length > 0 && (
                 <div className="space-y-1.5">
                   <span className="text-xs font-semibold text-cine-400 flex items-center gap-1.5">
                     <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
                     streaming:
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    {movie.streamingPlatforms.map((plat) => (
+                    {series.streamingPlatforms.map((plat) => (
                       <StreamingBadge key={plat} platform={plat} size="sm" />
                     ))}
                   </div>
@@ -259,11 +274,13 @@ export default function MovieDetailPage() {
                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
-                    : "bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold shadow-gold-glow"
+                    : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_20px_rgba(168,85,247,0.3)]"
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {isWatched ? "Editar valoración" : "Marcar como vista"}
+                {isWatched
+                  ? "Editar valoración de serie"
+                  : "Marcar serie como vista"}
               </button>
 
               {imdbUrl && (
@@ -288,19 +305,19 @@ export default function MovieDetailPage() {
         </div>
       </div>
 
-      {/* Sección: Mis Datos Cinematográficos (Si ya fue vista) */}
-      {isWatched && movie.userMovie && (
-        <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-cine-900 via-cine-900 to-cine-950 shadow-gold-glow space-y-4">
+      {/* Sección: Mis Datos Cinéfilos (Si ya fue vista) */}
+      {isWatched && series.userSeries && (
+        <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-gradient-to-r from-cine-900 via-cine-900 to-cine-950 shadow-[0_0_20px_rgba(168,85,247,0.15)] space-y-4">
           <div className="flex items-center justify-between border-b border-cine-800 pb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-400" />
+              <Sparkles className="w-5 h-5 text-purple-400" />
               <h2 className="text-xl font-bold text-white tracking-wide">
-                Tu Veredicto Cinéfilo
+                Tu Veredicto de Serie
               </h2>
             </div>
             <button
               onClick={() => setIsReviewModalOpen(true)}
-              className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-cine-800/80 transition-colors"
+              className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-cine-800/80 transition-colors"
             >
               <Edit3 className="w-3.5 h-3.5" /> Modificar nota y reseña
             </button>
@@ -313,34 +330,34 @@ export default function MovieDetailPage() {
                 Mi Calificación
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-amber-400 font-mono">
-                  {movie.userMovie.userRating?.toFixed(1) ?? "—"}
+                <span className="text-3xl font-extrabold text-purple-400 font-mono">
+                  {series.userSeries.userRating?.toFixed(1) ?? "—"}
                 </span>
                 <span className="text-sm text-cine-500">/ 10</span>
-                {movie.imdbRating && (
+                {series.imdbRating && (
                   <span className="text-xs text-cine-400 ml-2">
                     (IMDb:{" "}
                     <strong className="text-white">
-                      {movie.imdbRating.toFixed(1)}
+                      {series.imdbRating.toFixed(1)}
                     </strong>
                     )
                   </span>
                 )}
               </div>
-              {movie.userMovie.difference !== null &&
-                movie.userMovie.difference !== undefined && (
+              {series.userSeries.difference !== null &&
+                series.userSeries.difference !== undefined && (
                   <div className="text-xs text-cine-400 font-mono">
                     Diferencia con IMDb:{" "}
                     <strong
                       className={
-                        Math.abs(movie.userMovie.difference) <= 0.5
+                        Math.abs(series.userSeries.difference) <= 0.5
                           ? "text-emerald-400"
-                          : "text-amber-400"
+                          : "text-purple-400"
                       }
                     >
-                      {movie.userMovie.difference > 0
-                        ? `+${movie.userMovie.difference}`
-                        : movie.userMovie.difference}{" "}
+                      {series.userSeries.difference > 0
+                        ? `+${series.userSeries.difference}`
+                        : series.userSeries.difference}{" "}
                       pts
                     </strong>
                   </div>
@@ -354,8 +371,8 @@ export default function MovieDetailPage() {
               </span>
               <div>
                 <BallKnowledgeBadge
-                  score={movie.userMovie.ballKnowledge}
-                  difference={movie.userMovie.difference}
+                  score={series.userSeries.ballKnowledge}
+                  difference={series.userSeries.difference}
                   size="lg"
                 />
               </div>
@@ -367,9 +384,9 @@ export default function MovieDetailPage() {
                 Plataforma
               </span>
               <div className="pt-1">
-                {movie.userMovie.platform ? (
+                {series.userSeries.platform ? (
                   <StreamingBadge
-                    platform={movie.userMovie.platform}
+                    platform={series.userSeries.platform}
                     size="sm"
                   />
                 ) : (
@@ -383,51 +400,51 @@ export default function MovieDetailPage() {
             {/* Fecha de Visionado */}
             <div className="space-y-1">
               <span className="text-xs text-cine-400 font-medium">
-                Fecha de Visionado
+                Fecha de Registro
               </span>
               <div className="text-sm font-semibold text-cine-200">
-                {formatSpanishDate(movie.userMovie.watchedDate) ||
+                {formatSpanishDate(series.userSeries.watchedDate) ||
                   "No especificada"}
               </div>
             </div>
           </div>
 
           {/* Reseña Completa */}
-          {movie.userMovie.review && (
+          {series.userSeries.review && (
             <div className="pt-4 border-t border-cine-800/80">
               <span className="text-xs text-cine-400 font-medium block mb-1">
                 Mi Reseña
               </span>
               <blockquote className="p-4 rounded-xl bg-cine-950/70 border border-white/5 text-cine-200 text-sm italic leading-relaxed">
-                &quot;{movie.userMovie.review}&quot;
+                &quot;{series.userSeries.review}&quot;
               </blockquote>
             </div>
           )}
         </section>
       )}
 
-      {/* Sinopsis y Director */}
+      {/* Sinopsis y Creador */}
       <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-cine-800 space-y-6">
         <div>
           <h3 className="text-lg font-bold text-white tracking-wide border-b border-cine-800/80 pb-3 mb-4">
             Sinopsis
           </h3>
           <p className="text-cine-300 text-sm sm:text-base leading-relaxed">
-            {movie.overview || "Sin sinopsis disponible para este título."}
+            {series.overview || "Sin sinopsis disponible para esta serie."}
           </p>
         </div>
 
-        {/* Director */}
-        {movie.director && (
+        {/* Creador / Showrunner */}
+        {series.creator && (
           <div className="pt-2 border-t border-cine-800/60">
             <h4 className="text-xs uppercase font-bold text-cine-400 tracking-wider mb-3">
-              Dirección
+              Creador / Showrunner
             </h4>
             <div className="inline-flex items-center gap-3.5 glass-card px-4 py-3 rounded-2xl border border-cine-700/60 hover:border-amber-500/30 transition-all">
-              {movie.directorImage ? (
+              {series.creatorImage ? (
                 <img
-                  src={movie.directorImage}
-                  alt={movie.director}
+                  src={series.creatorImage}
+                  alt={series.creator}
                   className="w-14 h-14 rounded-full object-cover border-2 border-amber-500/30 shadow-md flex-shrink-0"
                   onError={(e) => {
                     const target = e.target as HTMLElement;
@@ -442,17 +459,17 @@ export default function MovieDetailPage() {
               ) : null}
               <div
                 className={`w-14 h-14 rounded-full bg-cine-800 flex items-center justify-center text-cine-400 flex-shrink-0 border border-cine-700 ${
-                  movie.directorImage ? "hidden" : ""
+                  series.creatorImage ? "hidden" : ""
                 }`}
               >
                 <UserIcon className="w-6 h-6" />
               </div>
               <div>
                 <div className="font-bold text-white text-base">
-                  {movie.director}
+                  {series.creator}
                 </div>
                 <div className="text-xs text-amber-400/90 font-medium">
-                  Director
+                  Creador
                 </div>
               </div>
             </div>
@@ -465,17 +482,17 @@ export default function MovieDetailPage() {
         <div className="flex items-center justify-between border-b border-cine-800/80 pb-3">
           <h3 className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
             Reparto Principal
-            {movie.cast && movie.cast.length > 0 && (
+            {series.cast && series.cast.length > 0 && (
               <span className="text-xs font-normal text-cine-400">
-                ({movie.cast.length} miembros)
+                ({series.cast.length} miembros)
               </span>
             )}
           </h3>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
-          {movie.cast && movie.cast.length > 0 ? (
-            movie.cast.map((actor, idx) => (
+          {series.cast && series.cast.length > 0 ? (
+            series.cast.map((actor, idx) => (
               <div
                 key={actor.id || idx}
                 className="group flex flex-col items-center text-center p-3.5 rounded-2xl glass-card border border-cine-800 hover:border-amber-500/30 hover:bg-cine-800/50 transition-all duration-200"
@@ -527,19 +544,21 @@ export default function MovieDetailPage() {
       <ReviewModal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
-        onSaved={fetchMovie}
+        onSaved={fetchSeries}
         movie={{
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          posterPath: movie.posterPath,
-          imdbRating: movie.imdbRating,
-          streamingPlatforms: movie.streamingPlatforms,
+          tmdbId: series.tmdbId,
+          title: series.name,
+          year: series.firstAirYear,
+          posterPath: series.posterPath,
+          imdbRating: series.imdbRating,
+          streamingPlatforms: series.streamingPlatforms,
         }}
-        initialRating={movie.userMovie?.userRating}
-        initialReview={movie.userMovie?.review}
-        initialDate={movie.userMovie?.watchedDate}
-        initialPlatform={movie.userMovie?.platform}
+        initialRating={series.userSeries?.userRating}
+        initialReview={series.userSeries?.review}
+        initialDate={series.userSeries?.watchedDate}
+        initialPlatform={series.userSeries?.platform}
+        apiEndpoint="/api/user-series"
+        mediaLabel="serie"
       />
     </div>
   );

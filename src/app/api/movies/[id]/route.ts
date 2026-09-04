@@ -36,14 +36,34 @@ export async function GET(
         }
       } catch {}
 
-      // Si no tiene plataformas en DB pero tiene tmdbId, consultar TMDB para actualizar
-      if (parsedPlatforms.length === 0 && dbMovie.tmdbId) {
+      // Si faltan plataformas, reparto completo o foto del director en DB pero tiene tmdbId, actualizar desde TMDB
+      if (
+        dbMovie.tmdbId &&
+        (parsedPlatforms.length === 0 ||
+          parsedCast.length < 8 ||
+          !dbMovie.directorImage)
+      ) {
         const freshDetail = await getMovieDetail(dbMovie.tmdbId);
-        if (freshDetail?.streamingPlatforms) {
-          parsedPlatforms = freshDetail.streamingPlatforms;
+        if (freshDetail) {
+          if (
+            freshDetail.streamingPlatforms &&
+            freshDetail.streamingPlatforms.length > 0
+          ) {
+            parsedPlatforms = freshDetail.streamingPlatforms;
+          }
+          if (freshDetail.cast && freshDetail.cast.length > parsedCast.length) {
+            parsedCast = freshDetail.cast;
+          }
           await prisma.movie.update({
             where: { id: dbMovie.id },
-            data: { streamingPlatforms: JSON.stringify(parsedPlatforms) },
+            data: {
+              streamingPlatforms: JSON.stringify(parsedPlatforms),
+              cast: JSON.stringify(parsedCast),
+              director: freshDetail.director || dbMovie.director,
+              directorImage: freshDetail.directorImage || dbMovie.directorImage,
+              posterPath: freshDetail.posterPath || dbMovie.posterPath,
+              backdropPath: freshDetail.backdropPath || dbMovie.backdropPath,
+            },
           });
         }
       }

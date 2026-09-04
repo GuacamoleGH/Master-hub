@@ -28,6 +28,8 @@ interface ReviewModalProps {
   initialReview?: string | null;
   initialDate?: string | null;
   initialPlatform?: string | null;
+  apiEndpoint?: string;
+  mediaLabel?: string;
 }
 
 const COMMON_PLATFORMS = [
@@ -48,6 +50,8 @@ export default function ReviewModal({
   initialReview,
   initialDate,
   initialPlatform,
+  apiEndpoint = "/api/user-movies",
+  mediaLabel = "película",
 }: ReviewModalProps) {
   const [rating, setRating] = useState<number>(initialRating ?? 8.0);
   const [review, setReview] = useState<string>(initialReview ?? "");
@@ -59,8 +63,8 @@ export default function ReviewModal({
   );
   const [watchedDate, setWatchedDate] = useState<string>(
     initialDate
-      ? initialDate.substring(0, 10)
-      : new Date().toISOString().substring(0, 10),
+      ? new Date(initialDate).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -69,11 +73,11 @@ export default function ReviewModal({
     if (initialRating !== undefined && initialRating !== null) {
       setRating(initialRating);
     }
-    if (initialReview !== undefined && initialReview !== null) {
+    if (initialReview) {
       setReview(initialReview);
     }
     if (initialDate) {
-      setWatchedDate(initialDate.substring(0, 10));
+      setWatchedDate(new Date(initialDate).toISOString().split("T")[0]);
     }
     if (initialPlatform) {
       setPlatform(initialPlatform);
@@ -93,7 +97,7 @@ export default function ReviewModal({
     setErrorMsg(null);
 
     try {
-      const res = await fetch("/api/user-movies", {
+      const res = await fetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
