@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  LogIn,
   Gamepad2,
   Trophy,
   Clock,
@@ -399,54 +400,7 @@ export default function GamerProfilePage() {
         </section>
       </div>
 
-      {/* Gestión de Datos y Reinicio de Videojuegos */}
-      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-cine-950 space-y-4">
-        <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-            Gestión de la Base de Datos de Videojuegos
-          </h3>
-          <p className="text-xs text-cine-400 mt-0.5">
-            Administra los registros de tus videojuegos en Supabase. Puedes
-            reiniciar para empezar tu historial desde cero o restaurar los datos
-            de demostración curados.
-          </p>
-        </div>
-
-        {adminMsg && (
-          <div className="p-3 bg-purple-950/70 border border-purple-500/40 rounded-xl text-purple-300 text-xs font-semibold">
-            {adminMsg}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            onClick={() => handleAdminAction("wipe")}
-            disabled={isActionLoading}
-            className="px-4 py-2.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-700/80 text-rose-300 font-semibold rounded-xl text-xs transition-colors flex items-center gap-2"
-          >
-            {isActionLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Trash2 className="w-3.5 h-3.5" />
-            )}
-            Vaciar Base de Datos (Empezar desde cero)
-          </button>
-
-          <button
-            onClick={() => handleAdminAction("seed")}
-            disabled={isActionLoading}
-            className="px-4 py-2.5 bg-cine-900 hover:bg-cine-800 border border-purple-500/40 text-purple-300 hover:text-white font-semibold rounded-xl text-xs transition-colors flex items-center gap-2"
-          >
-            {isActionLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="w-3.5 h-3.5" />
-            )}
-            Recargar Catálogo de Demostración
-          </button>
-        </div>
-      </section>
+      
 
       {/* Modal para Editar Perfil Gamer */}
       <EditGamerProfileModal
