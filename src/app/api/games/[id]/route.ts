@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getGameDetail } from "@/lib/rawg";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   const idOrRawg = params.id;
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   try {
     const isNum = !isNaN(Number(idOrRawg));
@@ -15,7 +19,7 @@ export async function GET(
         ? { OR: [{ id: idOrRawg }, { rawgId: Number(idOrRawg) }] }
         : { id: idOrRawg },
       include: {
-        userGame: true,
+        userGames: userId ? { where: { userId } } : false,
       },
     });
 
@@ -43,6 +47,8 @@ export async function GET(
           parsedScreenshots = JSON.parse(dbGame.screenshots);
       } catch {}
 
+      const userGame = (dbGame as any).userGames?.[0] || null;
+
       return NextResponse.json({
         game: {
           id: dbGame.id,
@@ -59,35 +65,34 @@ export async function GET(
           description: dbGame.description,
           screenshots: parsedScreenshots,
           trailerUrl: dbGame.trailerUrl,
-          userGame: dbGame.userGame
+          userGame: userGame
             ? {
-                id: dbGame.userGame.id,
-                status: dbGame.userGame.status,
-                userRating: dbGame.userGame.userRating,
-                hoursPlayed: dbGame.userGame.hoursPlayed,
-                platform: dbGame.userGame.platform,
-                platformDetails: dbGame.userGame.platformDetails
+                id: userGame.id,
+                status: userGame.status,
+                userRating: userGame.userRating,
+                hoursPlayed: userGame.hoursPlayed,
+                platform: userGame.platform,
+                platformDetails: userGame.platformDetails
                   ? (() => {
                       try {
-                        return JSON.parse(dbGame.userGame.platformDetails);
+                        return JSON.parse(userGame.platformDetails);
                       } catch {
                         return null;
                       }
                     })()
                   : null,
-                review: dbGame.userGame.review,
-                completedDate: dbGame.userGame.completedDate
-                  ? dbGame.userGame.completedDate.toISOString()
+                review: userGame.review,
+                completedDate: userGame.completedDate
+                  ? userGame.completedDate.toISOString()
                   : null,
-                gameKnowledge: dbGame.userGame.gameKnowledge,
-                difference: dbGame.userGame.difference,
+                gameKnowledge: userGame.gameKnowledge,
+                difference: userGame.difference,
               }
             : null,
         },
       });
     }
 
-    // 2. Si no está en DB pero es un ID numérico de RAWG, consultar la API externa
     if (isNum) {
       const rawgDetail = await getGameDetail(Number(idOrRawg));
       if (rawgDetail) {
@@ -97,13 +102,13 @@ export async function GET(
 
     return NextResponse.json(
       { error: "Videojuego no encontrado" },
-      { status: 404 },
+      { status: 404 }
     );
   } catch (error) {
     console.error("Error en /api/games/[id]:", error);
     return NextResponse.json(
       { error: "Error al obtener el videojuego" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

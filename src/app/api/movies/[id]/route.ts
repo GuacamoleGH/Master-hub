@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMovieDetail } from "@/lib/tmdb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   const idOrTmdb = params.id;
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   try {
-    // 1. Intentar buscar en DB por id interno o tmdbId
     const isNum = !isNaN(Number(idOrTmdb));
     let dbMovie = await prisma.movie.findFirst({
       where: isNum
         ? { OR: [{ id: idOrTmdb }, { tmdbId: Number(idOrTmdb) }] }
         : { id: idOrTmdb },
       include: {
-        userMovie: true,
+        userMovies: userId ? { where: { userId } } : false,
       },
     });
 
@@ -36,7 +39,6 @@ export async function GET(
         }
       } catch {}
 
-      // Si faltan plataformas, reparto completo o foto del director en DB pero tiene tmdbId, actualizar desde TMDB
       if (
         dbMovie.tmdbId &&
         (parsedPlatforms.length === 0 ||
@@ -68,6 +70,8 @@ export async function GET(
         }
       }
 
+      const userMovie = (dbMovie as any).userMovies?.[0] || null;
+
       return NextResponse.json({
         movie: {
           id: dbMovie.id,
@@ -86,25 +90,24 @@ export async function GET(
           cast: parsedCast,
           imdbRating: dbMovie.imdbRating,
           streamingPlatforms: parsedPlatforms,
-          userMovie: dbMovie.userMovie
+          userMovie: userMovie
             ? {
-                id: dbMovie.userMovie.id,
-                status: dbMovie.userMovie.status,
-                userRating: dbMovie.userMovie.userRating,
-                review: dbMovie.userMovie.review,
-                platform: dbMovie.userMovie.platform,
-                watchedDate: dbMovie.userMovie.watchedDate
-                  ? dbMovie.userMovie.watchedDate.toISOString()
+                id: userMovie.id,
+                status: userMovie.status,
+                userRating: userMovie.userRating,
+                review: userMovie.review,
+                platform: userMovie.platform,
+                watchedDate: userMovie.watchedDate
+                  ? userMovie.watchedDate.toISOString()
                   : null,
-                ballKnowledge: dbMovie.userMovie.ballKnowledge,
-                difference: dbMovie.userMovie.difference,
+                ballKnowledge: userMovie.ballKnowledge,
+                difference: userMovie.difference,
               }
             : null,
         },
       });
     }
 
-    // 2. Si no está en DB pero es un ID numérico de TMDB, consultar la API externa
     if (isNum) {
       const tmdbDetail = await getMovieDetail(Number(idOrTmdb));
       if (tmdbDetail) {
@@ -114,13 +117,13 @@ export async function GET(
 
     return NextResponse.json(
       { error: "Película no encontrada" },
-      { status: 404 },
+      { status: 404 }
     );
   } catch (error) {
     console.error("Error en /api/movies/[id]:", error);
     return NextResponse.json(
       { error: "Error al obtener la película" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

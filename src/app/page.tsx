@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +20,9 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function MasterHubPage() {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+
   // Estadísticas rápidas de Cine & Series
   let movieCount = 0;
   let seriesCount = 0;
@@ -28,25 +33,31 @@ export default async function MasterHubPage() {
   try {
     movieCount = await prisma.movie.count();
     seriesCount = await prisma.series.count();
-    const watched = await prisma.userMovie.findMany({
-      where: { status: "WATCHED" },
-      select: { ballKnowledge: true },
-    });
-    const watchedSeries = await prisma.userSeries.findMany({
-      where: { status: "WATCHED" },
-      select: { ballKnowledge: true },
-    });
+
+    const watched = userId
+      ? await prisma.userMovie.findMany({
+          where: { userId, status: "WATCHED" },
+          select: { ballKnowledge: true },
+        })
+      : [];
+    const watchedSeries = userId
+      ? await prisma.userSeries.findMany({
+          where: { userId, status: "WATCHED" },
+          select: { ballKnowledge: true },
+        })
+      : [];
+
     movieWatchedCount = watched.length;
     seriesWatchedCount = watchedSeries.length;
     const allWithBk = [...watched, ...watchedSeries].filter(
-      (w) => typeof w.ballKnowledge === "number",
+      (w) => typeof w.ballKnowledge === "number"
     );
     if (allWithBk.length > 0) {
       avgBallKnowledge = Number(
         (
           allWithBk.reduce((acc, c) => acc + (c.ballKnowledge || 0), 0) /
           allWithBk.length
-        ).toFixed(1),
+        ).toFixed(1)
       );
     }
   } catch {}
@@ -59,23 +70,27 @@ export default async function MasterHubPage() {
 
   try {
     gameCount = await prisma.game.count();
-    const userGames = await prisma.userGame.findMany({
-      select: { status: true, hoursPlayed: true, gameKnowledge: true },
-    });
+    const userGames = userId
+      ? await prisma.userGame.findMany({
+          where: { userId },
+          select: { status: true, hoursPlayed: true, gameKnowledge: true },
+        })
+      : [];
+
     for (const ug of userGames) {
       if (ug.hoursPlayed) totalHours += ug.hoursPlayed;
       if (ug.status === "COMPLETED" || ug.status === "PLATINUM")
         completedGamesCount++;
     }
     const withGk = userGames.filter(
-      (ug) => typeof ug.gameKnowledge === "number",
+      (ug) => typeof ug.gameKnowledge === "number"
     );
     if (withGk.length > 0) {
       avgGameKnowledge = Number(
         (
           withGk.reduce((acc, c) => acc + (c.gameKnowledge || 0), 0) /
           withGk.length
-        ).toFixed(1),
+        ).toFixed(1)
       );
     }
   } catch {}

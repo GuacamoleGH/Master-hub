@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -20,97 +22,78 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function SeriesHomePage() {
-  // 1. Obtener perfil de usuario
-  let profile = await prisma.userProfile.findUnique({
-    where: { id: "user-default" },
-  });
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
-  if (!profile) {
-    profile = {
-      id: "user-default",
-      displayName: "Jose",
-      avatarUrl: null,
-      bio: "Explorador de series y cine",
-      totalXp: 0,
-      updatedAt: new Date(),
-    };
+  // 1. Obtener perfil
+  let profile = {
+    id: "guest",
+    displayName: "Invitado",
+    avatarUrl: null as string | null,
+    bio: "Inicia sesión para guardar tu historial de series.",
+    totalXp: 0,
+    updatedAt: new Date(),
+  };
+
+  if (userId) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user) {
+      profile = {
+        id: user.id,
+        displayName: user.name || user.username || "Cinéfilo",
+        avatarUrl: user.image,
+        bio: user.bio || "Explorador cinematográfico",
+        totalXp: user.totalXp,
+        updatedAt: user.updatedAt,
+      };
+    }
   }
 
   const levelInfo = calculateLevelAndRank(profile.totalXp);
 
-  // 2. Sincronizar o sembrar series curadas iniciales
-  try {
-    for (const s of CURATED_SERIES) {
-      await prisma.series.upsert({
-        where: { tmdbId: s.tmdbId },
-        update: {
-          posterPath: s.posterPath,
-          backdropPath: s.backdropPath,
-          creator: s.creator,
-          creatorImage: s.creatorImage || null,
-          cast: JSON.stringify(s.cast),
-          numberOfSeasons: s.numberOfSeasons,
-          numberOfEpisodes: s.numberOfEpisodes,
-          imdbRating: s.imdbRating,
-          genres: JSON.stringify(s.genres),
-          overview: s.overview,
-        },
-        create: {
-          tmdbId: s.tmdbId,
-          imdbId: s.imdbId,
-          name: s.name,
-          originalName: s.originalName,
-          firstAirYear: s.firstAirYear,
-          lastAirYear: s.lastAirYear,
-          numberOfSeasons: s.numberOfSeasons,
-          numberOfEpisodes: s.numberOfEpisodes,
-          seriesStatus: s.seriesStatus,
-          posterPath: s.posterPath,
-          backdropPath: s.backdropPath,
-          overview: s.overview,
-          genres: JSON.stringify(s.genres),
-          creator: s.creator,
-          creatorImage: s.creatorImage || null,
-          cast: JSON.stringify(s.cast),
-          imdbRating: s.imdbRating,
-          streamingPlatforms: JSON.stringify(s.streamingPlatforms),
-        },
-      });
-    }
-  } catch (e) {
-    console.error("Error sincronizando series iniciales:", e);
-  }
+  // 2. Obtener series de la Watchlist
+  const watchlistRecords = userId
+    ? await prisma.userSeries.findMany({
+        where: { userId, status: "WATCHLIST" },
+        include: { series: true },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      })
+    : [];
 
-  // 3. Obtener series de la Watchlist (últimas añadidas)
-  const watchlistRecords = await prisma.userSeries.findMany({
-    where: { status: "WATCHLIST" },
-    include: { series: true },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  // 3. Obtener últimas series vistas
+  const watchedRecords = userId
+    ? await prisma.userSeries.findMany({
+        where: { userId, status: "WATCHED" },
+        include: { series: true },
+        orderBy: { updatedAt: "desc" },
+        take: 6,
+      })
+    : [];
 
-  // 4. Obtener últimas series vistas
-  const watchedRecords = await prisma.userSeries.findMany({
-    where: { status: "WATCHED" },
-    include: { series: true },
-    orderBy: { updatedAt: "desc" },
-    take: 6,
-  });
-
-  // 5. Catálogo general para continuar explorando
+  // 4. Catálogo general para continuar explorando
   let exploreSeries = await prisma.series.findMany({
-    where: {
-      userSeries: null,
-    },
+    where: userId
+      ? {
+          userSeries: {
+            none: { userId },
+          },
+        }
+      : {},
     orderBy: { imdbRating: "desc" },
-    include: { userSeries: true },
+    take: 12,
+    include: {
+      userSeries: userId ? { where: { userId } } : false,
+    },
   });
 
   if (exploreSeries.length === 0) {
     exploreSeries = await prisma.series.findMany({
       take: 12,
       orderBy: { imdbRating: "desc" },
-      include: { userSeries: true },
+      include: {
+        userSeries: userId ? { where: { userId } } : false,
+      },
     });
   }
 
@@ -125,6 +108,8 @@ export default async function SeriesHomePage() {
         streamingPlatforms = JSON.parse(s.streamingPlatforms);
     } catch {}
 
+    const uSeries = (s as any).userSeries?.[0] || null;
+
     return {
       id: s.id,
       tmdbId: s.tmdbId,
@@ -138,24 +123,26 @@ export default async function SeriesHomePage() {
       imdbRating: s.imdbRating,
       genres,
       streamingPlatforms,
-      userSeries: s.userSeries
+      userSeries: uSeries
         ? {
-            status: s.userSeries.status as any,
-            userRating: s.userSeries.userRating,
-            review: s.userSeries.review,
-            ballKnowledge: s.userSeries.ballKnowledge,
-            difference: s.userSeries.difference,
-            platform: s.userSeries.platform,
+            status: uSeries.status as any,
+            userRating: uSeries.userRating,
+            review: uSeries.review,
+            ballKnowledge: uSeries.ballKnowledge,
+            difference: uSeries.difference,
+            platform: uSeries.platform,
           }
         : null,
     };
   });
 
-  // 6. Estadísticas resumidas de Series
-  const allWatched = await prisma.userSeries.findMany({
-    where: { status: "WATCHED" },
-    include: { series: true },
-  });
+  // 5. Estadísticas resumidas de Series
+  const allWatched = userId
+    ? await prisma.userSeries.findMany({
+        where: { userId, status: "WATCHED" },
+        include: { series: true },
+      })
+    : [];
 
   const totalWatched = allWatched.length;
   const rated = allWatched.filter((r) => typeof r.userRating === "number");
@@ -166,7 +153,7 @@ export default async function SeriesHomePage() {
         ).toFixed(1)
       : null;
 
-  const withBk = rated.filter((r) => typeof r.ballKnowledge === "number");
+  const withBk = allWatched.filter((r) => typeof r.ballKnowledge === "number");
   const avgBk =
     withBk.length > 0
       ? (

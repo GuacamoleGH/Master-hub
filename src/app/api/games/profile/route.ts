@@ -5,14 +5,57 @@ import {
   classifyHotTake,
 } from "@/lib/gameKnowledge";
 import { GamerStats, HotTake } from "@/types/game";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const profile = await prisma.gamerProfile.findUnique({
-      where: { id: "gamer-default" },
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      const levelInfo = calculateGamerLevelAndRank(0);
+      return NextResponse.json({
+        profile: {
+          id: "guest",
+          displayName: "Invitado",
+          avatarUrl: null,
+          bio: "Inicia sesión para guardar tu progreso de videojuegos y subir de nivel.",
+        },
+        stats: {
+          totalHours: 0,
+          totalCompleted: 0,
+          totalBacklog: 0,
+          totalPlaying: 0,
+          totalPlatinum: 0,
+          totalReviews: 0,
+          averageRating: null,
+          averageMetacritic: null,
+          globalGameKnowledge: null,
+          totalXp: 0,
+          level: levelInfo.level,
+          rankTitle: levelInfo.rankTitle,
+          rankIcon: levelInfo.rankIcon,
+          rankColor: levelInfo.rankColor,
+          nextLevelXp: levelInfo.nextLevelXp,
+          currentLevelBaseXp: levelInfo.currentLevelBaseXp,
+          xpProgressPercent: levelInfo.xpProgressPercent,
+          topGenre: null,
+          topPlatform: null,
+          hotTakes: [],
+          criticVsYou: [],
+          hoursByPlatform: [],
+          hoursByGenre: [],
+          ratingDistribution: [],
+        },
+      });
+    }
+
+    const userId = session.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
     });
 
     const userGames = await prisma.userGame.findMany({
+      where: { userId },
       include: {
         game: true,
       },
@@ -82,7 +125,6 @@ export async function GET() {
 
       const gameHours = ug.hoursPlayed || 0;
 
-      // Mapear horas por plataforma individual utilizando platformDetails si está disponible
       let parsedProgress:
         | { platform: string; hours: number; status: string }[]
         | null = null;
@@ -118,12 +160,10 @@ export async function GET() {
         }
       }
 
-      // Mapear horas por género
       for (const g of parsedGenres) {
         genreHoursMap[g] = (genreHoursMap[g] || 0) + gameHours;
       }
 
-      // Hot Takes y Critic vs You
       if (
         typeof ug.userRating === "number" &&
         typeof ug.game.metacritic === "number" &&
@@ -158,16 +198,14 @@ export async function GET() {
       }
     }
 
-    // Ordenar Hot Takes: los más extremos primero
     hotTakes.sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference));
 
-    const totalXp = profile?.totalXp || 0;
+    const totalXp = user?.totalXp || 0;
     const levelInfo = calculateGamerLevelAndRank(totalXp);
 
-    // Formatear arrays para gráficos ordenados de mayor a menor horas
     const totalPlatformAggregatedHours = Object.values(platformHoursMap).reduce(
       (a, b) => a + b,
-      0,
+      0
     );
     const hoursByPlatform = Object.entries(platformHoursMap)
       .map(([platform, hours]) => ({
@@ -186,7 +224,7 @@ export async function GET() {
       .sort((a, b) => b.hours - a.hours);
 
     const ratingDistributionList = Object.entries(ratingDistribution).map(
-      ([rating, count]) => ({ rating: Number(rating), count }),
+      ([rating, count]) => ({ rating: Number(rating), count })
     );
 
     const stats: GamerStats = {
@@ -226,10 +264,10 @@ export async function GET() {
 
     return NextResponse.json({
       profile: {
-        id: profile?.id || "gamer-default",
-        displayName: profile?.displayName || "Gamer",
-        avatarUrl: profile?.avatarUrl || null,
-        bio: profile?.bio || null,
+        id: user?.id || "gamer-default",
+        displayName: user?.name || user?.username || "Gamer",
+        avatarUrl: user?.image || null,
+        bio: user?.bio || null,
       },
       stats,
     });
@@ -237,38 +275,44 @@ export async function GET() {
     console.error("Error en /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al calcular estadísticas gamer" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function PATCH(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { displayName, bio, avatarUrl } = body;
 
-    const updated = await prisma.gamerProfile.upsert({
-      where: { id: "gamer-default" },
-      update: {
-        ...(displayName !== undefined && { displayName: displayName.trim() }),
-        ...(bio !== undefined && { bio: bio.trim() }),
-        ...(avatarUrl !== undefined && { avatarUrl: avatarUrl.trim() || null }),
-      },
-      create: {
-        id: "gamer-default",
-        displayName: displayName ? displayName.trim() : "Gamer",
-        bio: bio ? bio.trim() : null,
-        avatarUrl: avatarUrl ? avatarUrl.trim() : null,
-        totalXp: 0,
+    const updated = await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        name: displayName ? displayName.trim() : undefined,
+        bio: bio !== undefined ? bio.trim() : undefined,
+        image: avatarUrl !== undefined ? avatarUrl.trim() || null : undefined,
       },
     });
 
-    return NextResponse.json({ success: true, profile: updated });
+    return NextResponse.json({
+      success: true,
+      profile: {
+        id: updated.id,
+        displayName: updated.name || updated.username,
+        bio: updated.bio,
+        avatarUrl: updated.image,
+      },
+    });
   } catch (error) {
     console.error("Error en PATCH /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al actualizar perfil gamer" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

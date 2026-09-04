@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   Gamepad2,
   Bookmark,
@@ -11,12 +12,17 @@ import {
   Menu,
   X,
   ArrowLeft,
+  LogIn,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 import GameSearchInput from "./GameSearchInput";
 
 export default function GameHeader() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const navLinks = [
     { href: "/games", label: "Inicio", icon: Gamepad2 },
@@ -65,7 +71,7 @@ export default function GameHeader() {
         </div>
 
         {/* Navegación Desktop */}
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-2">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -86,6 +92,75 @@ export default function GameHeader() {
               </Link>
             );
           })}
+
+          <div className="w-px h-5 bg-cine-800 mx-1" />
+
+          {/* Menú de Usuario / Login */}
+          {status === "loading" ? (
+            <div className="w-8 h-8 rounded-xl bg-cine-800/60 animate-pulse" />
+          ) : session?.user ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-cine-900/80 hover:bg-cine-800 border border-purple-500/30 hover:border-purple-500/60 transition-colors"
+              >
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || "Usuario"}
+                    className="w-5 h-5 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-lg bg-purple-500/20 text-purple-400 text-[11px] font-bold flex items-center justify-center">
+                    {(session.user.name || session.user.username || "U")[0].toUpperCase()}
+                  </div>
+                )}
+                <span className="text-xs font-semibold text-cine-200 max-w-[90px] truncate">
+                  {session.user.name || session.user.username}
+                </span>
+                <ChevronDown className="w-3 h-3 text-cine-400" />
+              </button>
+
+              {isUserMenuOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-48 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
+                  onMouseLeave={() => setIsUserMenuOpen(false)}
+                >
+                  <div className="px-3 py-2 border-b border-cine-800">
+                    <p className="text-xs font-bold text-white truncate">
+                      {session.user.name || session.user.username}
+                    </p>
+                    <p className="text-[10px] text-cine-400 truncate font-mono">
+                      {session.user.email}
+                    </p>
+                  </div>
+                  <Link
+                    href="/games/profile"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
+                  >
+                    <User className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Perfil Gamer</span>
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-purple-300 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.25)] transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5 text-purple-400" />
+              <span>Entrar</span>
+            </Link>
+          )}
         </nav>
 
         {/* Botón menú móvil */}
@@ -111,6 +186,22 @@ export default function GameHeader() {
       {/* Menú desplegable móvil */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-purple-500/20 bg-cine-950/95 px-4 py-3 space-y-1">
+          {session?.user && (
+            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900 border border-cine-800 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 text-xs font-bold flex items-center justify-center">
+                {(session.user.name || session.user.username || "U")[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-white truncate">
+                  {session.user.name || session.user.username}
+                </p>
+                <p className="text-[10px] text-cine-400 truncate">
+                  {session.user.email}
+                </p>
+              </div>
+            </div>
+          )}
+
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -131,7 +222,29 @@ export default function GameHeader() {
             );
           })}
 
-          <div className="pt-2 border-t border-cine-800 mt-2">
+          <div className="pt-2 border-t border-cine-800 mt-2 space-y-1">
+            {session?.user ? (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  signOut({ callbackUrl: "/" });
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-950/40"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Cerrar Sesión</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-purple-400 hover:bg-cine-900"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Iniciar Sesión / Registrarse</span>
+              </Link>
+            )}
+
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}

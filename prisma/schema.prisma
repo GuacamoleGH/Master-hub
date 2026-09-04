@@ -9,12 +9,71 @@ datasource db {
 }
 
 // =======================
+// AUTENTICACIÓN (NEXTAUTH PRISMA ADAPTER)
+// =======================
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?      // Nombre completo o display name
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?      // Avatar URL
+  username      String?      @unique
+  passwordHash  String?      // Contraseña con hash bcryptjs
+  bio           String?      @default("Explorador y analista del catálogo universal.")
+  totalXp       Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  userMovies    UserMovie[]
+  userSeries    UserSeries[]
+  userGames     UserGame[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// =======================
 // MODELOS DE CINE
 // =======================
 
 model Movie {
-  id                 String     @id @default(cuid())
-  tmdbId             Int        @unique
+  id                 String      @id @default(cuid())
+  tmdbId             Int         @unique
   imdbId             String?
   title              String
   originalTitle      String?
@@ -23,20 +82,23 @@ model Movie {
   backdropPath       String?
   overview           String?
   runtime            Int?
-  genres             String     // JSON array de strings
+  genres             String      // JSON array de strings
   director           String?
   directorImage      String?
-  cast               String     // JSON array de { name, character, profilePath }
+  cast               String      // JSON array de { name, character, profilePath }
   imdbRating         Float?
-  streamingPlatforms String?    // JSON array de plataformas
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  userMovie          UserMovie?
+  streamingPlatforms String?     // JSON array de plataformas
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  userMovies         UserMovie[]
 }
 
 model UserMovie {
   id            String    @id @default(cuid())
-  movieId       String    @unique
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId       String
   movie         Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
   status        String    // "WATCHLIST" | "WATCHED"
   userRating    Float?    // 0.0 a 10.0
@@ -47,6 +109,8 @@ model UserMovie {
   difference    Float?    // userRating - imdbRating
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, movieId])
 }
 
 model UserProfile {
@@ -81,15 +145,18 @@ model Series {
   creatorImage       String?
   cast               String      // JSON array de { id, name, character, profilePath }
   imdbRating         Float?
-  streamingPlatforms String?    // JSON array de plataformas
+  streamingPlatforms String?     // JSON array de plataformas
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
-  userSeries         UserSeries?
+
+  userSeries         UserSeries[]
 }
 
 model UserSeries {
   id            String    @id @default(cuid())
-  seriesId      String    @unique
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seriesId      String
   series        Series    @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   status        String    // "WATCHLIST" | "WATCHED"
   userRating    Float?    // 0.0 a 10.0
@@ -100,6 +167,8 @@ model UserSeries {
   difference    Float?    // userRating - imdbRating
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@unique([userId, seriesId])
 }
 
 // =======================
@@ -107,40 +176,45 @@ model UserSeries {
 // =======================
 
 model Game {
-  id              String     @id @default(cuid())
-  rawgId          Int        @unique
+  id              String      @id @default(cuid())
+  rawgId          Int         @unique
   title           String
   released        String?
   backgroundImage String?
-  metacritic      Int?       // 0 a 100 (ej. 92)
-  rating          Float?     // RAWG rating 0 a 5
-  genres          String     // JSON array
-  platforms       String     // JSON array de nombres (PC, PlayStation 5, Nintendo Switch, etc.)
-  developers      String?    // JSON array
-  publishers      String?    // JSON array
+  metacritic      Int?        // 0 a 100 (ej. 92)
+  rating          Float?      // RAWG rating 0 a 5
+  genres          String      // JSON array
+  platforms       String      // JSON array de nombres (PC, PlayStation 5, Nintendo Switch, etc.)
+  developers      String?     // JSON array
+  publishers      String?     // JSON array
   description     String?
-  screenshots     String?    // JSON array de URLs
+  screenshots     String?     // JSON array de URLs
   trailerUrl      String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  userGame        UserGame?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  userGames       UserGame[]
 }
 
 model UserGame {
-  id            String    @id @default(cuid())
-  gameId        String    @unique
-  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  status        String    // "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED"
-  userRating    Float?    // 0.0 a 10.0
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId          String
+  game            Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  status          String    // "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED"
+  userRating      Float?    // 0.0 a 10.0
   hoursPlayed     Float?    // Horas registradas (ej. 127)
   platform        String?   // Plataforma donde lo jugó (ej. "PC", "PS5", "Switch")
   platformDetails String?   // JSON array de { platform, hours, status }
   review          String?
-  completedDate DateTime?
-  gameKnowledge Float?    // 0 a 100 percentage
-  difference    Float?    // userRating - (metacritic / 10)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  completedDate   DateTime?
+  gameKnowledge   Float?    // 0 a 100 percentage
+  difference      Float?    // userRating - (metacritic / 10)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, gameId])
 }
 
 model GamerProfile {
