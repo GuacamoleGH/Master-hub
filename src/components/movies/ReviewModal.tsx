@@ -214,7 +214,9 @@ export default function ReviewModal({
                       }}
                       className="w-12 bg-transparent text-right font-mono font-bold text-amber-400 text-base focus:outline-none"
                     />
-                    <span className="text-xs text-cine-400 font-semibold">/10</span>
+                    <span className="text-xs text-cine-400 font-semibold">
+                      /10
+                    </span>
                   </div>
                 </div>
 
@@ -238,7 +240,8 @@ export default function ReviewModal({
               </div>
             ) : (
               <div className="p-3.5 rounded-xl bg-cine-950/40 border border-cine-800/80 text-xs text-cine-400 italic text-center">
-                Guardarás este título como visto sin puntuación (puedes asignarle nota cuando quieras).
+                Guardarás este título como visto sin puntuación (puedes
+                asignarle nota cuando quieras).
               </div>
             )}
           </div>

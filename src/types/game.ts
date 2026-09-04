@@ -120,7 +120,12 @@ export interface GamerStats {
     criticRating: number;
     gameKnowledge: number;
   }[];
-  hoursByPlatform: { platform: string; hours: number; gameCount?: number; percentage?: number }[];
+  hoursByPlatform: {
+    platform: string;
+    hours: number;
+    gameCount?: number;
+    percentage?: number;
+  }[];
   hoursByGenre: { genre: string; hours: number }[];
   ratingDistribution: { rating: number; count: number }[];
 }

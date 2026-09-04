@@ -318,8 +318,12 @@ export default function GamerProfilePage() {
                     }}
                     formatter={(val: any, name: any, item: any) => {
                       const count = item?.payload?.gameCount;
-                      const countStr = count ? ` (${count} juego${count > 1 ? "s" : ""})` : "";
-                      const pct = item?.payload?.percentage ? ` · ${item.payload.percentage}%` : "";
+                      const countStr = count
+                        ? ` (${count} juego${count > 1 ? "s" : ""})`
+                        : "";
+                      const pct = item?.payload?.percentage
+                        ? ` · ${item.payload.percentage}%`
+                        : "";
                       return [`${val} horas${countStr}${pct}`, "Tiempo"];
                     }}
                   />
