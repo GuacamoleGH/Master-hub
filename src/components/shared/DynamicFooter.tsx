@@ -54,7 +54,7 @@ export default function DynamicFooter() {
         <div className="flex items-center gap-2">
           <span className="font-bold text-cine-300">Cinephile Hub</span>
           <span>•</span>
-          <span>Ball Knowledge Engine 🏀</span>
+          <span>Sofa Knowledge Engine 🛋️</span>
         </div>
         <p className="text-cine-500">
           Datos impulsados por TMDB & OMDb. Diseñado para cinéfilos exigentes.

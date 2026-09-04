@@ -57,7 +57,7 @@ export default function Header() {
                 Cinephile<span className="text-amber-400">Hub</span>
               </span>
               <span className="text-[9px] uppercase tracking-widest text-cine-400 font-mono -mt-1">
-                Ball Knowledge
+                Sofa Knowledge
               </span>
             </div>
           </Link>

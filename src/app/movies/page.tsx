@@ -147,7 +147,7 @@ export default async function MoviesHomePage() {
               Registra cada película que ves, califícala con precisión
               quirúrgica y descubre tu nivel de coincidencia con el canon
               cinéfilo mediante el índice{" "}
-              <strong className="text-amber-400">Ball Knowledge</strong>.
+              <strong className="text-amber-400">Sofa Knowledge</strong>.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
@@ -167,7 +167,7 @@ export default async function MoviesHomePage() {
             </div>
           </div>
 
-          {/* Tarjeta de Resumen Rápido Ball Knowledge & Nivel */}
+          {/* Tarjeta de Resumen Rápido Sofa Knowledge & Nivel */}
           <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col gap-4 min-w-[260px] bg-cine-900/90 shadow-xl">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase font-bold text-cine-400 tracking-wider">
@@ -194,7 +194,7 @@ export default async function MoviesHomePage() {
             </div>
 
             <div className="pt-2 border-t border-cine-800 flex items-center justify-between">
-              <div className="text-xs text-cine-400">Ball Knowledge Global</div>
+              <div className="text-xs text-cine-400">Sofa Knowledge Global</div>
               {avgBk ? (
                 <BallKnowledgeBadge
                   score={parseFloat(avgBk)}
@@ -239,7 +239,7 @@ export default async function MoviesHomePage() {
 
         <div className="glass-panel p-4 rounded-2xl border border-cine-800">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <span className="text-sm">🏀</span> Ball Knowledge
+            <span className="text-sm">🛋️</span> Sofa Knowledge
           </div>
           <div className="text-2xl font-black text-emerald-400 font-mono">
             {avgBk ? `${avgBk}%` : "—"}

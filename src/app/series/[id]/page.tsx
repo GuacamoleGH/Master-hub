@@ -364,10 +364,10 @@ export default function SeriesDetailPage() {
                 )}
             </div>
 
-            {/* Ball Knowledge */}
+            {/* Sofa Knowledge */}
             <div className="space-y-2">
               <span className="text-xs text-cine-400 font-medium">
-                Índice Ball Knowledge
+                Índice Sofa Knowledge
               </span>
               <div>
                 <BallKnowledgeBadge

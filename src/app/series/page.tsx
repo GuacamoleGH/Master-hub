@@ -194,7 +194,7 @@ export default async function SeriesHomePage() {
               Registra cada serie que sigues, organiza tus temporadas
               pendientes, califica cada producción con precisión y pon a prueba
               tu criterio frente a IMDb con el índice{" "}
-              <strong className="text-purple-400">Ball Knowledge</strong>.
+              <strong className="text-purple-400">Sofa Knowledge</strong>.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
@@ -214,7 +214,7 @@ export default async function SeriesHomePage() {
             </div>
           </div>
 
-          {/* Tarjeta de Resumen Rápido Ball Knowledge & Nivel */}
+          {/* Tarjeta de Resumen Rápido Sofa Knowledge & Nivel */}
           <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col gap-4 min-w-[260px] bg-cine-900/90 shadow-xl">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase font-bold text-cine-400 tracking-wider">
@@ -241,7 +241,7 @@ export default async function SeriesHomePage() {
             </div>
 
             <div className="pt-2 border-t border-cine-800 flex items-center justify-between">
-              <div className="text-xs text-cine-400">Ball Knowledge Series</div>
+              <div className="text-xs text-cine-400">Sofa Knowledge Series</div>
               {avgBk ? (
                 <BallKnowledgeBadge
                   score={parseFloat(avgBk)}
@@ -286,7 +286,7 @@ export default async function SeriesHomePage() {
 
         <div className="glass-panel p-4 rounded-2xl border border-cine-800">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <span className="text-sm">🏀</span> Ball Knowledge
+            <span className="text-sm">🛋️</span> Sofa Knowledge
           </div>
           <div className="text-2xl font-black text-emerald-400 font-mono">
             {avgBk ? `${avgBk}%` : "—"}

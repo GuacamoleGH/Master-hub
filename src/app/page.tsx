@@ -129,7 +129,7 @@ export default async function MasterHubPage() {
                 Tu Letterboxd cinematográfico. Registra películas, escribe
                 reseñas, sigue plataformas de streaming (con opción 🏴‍☠️ Pirata) y
                 calcula tu precisión frente a IMDb con el índice{" "}
-                <strong>Ball Knowledge</strong>.
+                <strong>Sofa Knowledge</strong>.
               </p>
             </div>
 
@@ -137,25 +137,25 @@ export default async function MasterHubPage() {
             <div className="grid grid-cols-3 gap-3 pt-2 border-t border-cine-800/80">
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
                 <div className="text-[10px] uppercase font-bold text-cine-400">
-                  Vistas
-                </div>
-                <div className="text-lg font-mono font-black text-white mt-0.5">
-                  {movieWatchedCount + seriesWatchedCount}
-                </div>
-              </div>
-
-              <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
-                <div className="text-[10px] uppercase font-bold text-cine-400">
-                  Catálogo
+                  Pelis vistas
                 </div>
                 <div className="text-lg font-mono font-black text-amber-400 mt-0.5">
-                  {movieCount + seriesCount}
+                  {movieWatchedCount}
                 </div>
               </div>
 
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
                 <div className="text-[10px] uppercase font-bold text-cine-400">
-                  Ball Knowledge
+                  Series vistas
+                </div>
+                <div className="text-lg font-mono font-black text-purple-400 mt-0.5">
+                  {seriesWatchedCount}
+                </div>
+              </div>
+
+              <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
+                <div className="text-[10px] uppercase font-bold text-cine-400">
+                  Sofa Knowledge
                 </div>
                 <div className="text-lg font-mono font-black text-emerald-400 mt-0.5">
                   {avgBallKnowledge ? `${avgBallKnowledge}%` : "—"}

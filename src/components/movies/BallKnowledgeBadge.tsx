@@ -31,7 +31,7 @@ export default function BallKnowledgeBadge({
   } else if (roundedScore >= 85) {
     colorClasses =
       "border-emerald-500/40 bg-emerald-950/40 text-emerald-400 shadow-emerald-950/50";
-    labelText = "High Knowledge 🏀";
+    labelText = "High Knowledge 🛋️";
   } else if (roundedScore >= 70) {
     colorClasses =
       "border-amber-500/40 bg-amber-950/40 text-amber-400 shadow-amber-950/50";
@@ -47,14 +47,14 @@ export default function BallKnowledgeBadge({
   return (
     <div
       className={`inline-flex items-center rounded-full border backdrop-blur-md shadow-sm font-medium transition-all cursor-help ${sizeClasses} ${colorClasses}`}
-      title={`Ball Knowledge: ${score.toFixed(1)}% de afinidad cultural con la crítica de IMDb. ${
+      title={`Sofa Knowledge: ${score.toFixed(1)}% de afinidad cultural con la crítica de IMDb. ${
         difference !== undefined && difference !== null
           ? `Diferencia de criterio con IMDb: ${difference > 0 ? `+${difference.toFixed(1)}` : difference.toFixed(1)} puntos.`
           : ""
       }`}
     >
       <span className="font-mono font-bold tracking-tight">
-        🏀 {score.toFixed(0)}%
+        🛋️ {score.toFixed(0)}%
       </span>
       {showLabel && (
         <span className="text-[11px] opacity-90 hidden sm:inline-block border-l border-white/10 pl-1.5 ml-0.5">
