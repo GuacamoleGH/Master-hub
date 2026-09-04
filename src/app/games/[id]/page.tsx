@@ -17,12 +17,14 @@ import {
   Tv,
   Play,
   Layers,
+  ExternalLink,
 } from "lucide-react";
 import { GameDetail } from "@/types/game";
 import GameKnowledgeBadge from "@/components/games/GameKnowledgeBadge";
 import GameReviewModal from "@/components/games/GameReviewModal";
 import GamePoster from "@/components/games/GamePoster";
 import PlatformBadge from "@/components/games/PlatformBadge";
+import { getRawgUrl } from "@/lib/externalLinks";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -116,6 +118,8 @@ export default function GameDetailPage() {
     ? (game.metacritic / 10).toFixed(1)
     : null;
 
+  const rawgUrl = game ? getRawgUrl(game.slug, game.title, game.rawgId) : null;
+
   return (
     <div className="space-y-10 pb-16 animate-fade-in">
       {/* Botón Volver */}
@@ -141,9 +145,10 @@ export default function GameDetailPage() {
           </div>
         )}
 
+        {/* Contenido del Hero */}
         <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
-          {/* Carátula */}
-          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[16/10] sm:aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900">
+          {/* Portada Principal */}
+          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
@@ -156,9 +161,16 @@ export default function GameDetailPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 {game.metacritic && (
-                  <span className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black bg-purple-600 text-white border border-purple-400 shadow">
-                    Metacritic {game.metacritic}
-                  </span>
+                  <a
+                    href={rawgUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black bg-purple-600 hover:bg-purple-500 text-white border border-purple-400 shadow inline-flex items-center gap-1 transition-colors group cursor-pointer"
+                    title="Ver ficha en RAWG"
+                  >
+                    <span>Metacritic {game.metacritic}</span>
+                    <ExternalLink className="w-2.5 h-2.5 opacity-70 group-hover:opacity-100" />
+                  </a>
                 )}
                 {criticScore && (
                   <span className="text-xs text-cine-400 font-mono">
@@ -260,6 +272,24 @@ export default function GameDetailPage() {
                   ? "Modificar veredicto gamer"
                   : "Registrar partida"}
               </button>
+
+              {rawgUrl && (
+                <a
+                  href={rawgUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95"
+                  title="Abrir ficha oficial en RAWG"
+                >
+                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-white text-black leading-none tracking-tight">
+                    RAWG
+                  </span>
+                  <span className="font-semibold text-xs sm:text-sm">
+                    Ver en RAWG
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                </a>
+              )}
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getMovieDetail } from "@/lib/tmdb";
+import { getSeriesDetail } from "@/lib/tmdb";
 import { calculateBallKnowledge, calculateMovieXp } from "@/lib/ballKnowledge";
 
 async function refreshUserXp() {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status"); // 'WATCHLIST' | 'WATCHED'
   const genre = searchParams.get("genre");
-  const platform = searchParams.get("platform"); // 'Netflix' | 'HBO Max' | 'Prime Video' | 'Pirata' ...
+  const platform = searchParams.get("platform");
   const sort = searchParams.get("sort") || "recent";
   const ratingMin = searchParams.get("ratingMin");
   const ratingMax = searchParams.get("ratingMax");
@@ -59,10 +59,10 @@ export async function GET(request: NextRequest) {
     else if (sort === "watchedRecent") orderBy = { watchedDate: "desc" };
     else if (sort === "watchedOldest") orderBy = { watchedDate: "asc" };
 
-    const records = await prisma.userMovie.findMany({
+    const records = await prisma.userSeries.findMany({
       where: whereClause,
       include: {
-        movie: true,
+        series: true,
       },
       orderBy,
     });
@@ -72,17 +72,17 @@ export async function GET(request: NextRequest) {
       let genres: string[] = [];
       let streamingPlatforms: string[] = [];
       try {
-        genres = JSON.parse(r.movie.genres);
+        genres = JSON.parse(r.series.genres);
       } catch {}
       try {
-        if (r.movie.streamingPlatforms) {
-          streamingPlatforms = JSON.parse(r.movie.streamingPlatforms);
+        if (r.series.streamingPlatforms) {
+          streamingPlatforms = JSON.parse(r.series.streamingPlatforms);
         }
       } catch {}
 
       return {
         id: r.id,
-        movieId: r.movieId,
+        seriesId: r.seriesId,
         status: r.status,
         userRating: r.userRating,
         review: r.review,
@@ -91,18 +91,20 @@ export async function GET(request: NextRequest) {
         ballKnowledge: r.ballKnowledge,
         difference: r.difference,
         createdAt: r.createdAt.toISOString(),
-        movie: {
-          id: r.movie.id,
-          tmdbId: r.movie.tmdbId,
-          title: r.movie.title,
-          originalTitle: r.movie.originalTitle,
-          year: r.movie.year,
-          posterPath: r.movie.posterPath,
-          backdropPath: r.movie.backdropPath,
+        series: {
+          id: r.series.id,
+          tmdbId: r.series.tmdbId,
+          name: r.series.name,
+          originalName: r.series.originalName,
+          firstAirYear: r.series.firstAirYear,
+          lastAirYear: r.series.lastAirYear,
+          numberOfSeasons: r.series.numberOfSeasons,
+          numberOfEpisodes: r.series.numberOfEpisodes,
+          posterPath: r.series.posterPath,
+          backdropPath: r.series.backdropPath,
           genres,
-          runtime: r.movie.runtime,
-          director: r.movie.director,
-          imdbRating: r.movie.imdbRating,
+          creator: r.series.creator,
+          imdbRating: r.series.imdbRating,
           streamingPlatforms,
         },
       };
@@ -111,7 +113,7 @@ export async function GET(request: NextRequest) {
     // Filtrar por género si aplica
     if (genre && genre !== "all") {
       results = results.filter((item) =>
-        item.movie.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
+        item.series.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
       );
     }
 
@@ -119,14 +121,12 @@ export async function GET(request: NextRequest) {
     if (platform && platform !== "all") {
       const cleanPlat = platform.toLowerCase();
       results = results.filter((item) => {
-        // Coincide con la plataforma elegida por el usuario
         if (item.platform && item.platform.toLowerCase().includes(cleanPlat)) {
           return true;
         }
-        // O coincide con la plataforma disponible en la película
         if (
-          item.movie.streamingPlatforms &&
-          item.movie.streamingPlatforms.some((p) =>
+          item.series.streamingPlatforms &&
+          item.series.streamingPlatforms.some((p) =>
             p.toLowerCase().includes(cleanPlat),
           )
         ) {
@@ -136,26 +136,28 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Ordenamiento por campos de Movie si aplica
+    // Ordenamiento por campos de Series si aplica
     if (sort === "imdbRatingDesc") {
       results.sort(
-        (a, b) => (b.movie.imdbRating || 0) - (a.movie.imdbRating || 0),
+        (a, b) => (b.series.imdbRating || 0) - (a.series.imdbRating || 0),
       );
     } else if (sort === "imdbRatingAsc") {
       results.sort(
-        (a, b) => (a.movie.imdbRating || 0) - (b.movie.imdbRating || 0),
+        (a, b) => (a.series.imdbRating || 0) - (b.series.imdbRating || 0),
       );
     } else if (sort === "title") {
-      results.sort((a, b) => a.movie.title.localeCompare(b.movie.title));
+      results.sort((a, b) => a.series.name.localeCompare(b.series.name));
     } else if (sort === "yearDesc") {
-      results.sort((a, b) => (b.movie.year || 0) - (a.movie.year || 0));
+      results.sort(
+        (a, b) => (b.series.firstAirYear || 0) - (a.series.firstAirYear || 0),
+      );
     }
 
     return NextResponse.json({ items: results });
   } catch (error) {
-    console.error("Error en GET /api/user-movies:", error);
+    console.error("Error en GET /api/user-series:", error);
     return NextResponse.json(
-      { error: "Error al listar películas" },
+      { error: "Error al listar series del usuario" },
       { status: 500 },
     );
   }
@@ -180,34 +182,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Asegurar que la película existe en nuestra base de datos
-    let movie = await prisma.movie.findUnique({
+    // 1. Asegurar que la serie existe en nuestra base de datos
+    let series = await prisma.series.findUnique({
       where: { tmdbId: Number(tmdbId) },
     });
 
-    if (!movie) {
-      const detail = await getMovieDetail(Number(tmdbId));
+    if (!series) {
+      const detail = await getSeriesDetail(Number(tmdbId));
       if (!detail) {
         return NextResponse.json(
-          { error: "No se pudo obtener información de la película desde TMDB" },
+          { error: "No se pudo obtener información de la serie desde TMDB" },
           { status: 404 },
         );
       }
 
-      movie = await prisma.movie.create({
+      series = await prisma.series.create({
         data: {
           tmdbId: detail.tmdbId,
           imdbId: detail.imdbId,
-          title: detail.title,
-          originalTitle: detail.originalTitle,
-          year: detail.year,
+          name: detail.name,
+          originalName: detail.originalName,
+          firstAirYear: detail.firstAirYear,
+          lastAirYear: detail.lastAirYear,
+          numberOfSeasons: detail.numberOfSeasons,
+          numberOfEpisodes: detail.numberOfEpisodes,
+          seriesStatus: detail.seriesStatus,
           posterPath: detail.posterPath,
           backdropPath: detail.backdropPath,
           overview: detail.overview,
-          runtime: detail.runtime,
           genres: JSON.stringify(detail.genres),
-          director: detail.director,
-          directorImage: detail.directorImage,
+          creator: detail.creator,
+          creatorImage: detail.creatorImage,
           cast: JSON.stringify(detail.cast),
           imdbRating: detail.imdbRating,
           streamingPlatforms: JSON.stringify(
@@ -224,9 +229,9 @@ export async function POST(request: NextRequest) {
     if (
       status === "WATCHED" &&
       typeof userRating === "number" &&
-      typeof movie.imdbRating === "number"
+      typeof series.imdbRating === "number"
     ) {
-      const bkResult = calculateBallKnowledge(userRating, movie.imdbRating);
+      const bkResult = calculateBallKnowledge(userRating, series.imdbRating);
       ballKnowledge = bkResult.ballKnowledge;
       difference = bkResult.difference;
     }
@@ -237,9 +242,9 @@ export async function POST(request: NextRequest) {
         ? new Date()
         : null;
 
-    // 3. Upsert UserMovie con plataforma
-    const userMovie = await prisma.userMovie.upsert({
-      where: { movieId: movie.id },
+    // 3. Upsert UserSeries con plataforma
+    const userSeries = await prisma.userSeries.upsert({
+      where: { seriesId: series.id },
       update: {
         status,
         userRating: typeof userRating === "number" ? userRating : null,
@@ -250,7 +255,7 @@ export async function POST(request: NextRequest) {
         difference,
       },
       create: {
-        movieId: movie.id,
+        seriesId: series.id,
         status,
         userRating: typeof userRating === "number" ? userRating : null,
         review: review !== undefined ? review : null,
@@ -264,11 +269,11 @@ export async function POST(request: NextRequest) {
     // 4. Actualizar XP del perfil
     await refreshUserXp();
 
-    return NextResponse.json({ success: true, userMovie });
+    return NextResponse.json({ success: true, userSeries });
   } catch (error) {
-    console.error("Error en POST /api/user-movies:", error);
+    console.error("Error en POST /api/user-series:", error);
     return NextResponse.json(
-      { error: "Error al registrar la película" },
+      { error: "Error al registrar la serie" },
       { status: 500 },
     );
   }
@@ -276,17 +281,17 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const userMovieId = searchParams.get("id");
-  const movieId = searchParams.get("movieId");
+  const userSeriesId = searchParams.get("id");
+  const seriesId = searchParams.get("seriesId");
 
   try {
-    if (userMovieId) {
-      await prisma.userMovie.delete({ where: { id: userMovieId } });
-    } else if (movieId) {
-      await prisma.userMovie.deleteMany({ where: { movieId } });
+    if (userSeriesId) {
+      await prisma.userSeries.delete({ where: { id: userSeriesId } });
+    } else if (seriesId) {
+      await prisma.userSeries.deleteMany({ where: { seriesId } });
     } else {
       return NextResponse.json(
-        { error: "Falta parámetro id o movieId" },
+        { error: "Falta parámetro id o seriesId" },
         { status: 400 },
       );
     }
@@ -294,9 +299,9 @@ export async function DELETE(request: NextRequest) {
     await refreshUserXp();
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error en DELETE /api/user-movies:", error);
+    console.error("Error en DELETE /api/user-series:", error);
     return NextResponse.json(
-      { error: "Error al eliminar registro" },
+      { error: "Error al eliminar registro de serie" },
       { status: 500 },
     );
   }

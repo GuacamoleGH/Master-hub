@@ -2,16 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Clock, Star, Quote } from "lucide-react";
+import { Clock, Star, Quote, ExternalLink } from "lucide-react";
 import GameKnowledgeBadge from "./GameKnowledgeBadge";
 import GameReviewModal from "./GameReviewModal";
 import GamePoster from "./GamePoster";
 import PlatformBadge from "./PlatformBadge";
+import { getRawgUrl } from "@/lib/externalLinks";
 
 interface GameCardProps {
   game: {
     id: string;
     rawgId: number;
+    slug?: string | null;
     title: string;
     released?: string | null;
     backgroundImage?: string | null;
@@ -59,6 +61,8 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
     },
   };
 
+  const rawgUrl = getRawgUrl(game.slug, game.title, game.rawgId);
+
   return (
     <>
       <div className="group relative flex flex-col rounded-2xl overflow-hidden glass-card border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1 bg-cine-900/80 shadow-lg">
@@ -89,17 +93,33 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
             </div>
           )}
 
-          {/* Metacritic Badge */}
-          {game.metacritic && (
-            <div className="absolute top-2.5 right-2.5">
-              <span
-                className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 text-white border border-purple-400 shadow-md cursor-help"
-                title={`Puntuación de la crítica especializada en Metacritic: ${game.metacritic} / 100`}
+          {/* Metacritic & RAWG Badge */}
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
+            {game.metacritic && (
+              <a
+                href={rawgUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="px-2 py-0.5 rounded-lg text-[10px] font-mono font-black bg-purple-600/90 hover:bg-purple-500 text-white border border-purple-400 shadow-md transition-colors inline-flex items-center gap-1"
+                title={`Puntuación de la crítica especializada en Metacritic: ${game.metacritic} / 100 (Ver en RAWG)`}
               >
                 MC {game.metacritic}
-              </span>
-            </div>
-          )}
+              </a>
+            )}
+
+            <a
+              href={rawgUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="px-1.5 py-0.5 rounded-lg text-[10px] font-mono font-black bg-black/80 hover:bg-white text-white hover:text-black border border-white/20 shadow-md transition-all flex items-center gap-0.5"
+              title="Abrir ficha oficial en RAWG"
+            >
+              <span>RAWG</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
+          </div>
 
           {/* Horas Jugadas */}
           {userGame?.hoursPlayed !== null &&

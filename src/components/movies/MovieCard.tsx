@@ -2,16 +2,24 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Star, Bookmark, CheckCircle2, Quote } from "lucide-react";
+import {
+  Star,
+  Bookmark,
+  CheckCircle2,
+  Quote,
+  ExternalLink,
+} from "lucide-react";
 import BallKnowledgeBadge from "./BallKnowledgeBadge";
 import ReviewModal from "./ReviewModal";
 import MoviePoster from "./MoviePoster";
 import StreamingBadge from "./StreamingBadge";
+import { getImdbUrl } from "@/lib/externalLinks";
 
 interface MovieCardProps {
   movie: {
     id: string | number;
     tmdbId: number;
+    imdbId?: string | null;
     title: string;
     originalTitle?: string | null;
     year?: number | null;
@@ -103,19 +111,36 @@ export default function MovieCard({
           {/* Calificaciones superpuestas arriba */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10">
             {movie.imdbRating ? (
-              <div
-                className="flex items-center gap-1 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 shadow cursor-help"
-                title={`Nota media en IMDb: ${movie.imdbRating.toFixed(1)} / 10`}
+              <a
+                href={getImdbUrl(movie.imdbId, movie.title)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 bg-black/75 hover:bg-[#f5c518] hover:text-black transition-all backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 hover:border-amber-400 shadow group/imdb"
+                title={`Ver en IMDb (Nota: ${movie.imdbRating.toFixed(1)} / 10)`}
               >
-                <Star className="w-3 h-3 fill-amber-400" />
+                <Star className="w-3 h-3 fill-amber-400 group-hover/imdb:fill-black group-hover/imdb:text-black transition-colors" />
                 <span>{movie.imdbRating.toFixed(1)}</span>
-              </div>
+                <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover/imdb:opacity-100" />
+              </a>
             ) : (
               <div />
             )}
 
             {/* Acciones rápidas flotantes */}
             <div className="flex items-center gap-1">
+              <a
+                href={getImdbUrl(movie.imdbId, movie.title)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Abrir ficha oficial en IMDb"
+                className="px-1.5 py-1 rounded-lg backdrop-blur-md border border-amber-500/40 bg-black/70 hover:bg-[#f5c518] text-[#f5c518] hover:text-black font-black text-[10px] tracking-tight transition-all flex items-center gap-0.5 shadow"
+              >
+                <span>IMDb</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdating}

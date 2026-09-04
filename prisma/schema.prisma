@@ -59,6 +59,50 @@ model UserProfile {
 }
 
 // =======================
+// MODELOS DE SERIES DE TV
+// =======================
+
+model Series {
+  id                 String      @id @default(cuid())
+  tmdbId             Int         @unique
+  imdbId             String?
+  name               String
+  originalName       String?
+  firstAirYear       Int?
+  lastAirYear        Int?
+  numberOfSeasons    Int?
+  numberOfEpisodes   Int?
+  seriesStatus       String?     // "Returning Series", "Ended", etc.
+  posterPath         String?
+  backdropPath       String?
+  overview           String?
+  genres             String      // JSON array de strings
+  creator            String?
+  creatorImage       String?
+  cast               String      // JSON array de { id, name, character, profilePath }
+  imdbRating         Float?
+  streamingPlatforms String?    // JSON array de plataformas
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  userSeries         UserSeries?
+}
+
+model UserSeries {
+  id            String    @id @default(cuid())
+  seriesId      String    @unique
+  series        Series    @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  status        String    // "WATCHLIST" | "WATCHED"
+  userRating    Float?    // 0.0 a 10.0
+  review        String?
+  watchedDate   DateTime?
+  platform      String?   // "Netflix" | "HBO Max" | "Prime Video" | "Disney+" | "Pirata"
+  ballKnowledge Float?    // 0 a 100 percentage
+  difference    Float?    // userRating - imdbRating
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// =======================
 // MODELOS DE VIDEOJUEGOS
 // =======================
 

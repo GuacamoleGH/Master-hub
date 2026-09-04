@@ -19,6 +19,10 @@ export default function MoviePoster({
 }: MoviePosterProps) {
   const [hasError, setHasError] = useState(false);
 
+  React.useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
   if (!src || hasError) {
     return (
       <div className={fallbackClassName}>

@@ -1,5 +1,6 @@
 import { MovieSearchResult, MovieDetail, CastMember } from "@/types/movie";
-import { CURATED_MOVIES } from "./mockData";
+import { SeriesSearchResult, SeriesDetail } from "@/types/series";
+import { CURATED_MOVIES, CURATED_SERIES } from "./mockData";
 import { getImdbRating } from "./omdb";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
@@ -155,9 +156,9 @@ export async function getMovieDetail(
           ? `${TMDB_IMAGE_BASE}/w185${directorObj.profile_path}`
           : null;
 
-      // Principales actores (top 8)
+      // Principales actores (top 14)
       const cast: CastMember[] = (credits.cast || [])
-        .slice(0, 8)
+        .slice(0, 14)
         .map((c: any) => ({
           id: c.id,
           name: c.name,
@@ -227,6 +228,195 @@ export async function getMovieDetail(
       directorImage: local.directorImage,
       cast: local.cast.map((c, idx) => ({ id: idx + 1, ...c })),
       imdbRating: local.imdbRating,
+      streamingPlatforms: local.streamingPlatforms || ["Pirata / Stremio"],
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Busca series por texto en TMDB con fallback local
+ */
+export async function searchSeries(
+  query: string,
+): Promise<SeriesSearchResult[]> {
+  if (!query || query.trim().length === 0) return [];
+
+  const cleanQuery = query.trim().toLowerCase();
+
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/search/tv?query=${encodeURIComponent(query)}&language=es-ES&include_adult=false${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 3600 },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.results && Array.isArray(data.results)) {
+        return data.results.slice(0, 15).map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          originalName: item.original_name,
+          firstAirYear: item.first_air_date
+            ? parseInt(item.first_air_date.substring(0, 4), 10)
+            : undefined,
+          posterPath: item.poster_path
+            ? `${TMDB_IMAGE_BASE}/w500${item.poster_path}`
+            : null,
+          backdropPath: item.backdrop_path
+            ? `${TMDB_IMAGE_BASE}/original${item.backdrop_path}`
+            : null,
+          overview: item.overview || "",
+          voteAverage: Number((item.vote_average || 0).toFixed(1)),
+        }));
+      }
+    }
+  } catch (error) {
+    console.error("Error al consultar TMDB Series Search API:", error);
+  }
+
+  // Fallback: búsqueda en el catálogo curado local de series
+  const localMatches = CURATED_SERIES.filter(
+    (s) =>
+      s.name.toLowerCase().includes(cleanQuery) ||
+      (s.originalName
+        ? s.originalName.toLowerCase().includes(cleanQuery)
+        : false),
+  );
+
+  return localMatches.map((item) => ({
+    id: item.tmdbId,
+    name: item.name,
+    originalName: item.originalName || undefined,
+    firstAirYear: item.firstAirYear || undefined,
+    posterPath: item.posterPath || null,
+    backdropPath: item.backdropPath || null,
+    overview: item.overview || "",
+    voteAverage: item.imdbRating || 0,
+  }));
+}
+
+/**
+ * Obtiene los detalles completos de una serie por su ID de TMDB incluyendo streaming providers
+ */
+export async function getSeriesDetail(
+  tmdbId: number,
+): Promise<SeriesDetail | null> {
+  try {
+    const apiKeyParam = getApiKeyParam();
+    const url = `${TMDB_BASE_URL}/tv/${tmdbId}?language=es-ES&append_to_response=credits,external_ids,watch/providers${apiKeyParam ? `&${apiKeyParam}` : ""}`;
+
+    const res = await fetch(url, {
+      headers: getHeaders(),
+      next: { revalidate: 86400 },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const credits = data.credits || {};
+      const externalIds = data.external_ids || {};
+      const watchProviders = data["watch/providers"] || {};
+
+      // Creador
+      const creator = data.created_by?.[0]?.name || null;
+      const creatorImage = data.created_by?.[0]?.profile_path
+        ? `${TMDB_IMAGE_BASE}/w185${data.created_by[0].profile_path}`
+        : null;
+
+      // Principales actores (top 14)
+      const cast: CastMember[] = (credits.cast || [])
+        .slice(0, 14)
+        .map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          character: c.character,
+          profilePath: c.profile_path
+            ? `${TMDB_IMAGE_BASE}/w185${c.profile_path}`
+            : null,
+        }));
+
+      const genres = (data.genres || []).map((g: any) => g.name);
+      const imdbId = externalIds.imdb_id || null;
+      const tmdbRating = data.vote_average
+        ? Number(data.vote_average.toFixed(1))
+        : null;
+
+      // Plataformas de streaming
+      const streamingPlatforms = extractStreamingPlatforms(watchProviders);
+
+      // Obtener rating de IMDb vía OMDb con fallback a TMDB
+      const imdbRating = await getImdbRating(imdbId, tmdbRating);
+
+      let seriesStatus = data.status || null;
+      if (seriesStatus === "Ended") seriesStatus = "Finalizada";
+      else if (seriesStatus === "Returning Series") seriesStatus = "En emisión";
+      else if (seriesStatus === "Canceled") seriesStatus = "Cancelada";
+
+      return {
+        id: String(data.id),
+        tmdbId: data.id,
+        imdbId,
+        name: data.name,
+        originalName: data.original_name || null,
+        firstAirYear: data.first_air_date
+          ? parseInt(data.first_air_date.substring(0, 4), 10)
+          : null,
+        lastAirYear: data.last_air_date
+          ? parseInt(data.last_air_date.substring(0, 4), 10)
+          : null,
+        numberOfSeasons: data.number_of_seasons || null,
+        numberOfEpisodes: data.number_of_episodes || null,
+        seriesStatus,
+        posterPath: data.poster_path
+          ? `${TMDB_IMAGE_BASE}/w500${data.poster_path}`
+          : null,
+        backdropPath: data.backdrop_path
+          ? `${TMDB_IMAGE_BASE}/original${data.backdrop_path}`
+          : null,
+        overview: data.overview || null,
+        genres,
+        creator,
+        creatorImage,
+        cast,
+        imdbRating,
+        streamingPlatforms,
+      };
+    }
+  } catch (error) {
+    console.error("Error al obtener detalle de serie en TMDB:", error);
+  }
+
+  // Fallback: buscar en catálogo curado
+  const local = CURATED_SERIES.find((s) => s.tmdbId === tmdbId);
+  if (local) {
+    return {
+      id: String(local.tmdbId),
+      tmdbId: local.tmdbId,
+      imdbId: local.imdbId || null,
+      name: local.name,
+      originalName: local.originalName || null,
+      firstAirYear: local.firstAirYear || null,
+      lastAirYear: local.lastAirYear || null,
+      numberOfSeasons: local.numberOfSeasons || null,
+      numberOfEpisodes: local.numberOfEpisodes || null,
+      seriesStatus: local.seriesStatus || null,
+      posterPath: local.posterPath || null,
+      backdropPath: local.backdropPath || null,
+      overview: local.overview || null,
+      genres: local.genres,
+      creator: local.creator || null,
+      creatorImage: local.creatorImage || null,
+      cast: local.cast.map((c, idx) => ({
+        id: idx + 1,
+        name: c.name,
+        character: c.character,
+        profilePath: c.profilePath || null,
+      })),
+      imdbRating: local.imdbRating || null,
       streamingPlatforms: local.streamingPlatforms || ["Pirata / Stremio"],
     };
   }

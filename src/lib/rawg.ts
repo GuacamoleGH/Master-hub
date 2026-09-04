@@ -39,6 +39,7 @@ export async function searchGames(query: string): Promise<GameSearchResult[]> {
         metacritic: item.metacritic || null,
         platforms,
         genres,
+        slug: item.slug || null,
       };
     });
   } catch (error) {
@@ -126,6 +127,7 @@ export async function getGameDetail(
       description: data.description_raw || data.description || null,
       screenshots,
       trailerUrl,
+      slug: data.slug || null,
     };
   } catch (error) {
     console.error("Error al obtener detalle de juego en RAWG:", error);
