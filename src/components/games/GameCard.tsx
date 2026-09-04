@@ -26,6 +26,7 @@ interface GameCardProps {
     userRating?: number | null;
     hoursPlayed?: number | null;
     platform?: string | null;
+    platformDetails?: any;
     review?: string | null;
     gameKnowledge?: number | null;
     difference?: number | null;
@@ -128,7 +129,26 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
               <div className="absolute bottom-2.5 left-2.5">
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-cine-950/80 text-cyan-300 border border-cyan-500/30 backdrop-blur-md cursor-help"
-                  title={`Tiempo total dedicado: ${userGame.hoursPlayed} horas`}
+                  title={(() => {
+                    let desc = `Tiempo total dedicado: ${userGame.hoursPlayed} horas`;
+                    if (userGame.platformDetails) {
+                      try {
+                        const parsed =
+                          typeof userGame.platformDetails === "string"
+                            ? JSON.parse(userGame.platformDetails)
+                            : userGame.platformDetails;
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                          desc +=
+                            " (" +
+                            parsed
+                              .map((p: any) => `${p.platform}: ${p.hours}h`)
+                              .join(" · ") +
+                            ")";
+                        }
+                      } catch {}
+                    }
+                    return desc;
+                  })()}
                 >
                   <Clock className="w-2.5 h-2.5 text-cyan-400" />
                   {userGame.hoursPlayed}h
@@ -236,6 +256,7 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
         initialRating={userGame?.userRating}
         initialHours={userGame?.hoursPlayed}
         initialPlatform={userGame?.platform}
+        initialPlatformDetails={userGame?.platformDetails}
         initialReview={userGame?.review}
       />
     </>

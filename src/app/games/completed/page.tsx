@@ -241,6 +241,7 @@ export default function GamerCompletedPage() {
                 review: item.review,
                 gameKnowledge: item.gameKnowledge,
                 difference: item.difference,
+                platformDetails: item.platformDetails,
               }}
               onUpdate={fetchCompleted}
             />

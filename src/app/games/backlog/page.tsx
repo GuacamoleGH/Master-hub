@@ -193,6 +193,7 @@ export default function GamerBacklogPage() {
               userGame={{
                 status: "BACKLOG",
                 platform: item.platform,
+                platformDetails: item.platformDetails,
               }}
               onUpdate={fetchBacklog}
             />

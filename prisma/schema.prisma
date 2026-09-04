@@ -132,9 +132,10 @@ model UserGame {
   game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
   status        String    // "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED"
   userRating    Float?    // 0.0 a 10.0
-  hoursPlayed   Float?    // Horas registradas (ej. 127)
-  platform      String?   // Plataforma donde lo jugó (ej. "PC", "PS5", "Switch")
-  review        String?
+  hoursPlayed     Float?    // Horas registradas (ej. 127)
+  platform        String?   // Plataforma donde lo jugó (ej. "PC", "PS5", "Switch")
+  platformDetails String?   // JSON array de { platform, hours, status }
+  review          String?
   completedDate DateTime?
   gameKnowledge Float?    // 0 a 100 percentage
   difference    Float?    // userRating - (metacritic / 10)

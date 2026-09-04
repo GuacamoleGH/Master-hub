@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Award,
   Compass,
+  Tv,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -79,10 +80,45 @@ export default async function GamerHomePage() {
         ).toFixed(1)
       : null;
 
+  const platformHoursMap: Record<string, { hours: number; games: number }> = {};
+
   for (const ug of allUserGames) {
     if (ug.hoursPlayed) totalHours += ug.hoursPlayed;
     if (ug.status === "COMPLETED" || ug.status === "PLATINUM") totalCompleted++;
+
+    // Desglose de horas por plataforma
+    let parsed: any[] = [];
+    if (ug.platformDetails) {
+      try {
+        parsed = JSON.parse(ug.platformDetails);
+      } catch {}
+    }
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      for (const p of parsed) {
+        const plat = p.platform || "General";
+        const h = Number(p.hours) || 0;
+        if (!platformHoursMap[plat]) platformHoursMap[plat] = { hours: 0, games: 0 };
+        platformHoursMap[plat].hours += h;
+        platformHoursMap[plat].games += 1;
+      }
+    } else if (ug.platform) {
+      const individualPlats = ug.platform.split(",").map((p) => p.trim()).filter(Boolean);
+      for (const p of individualPlats) {
+        if (!platformHoursMap[p]) platformHoursMap[p] = { hours: 0, games: 0 };
+        platformHoursMap[p].hours += (ug.hoursPlayed || 0);
+        platformHoursMap[p].games += 1;
+      }
+    }
   }
+
+  const topPlatforms = Object.entries(platformHoursMap)
+    .map(([platform, data]) => ({
+      platform,
+      hours: Math.round(data.hours),
+      games: data.games,
+    }))
+    .sort((a, b) => b.hours - a.hours)
+    .slice(0, 6);
 
   // 6. Catálogo general para explorar (juegos no registrados o catálogo aclamado)
   let exploreGames = await prisma.game.findMany({
@@ -128,6 +164,7 @@ export default async function GamerHomePage() {
             review: game.userGame.review,
             gameKnowledge: game.userGame.gameKnowledge,
             difference: game.userGame.difference,
+            platformDetails: game.userGame.platformDetails,
           }
         : null,
     };
@@ -238,6 +275,63 @@ export default async function GamerHomePage() {
         </div>
       </section>
 
+      {/* Horas por Plataforma Destacadas */}
+      {topPlatforms.length > 0 && (
+        <section className="glass-panel p-6 rounded-3xl border border-purple-500/20 bg-gradient-to-br from-cine-950 via-cine-900/60 to-purple-950/20 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-cine-800 pb-3">
+            <div className="flex items-center gap-2">
+              <Tv className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-lg font-bold text-white tracking-wide">
+                Horas por Plataforma
+              </h2>
+            </div>
+            <span className="text-xs text-cine-400">
+              Desglose acumulado de tu tiempo de juego
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {topPlatforms.map((item, idx) => {
+              const maxHours = topPlatforms[0]?.hours || 1;
+              const percent = Math.min(
+                100,
+                Math.round((item.hours / maxHours) * 100),
+              );
+              return (
+                <div
+                  key={item.platform}
+                  className="p-4 rounded-2xl bg-cine-900/80 border border-cine-800 hover:border-purple-500/40 transition-all space-y-2.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-white truncate max-w-[170px]">
+                      {idx === 0 ? "👑 " : ""}
+                      {item.platform}
+                    </span>
+                    <span className="text-xs font-mono font-black text-cyan-300">
+                      {item.hours}h
+                    </span>
+                  </div>
+
+                  <div className="w-full h-2 bg-cine-950 rounded-full overflow-hidden border border-white/5">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full transition-all duration-500"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-cine-400 font-medium">
+                    <span>{item.games} título(s) registrado(s)</span>
+                    <span className="font-mono text-purple-300">
+                      {item.hours > 0 ? `${percent}% del líder` : "0h"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Jugando Actualmente (Si hay títulos activos) */}
       {playingRecords.length > 0 && (
         <section className="space-y-4">
@@ -270,6 +364,7 @@ export default async function GamerHomePage() {
                     status: "PLAYING",
                     hoursPlayed: item.hoursPlayed,
                     platform: item.platform,
+                    platformDetails: item.platformDetails,
                   }}
                 />
               );
@@ -323,6 +418,7 @@ export default async function GamerHomePage() {
                     review: item.review,
                     gameKnowledge: item.gameKnowledge,
                     difference: item.difference,
+                    platformDetails: item.platformDetails,
                   }}
                 />
               );
@@ -371,6 +467,7 @@ export default async function GamerHomePage() {
                   userGame={{
                     status: "BACKLOG",
                     platform: item.platform,
+                    platformDetails: item.platformDetails,
                   }}
                 />
               );
