@@ -405,7 +405,9 @@ export default function GameDetailPage() {
                 ? game.userGame.platformDetails
                 : (() => {
                     try {
-                      return JSON.parse(game.userGame.platformDetails as string);
+                      return JSON.parse(
+                        game.userGame.platformDetails as string,
+                      );
                     } catch {
                       return [];
                     }
@@ -418,7 +420,8 @@ export default function GameDetailPage() {
               <div className="pt-4 border-t border-cine-800/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-cine-300 flex items-center gap-1.5 uppercase tracking-wider">
-                    <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Desglose por Plataforma
+                    <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />{" "}
+                    Desglose por Plataforma
                   </span>
                   <span className="text-xs font-mono text-cyan-400 font-bold bg-cyan-950/60 px-2.5 py-0.5 rounded-lg border border-cyan-500/30">
                     {game.userGame.hoursPlayed || 0} h totales dedicadas

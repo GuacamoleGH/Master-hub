@@ -75,40 +75,40 @@ export async function GET(request: NextRequest) {
         if (r.game.developers) developers = JSON.parse(r.game.developers);
       } catch {}
 
-        let parsedPlatformDetails = null;
-        if (r.platformDetails) {
-          try {
-            parsedPlatformDetails = JSON.parse(r.platformDetails);
-          } catch {}
-        }
+      let parsedPlatformDetails = null;
+      if (r.platformDetails) {
+        try {
+          parsedPlatformDetails = JSON.parse(r.platformDetails);
+        } catch {}
+      }
 
-        return {
-          id: r.id,
-          gameId: r.gameId,
-          status: r.status,
-          userRating: r.userRating,
-          hoursPlayed: r.hoursPlayed,
-          platform: r.platform,
-          platformDetails: parsedPlatformDetails,
-          review: r.review,
-          completedDate: r.completedDate ? r.completedDate.toISOString() : null,
-          gameKnowledge: r.gameKnowledge,
-          difference: r.difference,
-          createdAt: r.createdAt.toISOString(),
-          game: {
-            id: r.game.id,
-            rawgId: r.game.rawgId,
-            title: r.game.title,
-            released: r.game.released,
-            backgroundImage: r.game.backgroundImage,
-            metacritic: r.game.metacritic,
-            rating: r.game.rating,
-            genres,
-            platforms,
-            developers,
-          },
-        };
-      });
+      return {
+        id: r.id,
+        gameId: r.gameId,
+        status: r.status,
+        userRating: r.userRating,
+        hoursPlayed: r.hoursPlayed,
+        platform: r.platform,
+        platformDetails: parsedPlatformDetails,
+        review: r.review,
+        completedDate: r.completedDate ? r.completedDate.toISOString() : null,
+        gameKnowledge: r.gameKnowledge,
+        difference: r.difference,
+        createdAt: r.createdAt.toISOString(),
+        game: {
+          id: r.game.id,
+          rawgId: r.game.rawgId,
+          title: r.game.title,
+          released: r.game.released,
+          backgroundImage: r.game.backgroundImage,
+          metacritic: r.game.metacritic,
+          rating: r.game.rating,
+          genres,
+          platforms,
+          developers,
+        },
+      };
+    });
 
     if (genre && genre !== "all") {
       results = results.filter((item) =>
@@ -222,14 +222,24 @@ export async function POST(request: NextRequest) {
         serializedPlatformDetails = platformDetails;
         try {
           const parsed = JSON.parse(platformDetails);
-          if (Array.isArray(parsed) && parsed.length > 0 && finalHoursPlayed === null) {
-            finalHoursPlayed = parsed.reduce((acc: number, p: any) => acc + (Number(p.hours) || 0), 0);
+          if (
+            Array.isArray(parsed) &&
+            parsed.length > 0 &&
+            finalHoursPlayed === null
+          ) {
+            finalHoursPlayed = parsed.reduce(
+              (acc: number, p: any) => acc + (Number(p.hours) || 0),
+              0,
+            );
           }
         } catch {}
       } else if (Array.isArray(platformDetails)) {
         serializedPlatformDetails = JSON.stringify(platformDetails);
         if (finalHoursPlayed === null && platformDetails.length > 0) {
-          finalHoursPlayed = platformDetails.reduce((acc: number, p: any) => acc + (Number(p.hours) || 0), 0);
+          finalHoursPlayed = platformDetails.reduce(
+            (acc: number, p: any) => acc + (Number(p.hours) || 0),
+            0,
+          );
         }
       }
     }
@@ -242,7 +252,10 @@ export async function POST(request: NextRequest) {
         userRating: typeof userRating === "number" ? userRating : null,
         hoursPlayed: finalHoursPlayed,
         platform: platform !== undefined ? platform : undefined,
-        platformDetails: serializedPlatformDetails !== null ? serializedPlatformDetails : undefined,
+        platformDetails:
+          serializedPlatformDetails !== null
+            ? serializedPlatformDetails
+            : undefined,
         review: review !== undefined ? review : null,
         completedDate: dateToSave,
         gameKnowledge,

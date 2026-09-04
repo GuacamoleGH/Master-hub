@@ -83,19 +83,27 @@ export async function GET() {
       const gameHours = ug.hoursPlayed || 0;
 
       // Mapear horas por plataforma individual utilizando platformDetails si está disponible
-      let parsedProgress: { platform: string; hours: number; status: string }[] | null = null;
+      let parsedProgress:
+        | { platform: string; hours: number; status: string }[]
+        | null = null;
       if (ug.platformDetails) {
         try {
           parsedProgress = JSON.parse(ug.platformDetails);
         } catch {}
       }
 
-      if (parsedProgress && Array.isArray(parsedProgress) && parsedProgress.length > 0) {
+      if (
+        parsedProgress &&
+        Array.isArray(parsedProgress) &&
+        parsedProgress.length > 0
+      ) {
         for (const prog of parsedProgress) {
           const platName = prog.platform || "General";
           const progHours = Number(prog.hours) || 0;
-          platformHoursMap[platName] = (platformHoursMap[platName] || 0) + progHours;
-          platformGamesCountMap[platName] = (platformGamesCountMap[platName] || 0) + 1;
+          platformHoursMap[platName] =
+            (platformHoursMap[platName] || 0) + progHours;
+          platformGamesCountMap[platName] =
+            (platformGamesCountMap[platName] || 0) + 1;
         }
       } else {
         const rawPlatform = ug.platform || "General";

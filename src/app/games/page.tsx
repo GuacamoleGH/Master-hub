@@ -97,15 +97,19 @@ export default async function GamerHomePage() {
       for (const p of parsed) {
         const plat = p.platform || "General";
         const h = Number(p.hours) || 0;
-        if (!platformHoursMap[plat]) platformHoursMap[plat] = { hours: 0, games: 0 };
+        if (!platformHoursMap[plat])
+          platformHoursMap[plat] = { hours: 0, games: 0 };
         platformHoursMap[plat].hours += h;
         platformHoursMap[plat].games += 1;
       }
     } else if (ug.platform) {
-      const individualPlats = ug.platform.split(",").map((p) => p.trim()).filter(Boolean);
+      const individualPlats = ug.platform
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
       for (const p of individualPlats) {
         if (!platformHoursMap[p]) platformHoursMap[p] = { hours: 0, games: 0 };
-        platformHoursMap[p].hours += (ug.hoursPlayed || 0);
+        platformHoursMap[p].hours += ug.hoursPlayed || 0;
         platformHoursMap[p].games += 1;
       }
     }
