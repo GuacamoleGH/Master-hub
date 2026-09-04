@@ -109,7 +109,7 @@ export default function WatchedPage() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-cine-400 mt-1">
-            Historial de visionados, plataformas y contrastes de Ball Knowledge.
+            Historial de visionados, plataformas y contrastes de Sofa Knowledge.
           </p>
         </div>
 
@@ -241,10 +241,10 @@ export default function WatchedPage() {
               Mi nota más baja
             </option>
             <option value="bkDesc" className="bg-cine-900 text-white">
-              Mayor Ball Knowledge
+              Mayor Sofa Knowledge
             </option>
             <option value="bkAsc" className="bg-cine-900 text-white">
-              Menor Ball Knowledge
+              Menor Sofa Knowledge
             </option>
             <option value="title" className="bg-cine-900 text-white">
               Título alfabético

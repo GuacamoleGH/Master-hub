@@ -193,10 +193,10 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Sello Gigante de Ball Knowledge Global */}
+          {/* Sello Gigante de Sofa Knowledge Global */}
           <div className="glass-card p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-cine-950/80 flex flex-col items-center text-center gap-1 shadow-gold-glow w-full sm:w-auto">
             <span className="text-[11px] uppercase font-bold tracking-widest text-amber-400 flex items-center gap-1">
-              🏀 BALL KNOWLEDGE SCORE
+              🛋️ SOFA KNOWLEDGE SCORE
             </span>
             <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
               {stats.globalBallKnowledge !== null
@@ -330,14 +330,14 @@ export default function ProfilePage() {
 
           <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🏀
+              🛋️
             </div>
             <div>
               <div className="text-xs text-cine-400 font-medium">
                 Precisión comunitaria
               </div>
               <div className="text-sm font-bold text-white">
-                Ball Knowledge global:{" "}
+                Sofa Knowledge global:{" "}
                 <span className="text-emerald-400 font-mono">
                   {stats.globalBallKnowledge !== null
                     ? `${stats.globalBallKnowledge}%`

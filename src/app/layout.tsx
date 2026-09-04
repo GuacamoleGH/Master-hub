@@ -6,7 +6,7 @@ import DynamicFooter from "@/components/DynamicFooter";
 export const metadata: Metadata = {
   title: "Cinephile & Gamer Hub",
   description:
-    "Centro de mando personal para cine y videojuegos con Ball Knowledge y Game Knowledge.",
+    "Centro de mando personal para cine y videojuegos con Sofa Knowledge y Game Knowledge.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

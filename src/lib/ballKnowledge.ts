@@ -23,10 +23,10 @@ export const RANKS: CinephileRank[] = [
     color: "#A855F7", // purple
   },
   {
-    title: "Ball Knowledge Merchant",
+    title: "Sofa Knowledge Merchant",
     minLevel: 31,
     maxLevel: 50,
-    icon: "🏀",
+    icon: "🛋️",
     color: "#F59E0B", // amber
   },
   {
