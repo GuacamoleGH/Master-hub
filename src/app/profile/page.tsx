@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
+  LogIn,
   User,
   Film,
   Star,
@@ -579,46 +580,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* 6. Gestión de Datos y Reinicio (Wipeout) */}
-      <section className="glass-panel p-6 rounded-3xl border border-cine-800 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-bold text-white">
-              Gestión de la Base de Datos Local
-            </h3>
-            <p className="text-xs text-cine-400 mt-0.5">
-              Control total sobre tus datos locales almacenados en SQLite
-              (`dev.db`).
-            </p>
-          </div>
-        </div>
-
-        {adminMsg && (
-          <div className="p-3 bg-emerald-950/70 border border-emerald-800/80 rounded-xl text-emerald-300 text-xs font-semibold">
-            {adminMsg}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            onClick={() => handleAdminAction("wipe")}
-            disabled={isActionLoading}
-            className="px-4 py-2 bg-red-950/60 hover:bg-red-900/80 border border-red-800/80 text-red-300 font-semibold rounded-xl text-xs transition-colors flex items-center gap-2"
-          >
-            <Trash2 className="w-3.5 h-3.5" /> Vaciar mis datos (Comenzar desde
-            cero)
-          </button>
-
-          <button
-            onClick={() => handleAdminAction("seed")}
-            disabled={isActionLoading}
-            className="px-4 py-2 bg-cine-900 hover:bg-cine-800 border border-cine-700 text-cine-200 font-semibold rounded-xl text-xs transition-colors flex items-center gap-2"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Recargar catálogo de
-            demostración
-          </button>
-        </div>
-      </section>
+      
     </div>
   );
 }

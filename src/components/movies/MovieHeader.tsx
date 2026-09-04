@@ -21,7 +21,7 @@ import MovieSearchInput from "./MovieSearchInput";
 
 export default function Header() {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -99,14 +99,12 @@ export default function Header() {
 
           <div className="w-px h-5 bg-cine-800 mx-1" />
 
-          {/* Menú de Usuario / Login */}
-          {status === "loading" ? (
-            <div className="w-8 h-8 rounded-xl bg-cine-800/60 animate-pulse" />
-          ) : session?.user ? (
+          {/* Menú de Usuario / Botones Login */}
+          {session?.user ? (
             <div className="relative">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-cine-900/80 hover:bg-cine-800 border border-amber-500/30 hover:border-amber-500/60 transition-colors"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-cine-900/80 hover:bg-cine-800 border border-amber-500/30 hover:border-amber-500/60 transition-colors shadow-sm"
               >
                 {session.user.image ? (
                   <img
@@ -157,13 +155,21 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 shadow-gold-glow transition-all"
-            >
-              <LogIn className="w-3.5 h-3.5 text-amber-400" />
-              <span>Entrar</span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-cine-950 bg-amber-400 hover:bg-amber-300 shadow-gold-glow transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Iniciar Sesión</span>
+              </Link>
+              <Link
+                href="/register"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 transition-all"
+              >
+                <span>Registro</span>
+              </Link>
+            </div>
           )}
         </nav>
 
@@ -190,7 +196,7 @@ export default function Header() {
       {/* Menú desplegable móvil */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-cine-800 bg-cine-950/95 px-4 py-3 space-y-1">
-          {session?.user && (
+          {session?.user ? (
             <div className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900 border border-cine-800 mb-2">
               <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
                 {(session.user.name || session.user.username || "U")[0].toUpperCase()}
@@ -203,6 +209,20 @@ export default function Header() {
                   {session.user.email}
                 </p>
               </div>
+            </div>
+          ) : (
+            <div className="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/30 mb-2 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-white">Modo Invitado</p>
+                <p className="text-[10px] text-cine-400">Inicia sesión para guardar tus valoraciones</p>
+              </div>
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-3 py-1.5 rounded-xl bg-amber-400 text-cine-950 text-xs font-bold"
+              >
+                Entrar
+              </Link>
             </div>
           )}
 
@@ -239,14 +259,22 @@ export default function Header() {
                 <span>Cerrar Sesión</span>
               </button>
             ) : (
-              <Link
-                href="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-amber-400 hover:bg-cine-900"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Iniciar Sesión / Registrarse</span>
-              </Link>
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-2 text-center rounded-xl text-xs font-bold bg-amber-400 text-cine-950 shadow-gold-glow"
+                >
+                  Iniciar Sesión
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-2 text-center rounded-xl text-xs font-semibold bg-cine-900 border border-cine-800 text-amber-300"
+                >
+                  Registrarse
+                </Link>
+              </div>
             )}
 
             <Link
