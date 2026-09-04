@@ -10,6 +10,12 @@ export interface GameSearchResult {
   slug?: string | null;
 }
 
+export interface PlatformProgress {
+  platform: string;
+  hours: number;
+  status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+}
+
 export interface GameDetail {
   id: string; // ID interno o string de rawgId
   rawgId: number;
@@ -32,6 +38,7 @@ export interface GameDetail {
     userRating: number | null;
     hoursPlayed: number | null;
     platform: string | null;
+    platformDetails?: PlatformProgress[] | string | null;
     review: string | null;
     completedDate: string | null;
     gameKnowledge: number | null;
@@ -46,6 +53,7 @@ export interface UserGameItem {
   userRating: number | null;
   hoursPlayed: number | null;
   platform: string | null;
+  platformDetails?: PlatformProgress[] | string | null;
   review: string | null;
   completedDate: string | null;
   gameKnowledge: number | null;
@@ -112,7 +120,7 @@ export interface GamerStats {
     criticRating: number;
     gameKnowledge: number;
   }[];
-  hoursByPlatform: { platform: string; hours: number }[];
+  hoursByPlatform: { platform: string; hours: number; gameCount?: number; percentage?: number }[];
   hoursByGenre: { genre: string; hours: number }[];
   ratingDistribution: { rating: number; count: number }[];
 }

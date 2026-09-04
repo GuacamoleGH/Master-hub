@@ -398,6 +398,68 @@ export default function GameDetailPage() {
             </div>
           </div>
 
+          {/* Desglose Multi-Plataforma si existe */}
+          {(() => {
+            const platformProgress: any[] = game.userGame?.platformDetails
+              ? Array.isArray(game.userGame.platformDetails)
+                ? game.userGame.platformDetails
+                : (() => {
+                    try {
+                      return JSON.parse(game.userGame.platformDetails as string);
+                    } catch {
+                      return [];
+                    }
+                  })()
+              : [];
+
+            if (!platformProgress || platformProgress.length === 0) return null;
+
+            return (
+              <div className="pt-4 border-t border-cine-800/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-cine-300 flex items-center gap-1.5 uppercase tracking-wider">
+                    <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Desglose por Plataforma
+                  </span>
+                  <span className="text-xs font-mono text-cyan-400 font-bold bg-cyan-950/60 px-2.5 py-0.5 rounded-lg border border-cyan-500/30">
+                    {game.userGame.hoursPlayed || 0} h totales dedicadas
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {platformProgress.map((item) => (
+                    <div
+                      key={item.platform}
+                      className="p-3.5 rounded-2xl bg-cine-950/80 border border-purple-500/20 flex flex-col justify-between gap-2.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-mono font-bold text-white truncate">
+                          {item.platform}
+                        </span>
+                        <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-md border border-cyan-500/20">
+                          {item.hours} h
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-cine-800/60">
+                        <span className="text-cine-500">Estado:</span>
+                        <span className="font-semibold text-purple-300">
+                          {item.status === "COMPLETED"
+                            ? "🏆 Completado"
+                            : item.status === "PLATINUM"
+                              ? "👑 100% Platino"
+                              : item.status === "PLAYING"
+                                ? "🕹️ Jugando Ahora"
+                                : item.status === "BACKLOG"
+                                  ? "📥 Backlog"
+                                  : "💀 Abandonado"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Reseña Completa */}
           {game.userGame.review && (
             <div className="pt-4 border-t border-cine-800/80">
@@ -488,6 +550,7 @@ export default function GameDetailPage() {
         initialRating={game.userGame?.userRating}
         initialHours={game.userGame?.hoursPlayed}
         initialPlatform={game.userGame?.platform}
+        initialPlatformDetails={game.userGame?.platformDetails}
         initialReview={game.userGame?.review}
       />
     </div>

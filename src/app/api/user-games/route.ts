@@ -75,32 +75,40 @@ export async function GET(request: NextRequest) {
         if (r.game.developers) developers = JSON.parse(r.game.developers);
       } catch {}
 
-      return {
-        id: r.id,
-        gameId: r.gameId,
-        status: r.status,
-        userRating: r.userRating,
-        hoursPlayed: r.hoursPlayed,
-        platform: r.platform,
-        review: r.review,
-        completedDate: r.completedDate ? r.completedDate.toISOString() : null,
-        gameKnowledge: r.gameKnowledge,
-        difference: r.difference,
-        createdAt: r.createdAt.toISOString(),
-        game: {
-          id: r.game.id,
-          rawgId: r.game.rawgId,
-          title: r.game.title,
-          released: r.game.released,
-          backgroundImage: r.game.backgroundImage,
-          metacritic: r.game.metacritic,
-          rating: r.game.rating,
-          genres,
-          platforms,
-          developers,
-        },
-      };
-    });
+        let parsedPlatformDetails = null;
+        if (r.platformDetails) {
+          try {
+            parsedPlatformDetails = JSON.parse(r.platformDetails);
+          } catch {}
+        }
+
+        return {
+          id: r.id,
+          gameId: r.gameId,
+          status: r.status,
+          userRating: r.userRating,
+          hoursPlayed: r.hoursPlayed,
+          platform: r.platform,
+          platformDetails: parsedPlatformDetails,
+          review: r.review,
+          completedDate: r.completedDate ? r.completedDate.toISOString() : null,
+          gameKnowledge: r.gameKnowledge,
+          difference: r.difference,
+          createdAt: r.createdAt.toISOString(),
+          game: {
+            id: r.game.id,
+            rawgId: r.game.rawgId,
+            title: r.game.title,
+            released: r.game.released,
+            backgroundImage: r.game.backgroundImage,
+            metacritic: r.game.metacritic,
+            rating: r.game.rating,
+            genres,
+            platforms,
+            developers,
+          },
+        };
+      });
 
     if (genre && genre !== "all") {
       results = results.filter((item) =>
@@ -144,6 +152,7 @@ export async function POST(request: NextRequest) {
       userRating,
       hoursPlayed,
       platform,
+      platformDetails,
       review,
       completedDate,
     } = body;
@@ -205,14 +214,35 @@ export async function POST(request: NextRequest) {
         ? new Date()
         : null;
 
+    // Calcular horas totales si vienen en platformDetails
+    let finalHoursPlayed = typeof hoursPlayed === "number" ? hoursPlayed : null;
+    let serializedPlatformDetails: string | null = null;
+    if (platformDetails) {
+      if (typeof platformDetails === "string") {
+        serializedPlatformDetails = platformDetails;
+        try {
+          const parsed = JSON.parse(platformDetails);
+          if (Array.isArray(parsed) && parsed.length > 0 && finalHoursPlayed === null) {
+            finalHoursPlayed = parsed.reduce((acc: number, p: any) => acc + (Number(p.hours) || 0), 0);
+          }
+        } catch {}
+      } else if (Array.isArray(platformDetails)) {
+        serializedPlatformDetails = JSON.stringify(platformDetails);
+        if (finalHoursPlayed === null && platformDetails.length > 0) {
+          finalHoursPlayed = platformDetails.reduce((acc: number, p: any) => acc + (Number(p.hours) || 0), 0);
+        }
+      }
+    }
+
     // 3. Upsert UserGame
     const userGame = await prisma.userGame.upsert({
       where: { gameId: game.id },
       update: {
         status,
         userRating: typeof userRating === "number" ? userRating : null,
-        hoursPlayed: typeof hoursPlayed === "number" ? hoursPlayed : null,
+        hoursPlayed: finalHoursPlayed,
         platform: platform !== undefined ? platform : undefined,
+        platformDetails: serializedPlatformDetails !== null ? serializedPlatformDetails : undefined,
         review: review !== undefined ? review : null,
         completedDate: dateToSave,
         gameKnowledge,
@@ -222,8 +252,9 @@ export async function POST(request: NextRequest) {
         gameId: game.id,
         status,
         userRating: typeof userRating === "number" ? userRating : null,
-        hoursPlayed: typeof hoursPlayed === "number" ? hoursPlayed : null,
+        hoursPlayed: finalHoursPlayed,
         platform: platform || null,
+        platformDetails: serializedPlatformDetails,
         review: review !== undefined ? review : null,
         completedDate: dateToSave,
         gameKnowledge,

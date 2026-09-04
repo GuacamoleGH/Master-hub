@@ -316,7 +316,12 @@ export default function GamerProfilePage() {
                       borderRadius: "12px",
                       fontSize: "12px",
                     }}
-                    formatter={(val: any) => [`${val} horas`, "Tiempo"]}
+                    formatter={(val: any, name: any, item: any) => {
+                      const count = item?.payload?.gameCount;
+                      const countStr = count ? ` (${count} juego${count > 1 ? "s" : ""})` : "";
+                      const pct = item?.payload?.percentage ? ` · ${item.payload.percentage}%` : "";
+                      return [`${val} horas${countStr}${pct}`, "Tiempo"];
+                    }}
                   />
                   <Bar
                     dataKey="hours"

@@ -12,6 +12,7 @@ import {
   Plus,
 } from "lucide-react";
 import { ALL_PLATFORMS, PlatformOption } from "@/lib/platforms";
+import { PlatformProgress } from "@/types/game";
 
 const STATUS_OPTIONS = [
   { value: "BACKLOG", label: "📥 Backlog (Pendiente)" },
@@ -45,6 +46,7 @@ interface GameReviewModalProps {
   initialRating?: number | null;
   initialHours?: number | null;
   initialPlatform?: string | null; // e.g. "PC (Steam), Xbox 360"
+  initialPlatformDetails?: PlatformProgress[] | string | null;
   initialReview?: string | null;
 }
 
@@ -57,6 +59,7 @@ export default function GameReviewModal({
   initialRating,
   initialHours,
   initialPlatform,
+  initialPlatformDetails,
   initialReview,
 }: GameReviewModalProps) {
   const [status, setStatus] = useState(initialStatus);
@@ -67,7 +70,9 @@ export default function GameReviewModal({
   const [hours, setHours] = useState<string>(
     initialHours ? String(initialHours) : "",
   );
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [platformProgressList, setPlatformProgressList] = useState<
+    PlatformProgress[]
+  >([]);
   const [activeCategory, setActiveCategory] = useState<string>("PC & Tiendas");
   const [customPlatform, setCustomPlatform] = useState("");
   const [review, setReview] = useState<string>(initialReview || "");
@@ -78,21 +83,57 @@ export default function GameReviewModal({
       setStatus(initialStatus);
       setRating(initialRating ?? 8.5);
       setHasRating(initialRating !== null && initialRating !== undefined);
-      setHours(initialHours ? String(initialHours) : "");
 
-      // Parsear múltiples plataformas
-      if (initialPlatform) {
-        const parsed = initialPlatform
-          .split(",")
-          .map((p) => p.trim())
-          .filter(Boolean);
-        setSelectedPlatforms(parsed);
-      } else if (game.platforms && game.platforms.length > 0) {
-        setSelectedPlatforms([game.platforms[0]]);
-      } else {
-        setSelectedPlatforms(["PC (Steam)"]);
+      // Cargar desglose de plataformas
+      let loadedList: PlatformProgress[] = [];
+      if (initialPlatformDetails) {
+        if (typeof initialPlatformDetails === "string") {
+          try {
+            loadedList = JSON.parse(initialPlatformDetails);
+          } catch {}
+        } else if (Array.isArray(initialPlatformDetails)) {
+          loadedList = [...initialPlatformDetails];
+        }
       }
 
+      if (loadedList.length === 0) {
+        if (initialPlatform) {
+          const parsed = initialPlatform
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean);
+          loadedList = parsed.map((p, idx) => ({
+            platform: p,
+            hours: idx === 0 ? initialHours || 0 : 0,
+            status: initialStatus,
+          }));
+        } else if (game.platforms && game.platforms.length > 0) {
+          loadedList = [
+            {
+              platform: game.platforms[0],
+              hours: initialHours || 0,
+              status: initialStatus,
+            },
+          ];
+        } else {
+          loadedList = [
+            {
+              platform: "PC (Steam)",
+              hours: initialHours || 0,
+              status: initialStatus,
+            },
+          ];
+        }
+      }
+
+      setPlatformProgressList(loadedList);
+      const totalH = loadedList.reduce(
+        (acc, p) => acc + (Number(p.hours) || 0),
+        0,
+      );
+      setHours(
+        totalH > 0 ? String(totalH) : initialHours ? String(initialHours) : "",
+      );
       setReview(initialReview || "");
     }
   }, [
@@ -101,44 +142,88 @@ export default function GameReviewModal({
     initialRating,
     initialHours,
     initialPlatform,
+    initialPlatformDetails,
     initialReview,
     game,
   ]);
 
   if (!isOpen) return null;
 
+  const selectedPlatformNames = platformProgressList.map((p) => p.platform);
+
   const togglePlatform = (name: string) => {
-    setSelectedPlatforms((prev) => {
-      if (prev.includes(name)) {
-        return prev.filter((p) => p !== name);
+    setPlatformProgressList((prev) => {
+      const exists = prev.some((p) => p.platform === name);
+      let next: PlatformProgress[];
+      if (exists) {
+        next = prev.filter((p) => p.platform !== name);
       } else {
-        return [...prev, name];
+        next = [...prev, { platform: name, hours: 0, status: status }];
       }
+      const totalH = next.reduce((acc, p) => acc + (Number(p.hours) || 0), 0);
+      setHours(totalH > 0 ? String(totalH) : "");
+      return next;
     });
   };
 
+  const updatePlatformHours = (platformName: string, h: number) => {
+    setPlatformProgressList((prev) => {
+      const next = prev.map((p) =>
+        p.platform === platformName ? { ...p, hours: Math.max(0, h) } : p,
+      );
+      const totalH = next.reduce((acc, p) => acc + (Number(p.hours) || 0), 0);
+      setHours(totalH > 0 ? String(totalH) : "");
+      return next;
+    });
+  };
+
+  const updatePlatformStatus = (
+    platformName: string,
+    st: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED",
+  ) => {
+    setPlatformProgressList((prev) =>
+      prev.map((p) => (p.platform === platformName ? { ...p, status: st } : p)),
+    );
+  };
+
   const addCustomPlatform = () => {
-    if (
-      customPlatform.trim() &&
-      !selectedPlatforms.includes(customPlatform.trim())
-    ) {
-      setSelectedPlatforms((prev) => [...prev, customPlatform.trim()]);
+    const trimmed = customPlatform.trim();
+    if (trimmed && !selectedPlatformNames.includes(trimmed)) {
+      setPlatformProgressList((prev) => [
+        ...prev,
+        { platform: trimmed, hours: 0, status },
+      ]);
       setCustomPlatform("");
     }
   };
+
+  const calculatedTotalHours = platformProgressList.reduce(
+    (acc, p) => acc + (Number(p.hours) || 0),
+    0,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      const totalH =
+        calculatedTotalHours > 0
+          ? calculatedTotalHours
+          : hours.trim()
+            ? parseFloat(hours)
+            : null;
+
       const payload: any = {
         rawgId: game.rawgId,
         status,
         platform:
-          selectedPlatforms.length > 0 ? selectedPlatforms.join(", ") : null,
+          platformProgressList.length > 0
+            ? platformProgressList.map((p) => p.platform).join(", ")
+            : null,
+        platformDetails: JSON.stringify(platformProgressList),
         review: review.trim() || null,
-        hoursPlayed: hours.trim() ? parseFloat(hours) : null,
+        hoursPlayed: totalH,
       };
 
       if (
@@ -226,19 +311,26 @@ export default function GameReviewModal({
             </div>
           </div>
 
-          {/* Horas Jugadas */}
+          {/* Horas Jugadas Totales */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
-              Totales
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
+                Totales
+              </label>
+              {platformProgressList.length > 0 && (
+                <span className="text-[11px] font-mono text-cyan-300">
+                  {calculatedTotalHours}h sumadas entre plataformas
+                </span>
+              )}
+            </div>
             <div className="relative max-w-xs">
               <input
                 type="number"
                 step="0.5"
                 min="0"
                 max="9999"
-                value={hours}
+                value={calculatedTotalHours > 0 ? calculatedTotalHours : hours}
                 onChange={(e) => setHours(e.target.value)}
                 placeholder="ej. 127"
                 className="w-full px-3.5 py-2.5 bg-cine-900 border border-cine-700 rounded-xl text-sm text-white font-mono placeholder-cine-500 focus:outline-none focus:border-cyan-400"
@@ -249,42 +341,100 @@ export default function GameReviewModal({
             </div>
           </div>
 
-          {/* Selector Multi-Plataforma */}
+          {/* Selector Multi-Plataforma con Desglose */}
           <div className="space-y-3 pt-2 border-t border-cine-800/80">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
                 <Gamepad2 className="w-3.5 h-3.5 text-purple-400" /> Plataformas
-                donde lo jugaste o completaste
+                registradas (Horas y Estado individual)
               </label>
               <span className="text-[11px] font-mono text-purple-300">
-                {selectedPlatforms.length} seleccionada(s)
+                {platformProgressList.length} seleccionada(s)
               </span>
             </div>
 
-            {/* Chips de plataformas actualmente seleccionadas */}
-            {selectedPlatforms.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 min-h-[44px] items-center">
-                {selectedPlatforms.map((plat) => (
-                  <span
-                    key={plat}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-purple-600/40 text-white border border-purple-400 shadow-sm"
+            {/* Tarjetas interactivas de cada plataforma seleccionada */}
+            {platformProgressList.length > 0 ? (
+              <div className="space-y-2">
+                {platformProgressList.map((p) => (
+                  <div
+                    key={p.platform}
+                    className="p-3 rounded-2xl bg-cine-900/90 border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-sm"
                   >
-                    <Check className="w-3 h-3 text-cyan-300" />
-                    {plat}
-                    <button
-                      type="button"
-                      onClick={() => togglePlatform(plat)}
-                      className="ml-1 hover:text-rose-400"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 flex-shrink-0" />
+                      <span className="text-xs font-mono font-bold text-white">
+                        {p.platform}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Horas en esta plataforma */}
+                      <div className="flex items-center gap-1.5 bg-cine-950 px-2.5 py-1 rounded-xl border border-cine-700">
+                        <Clock className="w-3 h-3 text-cyan-400" />
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={p.hours === 0 ? "" : p.hours}
+                          onChange={(e) =>
+                            updatePlatformHours(
+                              p.platform,
+                              parseFloat(e.target.value) || 0,
+                            )
+                          }
+                          placeholder="0"
+                          className="w-12 bg-transparent font-mono text-xs font-bold text-cyan-300 text-right focus:outline-none placeholder-cine-600"
+                        />
+                        <span className="text-[10px] text-cine-500 font-mono">
+                          horas
+                        </span>
+                      </div>
+
+                      {/* Estado en esta plataforma */}
+                      <select
+                        value={p.status}
+                        onChange={(e) =>
+                          updatePlatformStatus(
+                            p.platform,
+                            e.target.value as any,
+                          )
+                        }
+                        className="bg-cine-950 border border-cine-700 rounded-xl px-2 py-1 text-xs font-semibold text-purple-300 focus:outline-none focus:border-purple-400 cursor-pointer"
+                      >
+                        {STATUS_OPTIONS.map((opt) => (
+                          <option
+                            key={opt.value}
+                            value={opt.value}
+                            className="bg-cine-900 text-white"
+                          >
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Botón quitar */}
+                      <button
+                        type="button"
+                        onClick={() => togglePlatform(p.platform)}
+                        className="p-1 rounded-lg text-cine-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors"
+                        title="Quitar plataforma"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
                 ))}
+              </div>
+            ) : (
+              <div className="p-3 text-center text-xs text-cine-500 bg-cine-900/40 rounded-xl border border-dashed border-cine-800">
+                Selecciona al menos una plataforma abajo para registrar horas y
+                estado individual.
               </div>
             )}
 
             {/* Pestañas de categorías de plataformas */}
-            <div className="flex flex-wrap gap-1 border-b border-cine-800 pb-1 text-xs">
+            <div className="flex flex-wrap gap-1 border-b border-cine-800 pb-1 text-xs pt-1">
               {PLATFORM_CATEGORIES.map((cat) => (
                 <button
                   type="button"
@@ -305,7 +455,7 @@ export default function GameReviewModal({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto p-1">
               {ALL_PLATFORMS.filter((p) => p.category === activeCategory).map(
                 (plat) => {
-                  const isSelected = selectedPlatforms.includes(plat.name);
+                  const isSelected = selectedPlatformNames.includes(plat.name);
                   return (
                     <button
                       type="button"

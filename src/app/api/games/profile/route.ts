@@ -35,6 +35,7 @@ export async function GET() {
     let gkCount = 0;
 
     const platformHoursMap: Record<string, number> = {};
+    const platformGamesCountMap: Record<string, number> = {};
     const genreHoursMap: Record<string, number> = {};
     const ratingDistribution: Record<number, number> = {
       1: 0,
@@ -79,22 +80,39 @@ export async function GET() {
         parsedGenres = JSON.parse(ug.game.genres);
       } catch {}
 
-      // Mapear horas por plataforma individual (desglosando plataformas combinadas)
-      const rawPlatform = ug.platform || "General";
-      const hours = ug.hoursPlayed || 0;
-      const individualPlats = rawPlatform
-        .split(",")
-        .map((p) => p.trim())
-        .filter(Boolean);
+      const gameHours = ug.hoursPlayed || 0;
 
-      // Si tiene múltiples plataformas registradas, asignamos las horas a cada una de ellas
-      for (const p of individualPlats) {
-        platformHoursMap[p] = (platformHoursMap[p] || 0) + hours;
+      // Mapear horas por plataforma individual utilizando platformDetails si está disponible
+      let parsedProgress: { platform: string; hours: number; status: string }[] | null = null;
+      if (ug.platformDetails) {
+        try {
+          parsedProgress = JSON.parse(ug.platformDetails);
+        } catch {}
+      }
+
+      if (parsedProgress && Array.isArray(parsedProgress) && parsedProgress.length > 0) {
+        for (const prog of parsedProgress) {
+          const platName = prog.platform || "General";
+          const progHours = Number(prog.hours) || 0;
+          platformHoursMap[platName] = (platformHoursMap[platName] || 0) + progHours;
+          platformGamesCountMap[platName] = (platformGamesCountMap[platName] || 0) + 1;
+        }
+      } else {
+        const rawPlatform = ug.platform || "General";
+        const individualPlats = rawPlatform
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+
+        for (const p of individualPlats) {
+          platformHoursMap[p] = (platformHoursMap[p] || 0) + gameHours;
+          platformGamesCountMap[p] = (platformGamesCountMap[p] || 0) + 1;
+        }
       }
 
       // Mapear horas por género
       for (const g of parsedGenres) {
-        genreHoursMap[g] = (genreHoursMap[g] || 0) + hours;
+        genreHoursMap[g] = (genreHoursMap[g] || 0) + gameHours;
       }
 
       // Hot Takes y Critic vs You
@@ -139,8 +157,20 @@ export async function GET() {
     const levelInfo = calculateGamerLevelAndRank(totalXp);
 
     // Formatear arrays para gráficos ordenados de mayor a menor horas
+    const totalPlatformAggregatedHours = Object.values(platformHoursMap).reduce(
+      (a, b) => a + b,
+      0,
+    );
     const hoursByPlatform = Object.entries(platformHoursMap)
-      .map(([platform, hours]) => ({ platform, hours: Math.round(hours) }))
+      .map(([platform, hours]) => ({
+        platform,
+        hours: Math.round(hours),
+        gameCount: platformGamesCountMap[platform] || 1,
+        percentage:
+          totalPlatformAggregatedHours > 0
+            ? Math.round((hours / totalPlatformAggregatedHours) * 100)
+            : 0,
+      }))
       .sort((a, b) => b.hours - a.hours);
 
     const hoursByGenre = Object.entries(genreHoursMap)

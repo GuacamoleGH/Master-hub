@@ -53,6 +53,9 @@ export default function ReviewModal({
   apiEndpoint = "/api/user-movies",
   mediaLabel = "película",
 }: ReviewModalProps) {
+  const [hasRating, setHasRating] = useState<boolean>(
+    initialRating !== null && initialRating !== undefined ? true : true,
+  );
   const [rating, setRating] = useState<number>(initialRating ?? 8.0);
   const [review, setReview] = useState<string>(initialReview ?? "");
   const [platform, setPlatform] = useState<string>(
@@ -70,8 +73,13 @@ export default function ReviewModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialRating !== undefined && initialRating !== null) {
-      setRating(initialRating);
+    if (initialRating !== undefined) {
+      setHasRating(initialRating !== null);
+      if (initialRating !== null) {
+        setRating(initialRating);
+      }
+    } else {
+      setHasRating(true);
     }
     if (initialReview) {
       setReview(initialReview);
@@ -103,7 +111,7 @@ export default function ReviewModal({
         body: JSON.stringify({
           tmdbId: movie.tmdbId,
           status: "WATCHED",
-          userRating: rating,
+          userRating: hasRating ? Number(rating.toFixed(1)) : null,
           review: review.trim() || null,
           platform: platform || null,
           watchedDate: new Date(watchedDate).toISOString(),
@@ -158,51 +166,81 @@ export default function ReviewModal({
             </div>
           )}
 
-          {/* Slider e Input de Nota */}
+          {/* Calificación y Checkbox Asignar nota */}
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <label className="text-sm font-semibold text-cine-200 flex items-center gap-1.5">
                 <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Mi
-                Valoración (0 a 10)
+                Valoración
               </label>
-              <div className="flex items-center gap-1 bg-cine-950 border border-amber-500/30 px-3 py-1 rounded-xl">
+
+              <div className="flex items-center gap-2">
                 <input
-                  type="number"
+                  type="checkbox"
+                  id="enableMovieRating"
+                  checked={hasRating}
+                  onChange={(e) => setHasRating(e.target.checked)}
+                  className="w-4 h-4 rounded border-cine-700 bg-cine-900 text-amber-500 focus:ring-amber-400 focus:ring-offset-0 cursor-pointer"
+                />
+                <label
+                  htmlFor="enableMovieRating"
+                  className="text-xs text-cine-300 font-medium cursor-pointer select-none hover:text-white transition-colors"
+                >
+                  Asignar nota
+                </label>
+              </div>
+            </div>
+
+            {hasRating ? (
+              <div className="space-y-3 bg-cine-950/60 p-4 rounded-2xl border border-amber-500/20 animate-in fade-in duration-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-3xl font-black text-amber-400 font-mono tracking-tight">
+                    {rating.toFixed(1)}
+                  </span>
+                  <div className="flex items-center gap-1 bg-cine-900 border border-amber-500/30 px-2.5 py-1 rounded-xl">
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      value={rating}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        if (!isNaN(val)) {
+                          setRating(
+                            Math.max(0, Math.min(10, Number(val.toFixed(1)))),
+                          );
+                        }
+                      }}
+                      className="w-12 bg-transparent text-right font-mono font-bold text-amber-400 text-base focus:outline-none"
+                    />
+                    <span className="text-xs text-cine-400 font-semibold">/10</span>
+                  </div>
+                </div>
+
+                {/* Slider interactivo */}
+                <input
+                  type="range"
                   min="0"
                   max="10"
                   step="0.1"
                   value={rating}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    if (!isNaN(val)) {
-                      setRating(
-                        Math.max(0, Math.min(10, Number(val.toFixed(1)))),
-                      );
-                    }
-                  }}
-                  className="w-14 bg-transparent text-right font-mono font-bold text-amber-400 text-lg focus:outline-none"
+                  onChange={(e) => setRating(parseFloat(e.target.value))}
+                  className="w-full h-2 bg-cine-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                 />
-                <span className="text-xs text-cine-400 font-semibold">/10</span>
+                <div className="flex justify-between text-[11px] text-cine-500 font-mono">
+                  <span>0.0</span>
+                  <span>2.5</span>
+                  <span>5.0</span>
+                  <span>7.5</span>
+                  <span>10.0</span>
+                </div>
               </div>
-            </div>
-
-            {/* Slider interactivo */}
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="0.1"
-              value={rating}
-              onChange={(e) => setRating(parseFloat(e.target.value))}
-              className="w-full h-2.5 bg-cine-800 rounded-lg appearance-none cursor-pointer"
-            />
-            <div className="flex justify-between text-[11px] text-cine-500 font-mono">
-              <span>0.0</span>
-              <span>2.5</span>
-              <span>5.0</span>
-              <span>7.5</span>
-              <span>10.0</span>
-            </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-cine-950/40 border border-cine-800/80 text-xs text-cine-400 italic text-center">
+                Guardarás este título como visto sin puntuación (puedes asignarle nota cuando quieras).
+              </div>
+            )}
           </div>
 
           {/* Selector de Plataforma de Streaming / Opción Pirata */}

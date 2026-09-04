@@ -66,6 +66,15 @@ export async function GET(
                 userRating: dbGame.userGame.userRating,
                 hoursPlayed: dbGame.userGame.hoursPlayed,
                 platform: dbGame.userGame.platform,
+                platformDetails: dbGame.userGame.platformDetails
+                  ? (() => {
+                      try {
+                        return JSON.parse(dbGame.userGame.platformDetails);
+                      } catch {
+                        return null;
+                      }
+                    })()
+                  : null,
                 review: dbGame.userGame.review,
                 completedDate: dbGame.userGame.completedDate
                   ? dbGame.userGame.completedDate.toISOString()
