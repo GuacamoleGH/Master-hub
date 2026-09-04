@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -19,54 +21,78 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function MoviesHomePage() {
-  // 1. Obtener perfil
-  let profile = await prisma.userProfile.findUnique({
-    where: { id: "user-default" },
-  });
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
-  if (!profile) {
-    profile = {
-      id: "user-default",
-      displayName: "Jose",
-      avatarUrl: null,
-      bio: "Explorador cinematográfico",
-      totalXp: 0,
-      updatedAt: new Date(),
-    };
+  // 1. Obtener perfil del usuario o invitado
+  let profile = {
+    id: "guest",
+    displayName: "Invitado",
+    avatarUrl: null as string | null,
+    bio: "Inicia sesión para guardar tus valoraciones y calcular tu Sofa Knowledge.",
+    totalXp: 0,
+    updatedAt: new Date(),
+  };
+
+  if (userId) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user) {
+      profile = {
+        id: user.id,
+        displayName: user.name || user.username || "Cinéfilo",
+        avatarUrl: user.image,
+        bio: user.bio || "Explorador cinematográfico",
+        totalXp: user.totalXp,
+        updatedAt: user.updatedAt,
+      };
+    }
   }
 
   const levelInfo = calculateLevelAndRank(profile.totalXp);
 
-  // 2. Obtener películas de la Watchlist (últimas añadidas)
-  const watchlistRecords = await prisma.userMovie.findMany({
-    where: { status: "WATCHLIST" },
-    include: { movie: true },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  // 2. Obtener películas de la Watchlist
+  const watchlistRecords = userId
+    ? await prisma.userMovie.findMany({
+        where: { userId, status: "WATCHLIST" },
+        include: { movie: true },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      })
+    : [];
 
   // 3. Obtener últimas películas vistas
-  const watchedRecords = await prisma.userMovie.findMany({
-    where: { status: "WATCHED" },
-    include: { movie: true },
-    orderBy: { updatedAt: "desc" },
-    take: 6,
-  });
+  const watchedRecords = userId
+    ? await prisma.userMovie.findMany({
+        where: { userId, status: "WATCHED" },
+        include: { movie: true },
+        orderBy: { updatedAt: "desc" },
+        take: 6,
+      })
+    : [];
 
-  // 4. Catálogo general para continuar explorando (priorizando no registradas por el usuario)
+  // 4. Catálogo general para continuar explorando
   let exploreMovies = await prisma.movie.findMany({
-    where: {
-      userMovie: null,
-    },
+    where: userId
+      ? {
+          userMovies: {
+            none: { userId },
+          },
+        }
+      : {},
     orderBy: { imdbRating: "desc" },
-    include: { userMovie: true },
+    take: 12,
+    include: {
+      userMovies: userId ? { where: { userId } } : false,
+    },
   });
 
   if (exploreMovies.length === 0) {
     exploreMovies = await prisma.movie.findMany({
       take: 12,
       orderBy: { imdbRating: "desc" },
-      include: { userMovie: true },
+      include: {
+        userMovies: userId ? { where: { userId } } : false,
+      },
     });
   }
 
@@ -81,6 +107,8 @@ export default async function MoviesHomePage() {
         streamingPlatforms = JSON.parse(movie.streamingPlatforms);
     } catch {}
 
+    const uMovie = (movie as any).userMovies?.[0] || null;
+
     return {
       id: movie.id,
       tmdbId: movie.tmdbId,
@@ -91,24 +119,26 @@ export default async function MoviesHomePage() {
       imdbRating: movie.imdbRating,
       genres,
       streamingPlatforms,
-      userMovie: movie.userMovie
+      userMovie: uMovie
         ? {
-            status: movie.userMovie.status as any,
-            userRating: movie.userMovie.userRating,
-            review: movie.userMovie.review,
-            ballKnowledge: movie.userMovie.ballKnowledge,
-            difference: movie.userMovie.difference,
-            platform: movie.userMovie.platform,
+            status: uMovie.status as any,
+            userRating: uMovie.userRating,
+            review: uMovie.review,
+            ballKnowledge: uMovie.ballKnowledge,
+            difference: uMovie.difference,
+            platform: uMovie.platform,
           }
         : null,
     };
   });
 
   // 5. Estadísticas resumidas para la Home
-  const allWatched = await prisma.userMovie.findMany({
-    where: { status: "WATCHED" },
-    include: { movie: true },
-  });
+  const allWatched = userId
+    ? await prisma.userMovie.findMany({
+        where: { userId, status: "WATCHED" },
+        include: { movie: true },
+      })
+    : [];
 
   const totalWatched = allWatched.length;
   const rated = allWatched.filter((r) => typeof r.userRating === "number");
@@ -119,7 +149,7 @@ export default async function MoviesHomePage() {
         ).toFixed(1)
       : null;
 
-  const withBk = rated.filter((r) => typeof r.ballKnowledge === "number");
+  const withBk = allWatched.filter((r) => typeof r.ballKnowledge === "number");
   const avgBk =
     withBk.length > 0
       ? (
