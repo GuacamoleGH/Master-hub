@@ -1,6 +1,6 @@
 # 🛸 Master Hub: Multi-Universo Personal (Cinephile & Gamer Hub)
 
-> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Plataformas de Streaming y Ball Knowledge) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Desplegado en **Vercel** con base de datos en la nube en **Supabase PostgreSQL**.
+> Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Desplegado en **Vercel** con base de datos en la nube en **Supabase PostgreSQL**.
 
 ---
 
@@ -73,21 +73,22 @@ prueba/
 
 ### 2. 🎮 Gamer Hub (`/games/...`)
 
-- **Integración RAWG API:** Catálogo de más de 500.000 videojuegos con carátulas, screenshots y trailers oficiales.
-- **Soporte Multi-Plataforma:** Posibilidad de registrar un juego completado en varias consolas/tiendas (ej. _PC (Steam)_ y _PlayStation 5_).
-- **Catálogo Retro & Old Gen:** Soporte para PC (Steam, Epic, GOG, Game Pass), Xbox (Xbox 360, One, Series, Clásica), PlayStation (PS5, PS4, PS3, PS2, PS1, Vita), Nintendo (Switch, Wii, GameCube, N64, 3DS, GBA) y Steam Deck.
-- **Seguimiento de Horas Jugadas:** Registro de horas totales acumuladas en tu vida.
+- **Integración RAWG API y Enlace Externo:** Catálogo con carátulas, screenshots, trailers y botón con enlace directo a la ficha oficial de RAWG.
+- **Registro Multi-Plataforma Granular (v2.1):** Posibilidad de registrar horas independientes (ej: *Steam: 60h*, *PS4: 30h*) y estado independiente por cada plataforma (*Completado en PC*, *Jugando en Xbox*).
+- **Estadísticas Avanzadas de Plataforma (v2.1):** Paneles y gráficos de horas acumuladas, número de juegos y porcentaje de dedicación por cada consola/tienda.
+- **Catálogo Retro & Moderno:** Soporte para PC (Steam, Epic, GOG, Game Pass, Battle.net), Xbox (Series, One, 360, Clásica), PlayStation (PS5, PS4, PS3, PS2, PS1, Vita), Nintendo (Switch, Wii, GameCube, N64, 3DS, GBA) y Steam Deck / Portátiles.
 - **Motor Game Knowledge (GK):**
   $$\text{Game Knowledge (\%)} = \max\left(0,\, 100 - (|\text{Tu Nota} - \text{Nota Metacritic}| \times 10)\right)$$
 - **Tus Hot Takes 🔥:** Detección de títulos sobrevalorados por la prensa (_Biggest Overrated_) y joyas ocultas (_Hidden Gems_).
 - **Perfil Gamer Editable:** Cambia tu nombre de jugador, biografía y avatar con vista previa inmediata.
 
-### 3. 🎬 Cinephile Hub (`/movies/...`)
+### 3. 🎬 Cinephile Hub (`/movies/...` y `/series/...`)
 
-- Catálogo cinematográfico conectado a **TMDB**.
-- Selección de plataformas de streaming donde la viste (Netflix, HBO Max, Prime Video, Disney+, Apple TV+, Movistar Plus+, Filmin o **🏴‍☠️ Pirata**).
-- Motor de **Ball Knowledge** frente al consenso de IMDb.
-- Historial de películas vistas y Watchlist con filtros por plataforma y género.
+- **Catálogo de Cine y Series:** Conectado a **TMDB** con reparto extendido, fotos y enlaces directos a **IMDb**.
+- **Selección de plataformas de streaming:** Netflix, HBO Max, Prime Video, Disney+, Apple TV+, Movistar Plus+, Filmin o **🏴‍☠️ Pirata / Stremio**.
+- **Asignación Opcional de Nota (v2.1):** Casilla interactiva `[x] Asignar nota` para poder registrar películas o series como vistas en el diario sin necesidad de puntuarlas.
+- **Motor Sofa Knowledge 🛋️:** Mide tu afinidad cultural con la crítica de IMDb.
+- **Historial de Pelis y Series Vistas y Watchlist:** Con filtros avanzados por plataforma y género.
 
 ---
 
