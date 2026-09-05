@@ -7,6 +7,7 @@
 ## 📜 Historial de Versiones (Changelog)
 
 ### 🚀 v3.0.0 — User Management & Social Hub *(Versión Actual)*
+
 - **Autenticación Multi-Proveedor:**
   - Integración completa con **NextAuth.js** con registro seguro y verificación por credenciales (contraseñas encriptadas con `bcryptjs`).
   - Inicio de sesión rápido y seguro con **Google OAuth** y **Discord OAuth**.
@@ -17,7 +18,7 @@
 - **Muros Críticos de Reseñas Comunitarias:**
   - Espacio de críticas cinéfilas (`/reviews` o `/resenas`) y críticas gamer (`/games/reviews` o `/games/resenas`).
   - Buscador reactivo en tiempo real por obra, usuario crítico o texto de la reseña.
-  - Criterios de ordenación: 🕒 *Más recientes*, ⭐ *Mayor nota* (Aclamadas) y 🔥 *Hot Takes* (Mayor discrepancia con la crítica oficial).
+  - Criterios de ordenación: 🕒 _Más recientes_, ⭐ _Mayor nota_ (Aclamadas) y 🔥 _Hot Takes_ (Mayor discrepancia con la crítica oficial).
   - Tarjetas de reseña completas con carátula en alta resolución, insignia de Ball/Game Knowledge, spoiler warning y fecha.
 - **Salón de la Fama & Leaderboard Global (`/leaderboard`):**
   - Podio interactivo con los tres mejores usuarios de la comunidad.
@@ -34,8 +35,9 @@
   - Sistema de sonido interactivo (`lib/sounds.ts`) con conmutador de silencio (`SoundToggle`) en la cabecera.
 
 ### 🎮 v2.1.0 — Multi-Plataforma Granular & UI Refinements
+
 - **Desglose de Horas Multi-Plataforma:**
-  - Registro de horas y estado específico por plataforma (ej. *80h en Steam*, *20h en Nintendo Switch*).
+  - Registro de horas y estado específico por plataforma (ej. _80h en Steam_, _20h en Nintendo Switch_).
   - Paneles analíticos y gráficos de dedicación por consola/tienda.
 - **Catálogo Retro & Moderno:**
   - Soporte para ecosistemas clásicos: PS1, PS2, PS3, PS4, PS5, Xbox 360, Xbox One, Xbox Series, GameCube, N64, GBA y consolas portátiles.
@@ -45,6 +47,7 @@
   - Índices en base de datos Supabase, lazy loading de carátulas y scripts de mantenimiento de índice Git para Windows (`repair-git.bat`).
 
 ### 🛸 v2.0.0 — Gamer Hub & Arquitectura Multi-Universo
+
 - **Launcher Genérico Modular (`/`):**
   - Pantalla principal para navegar entre universos con métricas en tiempo real de cada ecosistema.
 - **Lanzamiento de Gamer Hub (`/games`):**
@@ -52,19 +55,20 @@
   - Sistema de **Backlog** y juegos **Completados/Platinados**.
 - **Motor Game Knowledge (GK):**
   - Cálculo matemático de sintonía frente al consenso de Metacritic.
-  - Tabla de **Hot Takes** clasificando títulos en *Overrated* y *Based*.
+  - Tabla de **Hot Takes** clasificando títulos en _Overrated_ y _Based_.
 - **Sistema de Nivel y XP Gamer:**
-  - Barra de progreso dinámica, cálculo de experiencia y rangos desbloqueables (de *Novato de Silicio* a *Leyenda del Píxel*).
+  - Barra de progreso dinámica, cálculo de experiencia y rangos desbloqueables (de _Novato de Silicio_ a _Leyenda del Píxel_).
 
 ### 🎬 v1.0.0 — Cinephile Hub
+
 - **Lanzamiento Inicial de Cinephile Hub (`/movies`):**
   - Conexión con **TMDB API** para catálogo universal de películas y series.
   - Fichas interactivas con reparto, sinopsis, plataformas de streaming y enlace directo a IMDb.
-  - Inclusión de plataforma especial 🏴‍☠️ *Pirata / Stremio*.
+  - Inclusión de plataforma especial 🏴‍☠️ _Pirata / Stremio_.
 - **Motor Sofa Knowledge (SK):**
   - Cálculo de precisión cultural del usuario frente a las notas medias de IMDb.
 - **Gestión de Colecciones:**
-  - Listas de *Vistas* y *Watchlist* con filtrado por género, nota y plataforma.
+  - Listas de _Vistas_ y _Watchlist_ con filtrado por género, nota y plataforma.
   - Gráficos interactivos de distribución de notas, géneros favoritos y cronología de visionados.
 
 ---
