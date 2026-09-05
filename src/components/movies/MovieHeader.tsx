@@ -17,6 +17,7 @@ import {
   LogOut,
   ChevronDown,
   Share2,
+  Trophy,
 } from "lucide-react";
 import MovieSearchInput from "./MovieSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -33,6 +34,7 @@ export default function Header() {
     { href: "/series", label: "Series", icon: Tv },
     { href: "/watchlist", label: "Watchlist", icon: Bookmark },
     { href: "/watched", label: "Vistas", icon: CheckCircle2 },
+    { href: "/leaderboard", label: "Ranking", icon: Trophy },
     { href: "/profile", label: "Mi Perfil", icon: User },
   ];
 
@@ -40,6 +42,8 @@ export default function Header() {
     if (href === "/movies") return pathname === "/movies";
     if (href === "/series")
       return pathname === "/series" || pathname.startsWith("/series/");
+    if (href === "/leaderboard")
+      return pathname === "/leaderboard" || pathname === "/ranking";
     return pathname === href || pathname.startsWith(href + "/");
   };
 

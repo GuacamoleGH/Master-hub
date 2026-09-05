@@ -221,6 +221,31 @@ class SoundEngine {
       });
     } catch {}
   }
+
+  // Aliases ergonómicos
+  public click(): void {
+    this.playClick();
+  }
+
+  public nav(): void {
+    this.playNav();
+  }
+
+  public star(starIndex?: number): void {
+    this.playStar(starIndex);
+  }
+
+  public success(): void {
+    this.playSuccess();
+  }
+
+  public delete(): void {
+    this.playDelete();
+  }
+
+  public fanfare(): void {
+    this.playFanfare();
+  }
 }
 
 export const sounds = new SoundEngine();
