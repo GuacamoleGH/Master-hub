@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { ALL_PLATFORMS, PlatformOption } from "@/lib/platforms";
 import { PlatformProgress } from "@/types/game";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 const STATUS_OPTIONS = [
   { value: "BACKLOG", label: "📥 Backlog (Pendiente)" },
@@ -79,6 +81,7 @@ export default function GameReviewModal({
   const [review, setReview] = useState<string>(initialReview || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     setMounted(true);
@@ -261,7 +264,19 @@ export default function GameReviewModal({
         body: JSON.stringify(payload),
       });
 
+      if (res.status === 401) {
+        toast.guestPrompt("guardar videojuegos en tu catálogo");
+        return;
+      }
+
       if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Juego registrado!",
+          status === "COMPLETED" || status === "PLATINUM"
+            ? `Marcado como ${status === "PLATINUM" ? "100% Platino 👑" : "Completado 🏆"} (+15 XP)`
+            : "Añadido a tu colección gamer",
+        );
         onSaved();
         onClose();
       }
@@ -563,7 +578,11 @@ export default function GameReviewModal({
                   max="10"
                   step="0.1"
                   value={rating}
-                  onChange={(e) => setRating(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setRating(val);
+                    sounds.playStar(Math.round(val));
+                  }}
                   className="w-full accent-purple-500 cursor-pointer h-2 bg-cine-950 rounded-lg"
                 />
 

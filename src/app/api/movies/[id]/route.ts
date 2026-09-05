@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMovieDetail } from "@/lib/tmdb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
   const idOrTmdb = params.id;
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   try {
-    // 1. Intentar buscar en DB por id interno o tmdbId
     const isNum = !isNaN(Number(idOrTmdb));
     let dbMovie = await prisma.movie.findFirst({
       where: isNum
         ? { OR: [{ id: idOrTmdb }, { tmdbId: Number(idOrTmdb) }] }
         : { id: idOrTmdb },
       include: {
-        userMovie: true,
+        userMovies: userId ? { where: { userId } } : false,
       },
     });
 
@@ -36,7 +39,6 @@ export async function GET(
         }
       } catch {}
 
-      // Si faltan plataformas, reparto completo o foto del director en DB pero tiene tmdbId, actualizar desde TMDB
       if (
         dbMovie.tmdbId &&
         (parsedPlatforms.length === 0 ||
@@ -68,6 +70,75 @@ export async function GET(
         }
       }
 
+      // Obtener todas las valoraciones y reseñas de la comunidad para este título
+      const allCommunityUserMovies = await prisma.userMovie.findMany({
+        where: {
+          movieId: dbMovie.id,
+          OR: [
+            { review: { not: null, gt: "" } },
+            { userRating: { not: null } },
+          ],
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true,
+              totalXp: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      const validRatings: number[] = [];
+      const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const communityReviews = [];
+
+      for (const um of allCommunityUserMovies) {
+        if (typeof um.userRating === "number" && um.userRating > 0) {
+          validRatings.push(um.userRating);
+          const starIndex =
+            Math.min(10, Math.max(1, Math.round(um.userRating))) - 1;
+          distribution[starIndex]++;
+        }
+        if (um.review && um.review.trim().length > 0) {
+          const username =
+            um.user.username ||
+            um.user.name?.toLowerCase().replace(/\s+/g, "") ||
+            `user_${um.user.id.slice(-5)}`;
+          communityReviews.push({
+            id: um.id,
+            user: {
+              id: um.user.id,
+              username,
+              name: um.user.name,
+              image: um.user.image,
+              totalXp: um.user.totalXp,
+            },
+            userRating: um.userRating,
+            review: um.review,
+            platform: um.platform,
+            knowledgeScore: um.ballKnowledge,
+            knowledgeType: "sofa" as const,
+            date: (um.watchedDate || um.updatedAt).toISOString(),
+          });
+        }
+      }
+
+      const masterHubScore =
+        validRatings.length > 0
+          ? Number(
+              (
+                validRatings.reduce((a, b) => a + b, 0) / validRatings.length
+              ).toFixed(1),
+            )
+          : null;
+
+      const userMovie = (dbMovie as any).userMovies?.[0] || null;
+
       return NextResponse.json({
         movie: {
           id: dbMovie.id,
@@ -86,25 +157,28 @@ export async function GET(
           cast: parsedCast,
           imdbRating: dbMovie.imdbRating,
           streamingPlatforms: parsedPlatforms,
-          userMovie: dbMovie.userMovie
+          masterHubScore,
+          masterHubVotes: validRatings.length,
+          masterHubDistribution: distribution,
+          communityReviews,
+          userMovie: userMovie
             ? {
-                id: dbMovie.userMovie.id,
-                status: dbMovie.userMovie.status,
-                userRating: dbMovie.userMovie.userRating,
-                review: dbMovie.userMovie.review,
-                platform: dbMovie.userMovie.platform,
-                watchedDate: dbMovie.userMovie.watchedDate
-                  ? dbMovie.userMovie.watchedDate.toISOString()
+                id: userMovie.id,
+                status: userMovie.status,
+                userRating: userMovie.userRating,
+                review: userMovie.review,
+                platform: userMovie.platform,
+                watchedDate: userMovie.watchedDate
+                  ? userMovie.watchedDate.toISOString()
                   : null,
-                ballKnowledge: dbMovie.userMovie.ballKnowledge,
-                difference: dbMovie.userMovie.difference,
+                ballKnowledge: userMovie.ballKnowledge,
+                difference: userMovie.difference,
               }
             : null,
         },
       });
     }
 
-    // 2. Si no está en DB pero es un ID numérico de TMDB, consultar la API externa
     if (isNum) {
       const tmdbDetail = await getMovieDetail(Number(idOrTmdb));
       if (tmdbDetail) {

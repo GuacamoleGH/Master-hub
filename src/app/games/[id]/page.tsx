@@ -25,6 +25,8 @@ import GameReviewModal from "@/components/games/GameReviewModal";
 import GamePoster from "@/components/games/GamePoster";
 import PlatformBadge from "@/components/games/PlatformBadge";
 import { getRawgUrl } from "@/lib/externalLinks";
+import MasterHubScoreBadge from "@/components/shared/MasterHubScoreBadge";
+import CommunityReviewsSection from "@/components/shared/CommunityReviewsSection";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -241,6 +243,14 @@ export default function GameDetailPage() {
                 ))}
               </div>
             )}
+
+            {/* Master Hub Score Oficial */}
+            <MasterHubScoreBadge
+              score={game.masterHubScore || null}
+              totalVotes={game.masterHubVotes || 0}
+              distribution={game.masterHubDistribution}
+              themeColor="purple"
+            />
 
             {/* Botones de Acción */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -535,6 +545,14 @@ export default function GameDetailPage() {
             "Sin descripción disponible para este videojuego."}
         </div>
       </section>
+
+      {/* Muro de Reseñas de la Comunidad */}
+      <CommunityReviewsSection
+        reviews={game.communityReviews || []}
+        title={game.title}
+        themeColor="purple"
+        onOpenReviewModal={() => setIsReviewOpen(true)}
+      />
 
       {/* Modal de Registro Gamer */}
       <GameReviewModal

@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSeriesDetail } from "@/lib/tmdb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   const idOrTmdb = params.id;
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   try {
-    // 1. Intentar buscar en DB por id interno o tmdbId
     const isNum = !isNaN(Number(idOrTmdb));
     let dbSeries = await prisma.series.findFirst({
       where: isNum
         ? { OR: [{ id: idOrTmdb }, { tmdbId: Number(idOrTmdb) }] }
         : { id: idOrTmdb },
       include: {
-        userSeries: true,
+        userSeries: userId ? { where: { userId } } : false,
       },
     });
 
@@ -36,7 +39,6 @@ export async function GET(
         }
       } catch {}
 
-      // Si faltan plataformas, reparto completo o foto del creador en DB pero tiene tmdbId, actualizar desde TMDB
       if (
         dbSeries.tmdbId &&
         (parsedPlatforms.length === 0 ||
@@ -68,6 +70,8 @@ export async function GET(
         }
       }
 
+      const userSeries = (dbSeries as any).userSeries?.[0] || null;
+
       return NextResponse.json({
         series: {
           id: dbSeries.id,
@@ -89,25 +93,24 @@ export async function GET(
           cast: parsedCast,
           imdbRating: dbSeries.imdbRating,
           streamingPlatforms: parsedPlatforms,
-          userSeries: dbSeries.userSeries
+          userSeries: userSeries
             ? {
-                id: dbSeries.userSeries.id,
-                status: dbSeries.userSeries.status,
-                userRating: dbSeries.userSeries.userRating,
-                review: dbSeries.userSeries.review,
-                platform: dbSeries.userSeries.platform,
-                watchedDate: dbSeries.userSeries.watchedDate
-                  ? dbSeries.userSeries.watchedDate.toISOString()
+                id: userSeries.id,
+                status: userSeries.status,
+                userRating: userSeries.userRating,
+                review: userSeries.review,
+                platform: userSeries.platform,
+                watchedDate: userSeries.watchedDate
+                  ? userSeries.watchedDate.toISOString()
                   : null,
-                ballKnowledge: dbSeries.userSeries.ballKnowledge,
-                difference: dbSeries.userSeries.difference,
+                ballKnowledge: userSeries.ballKnowledge,
+                difference: userSeries.difference,
               }
             : null,
         },
       });
     }
 
-    // 2. Si no está en DB pero es un ID numérico de TMDB, consultar la API externa
     if (isNum) {
       const tmdbDetail = await getSeriesDetail(Number(idOrTmdb));
       if (tmdbDetail) {
@@ -120,7 +123,7 @@ export async function GET(
     console.error("Error en /api/series/[id]:", error);
     return NextResponse.json(
       { error: "Error al obtener la serie" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

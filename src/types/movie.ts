@@ -33,6 +33,10 @@ export interface MovieDetail {
   cast: CastMember[];
   imdbRating: number | null;
   streamingPlatforms?: string[];
+  masterHubScore?: number | null;
+  masterHubVotes?: number;
+  masterHubDistribution?: number[];
+  communityReviews?: any[];
   userMovie?: {
     id: string;
     status: "WATCHLIST" | "WATCHED";

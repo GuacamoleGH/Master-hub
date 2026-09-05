@@ -1,9 +1,18 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { CURATED_GAMES } from "@/lib/mockGames";
 import { calculateGameKnowledge } from "@/lib/gameKnowledge";
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  let targetUserId = session?.user?.id;
+  if (!targetUserId) {
+    const firstUser = await prisma.user.findFirst();
+    targetUserId = firstUser?.id;
+  }
+
   try {
     const body = await request.json();
     const action = body.action || "wipe";
@@ -53,26 +62,30 @@ export async function POST(request: NextRequest) {
           ) {
             const res = calculateGameKnowledge(
               item.userGame.userRating,
-              item.metacritic
+              item.metacritic,
             );
             gameKnowledge = res.gameKnowledge;
             difference = res.difference;
           }
 
-          await prisma.userGame.create({
-            data: {
-              gameId: game.id,
-              status: item.userGame.status,
-              userRating: item.userGame.userRating ?? null,
-              hoursPlayed: item.userGame.hoursPlayed ?? null,
-              platform: item.userGame.platform ?? null,
-              review: item.userGame.review ?? null,
-              completedDate: item.userGame.completedDate ? new Date(item.userGame.completedDate) : null,
-              gameKnowledge,
-              difference,
-            },
-          });
-
+          if (targetUserId) {
+            await prisma.userGame.create({
+              data: {
+                userId: targetUserId,
+                gameId: game.id,
+                status: item.userGame.status,
+                userRating: item.userGame.userRating ?? null,
+                hoursPlayed: item.userGame.hoursPlayed ?? null,
+                platform: item.userGame.platform ?? null,
+                review: item.userGame.review ?? null,
+                completedDate: item.userGame.completedDate
+                  ? new Date(item.userGame.completedDate)
+                  : null,
+                gameKnowledge,
+                difference,
+              },
+            });
+          }
           if (item.userGame.status === "COMPLETED") totalXp += 150;
           else if (item.userGame.status === "PLATINUM") totalXp += 250;
           else if (item.userGame.status === "PLAYING") totalXp += 35;
@@ -83,7 +96,7 @@ export async function POST(request: NextRequest) {
           if (item.userGame.hoursPlayed) {
             totalXp += Math.min(
               200,
-              Math.floor(item.userGame.hoursPlayed / 10) * 10
+              Math.floor(item.userGame.hoursPlayed / 10) * 10,
             );
           }
         }
@@ -110,7 +123,7 @@ export async function POST(request: NextRequest) {
     console.error("Error en /api/games/admin/reset:", error);
     return NextResponse.json(
       { error: "Error al gestionar la base de datos de videojuegos" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

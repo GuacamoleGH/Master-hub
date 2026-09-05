@@ -32,6 +32,10 @@ export interface GameDetail {
   description: string | null;
   screenshots: string[];
   trailerUrl: string | null;
+  masterHubScore?: number | null;
+  masterHubVotes?: number;
+  masterHubDistribution?: number[];
+  communityReviews?: any[];
   userGame?: {
     id: string;
     status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";

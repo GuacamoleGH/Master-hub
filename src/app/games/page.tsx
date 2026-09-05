@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -21,56 +23,76 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function GamerHomePage() {
-  // 1. Obtener perfil gamer
-  let profile = await prisma.gamerProfile.findUnique({
-    where: { id: "gamer-default" },
-  });
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
-  if (!profile) {
-    profile = {
-      id: "gamer-default",
-      displayName: "Jose",
-      avatarUrl: null,
-      bio: "Explorador y analista de videojuegos.",
-      totalXp: 0,
-      updatedAt: new Date(),
-    };
+  // 1. Obtener perfil
+  let profile = {
+    id: "guest",
+    displayName: "Invitado",
+    avatarUrl: null as string | null,
+    bio: "Inicia sesión para guardar tus partidas y calcular tu Game Knowledge.",
+    totalXp: 0,
+    updatedAt: new Date(),
+  };
+
+  if (userId) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user) {
+      profile = {
+        id: user.id,
+        displayName: user.name || user.username || "Gamer",
+        avatarUrl: user.image,
+        bio: user.bio || "Explorador de mundos virtuales.",
+        totalXp: user.totalXp,
+        updatedAt: user.updatedAt,
+      };
+    }
   }
 
   const levelInfo = calculateGamerLevelAndRank(profile.totalXp);
 
   // 2. Obtener backlog
-  const backlogRecords = await prisma.userGame.findMany({
-    where: { status: "BACKLOG" },
-    include: { game: true },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  const backlogRecords = userId
+    ? await prisma.userGame.findMany({
+        where: { userId, status: "BACKLOG" },
+        include: { game: true },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      })
+    : [];
 
   // 3. Obtener completados
-  const completedRecords = await prisma.userGame.findMany({
-    where: { status: { in: ["COMPLETED", "PLATINUM"] } },
-    include: { game: true },
-    orderBy: { completedDate: "desc" },
-    take: 6,
-  });
+  const completedRecords = userId
+    ? await prisma.userGame.findMany({
+        where: { userId, status: { in: ["COMPLETED", "PLATINUM"] } },
+        include: { game: true },
+        orderBy: { completedDate: "desc" },
+        take: 6,
+      })
+    : [];
 
   // 4. Jugando actualmente
-  const playingRecords = await prisma.userGame.findMany({
-    where: { status: "PLAYING" },
-    include: { game: true },
-    take: 4,
-  });
+  const playingRecords = userId
+    ? await prisma.userGame.findMany({
+        where: { userId, status: "PLAYING" },
+        include: { game: true },
+        take: 4,
+      })
+    : [];
 
   // 5. Estadísticas de resumen
-  const allUserGames = await prisma.userGame.findMany({
-    include: { game: true },
-  });
+  const allUserGames = userId
+    ? await prisma.userGame.findMany({
+        where: { userId },
+        include: { game: true },
+      })
+    : [];
 
   let totalHours = 0;
   let totalCompleted = 0;
   const withGk = allUserGames.filter(
-    (ug) => typeof ug.gameKnowledge === "number",
+    (ug) => typeof ug.gameKnowledge === "number"
   );
   const avgGk =
     withGk.length > 0
@@ -86,7 +108,6 @@ export default async function GamerHomePage() {
     if (ug.hoursPlayed) totalHours += ug.hoursPlayed;
     if (ug.status === "COMPLETED" || ug.status === "PLATINUM") totalCompleted++;
 
-    // Desglose de horas por plataforma
     let parsed: any[] = [];
     if (ug.platformDetails) {
       try {
@@ -124,20 +145,29 @@ export default async function GamerHomePage() {
     .sort((a, b) => b.hours - a.hours)
     .slice(0, 6);
 
-  // 6. Catálogo general para explorar (juegos no registrados o catálogo aclamado)
+  // 6. Catálogo general para explorar
   let exploreGames = await prisma.game.findMany({
-    where: {
-      userGame: null,
-    },
+    where: userId
+      ? {
+          userGames: {
+            none: { userId },
+          },
+        }
+      : {},
     orderBy: { metacritic: "desc" },
-    include: { userGame: true },
+    take: 12,
+    include: {
+      userGames: userId ? { where: { userId } } : false,
+    },
   });
 
   if (exploreGames.length === 0) {
     exploreGames = await prisma.game.findMany({
       take: 12,
       orderBy: { rating: "desc" },
-      include: { userGame: true },
+      include: {
+        userGames: userId ? { where: { userId } } : false,
+      },
     });
   }
 
@@ -150,6 +180,9 @@ export default async function GamerHomePage() {
     try {
       genres = JSON.parse(game.genres);
     } catch {}
+
+    const uGame = (game as any).userGames?.[0] || null;
+
     return {
       id: game.id,
       rawgId: game.rawgId,
@@ -159,16 +192,16 @@ export default async function GamerHomePage() {
       metacritic: game.metacritic,
       platforms,
       genres,
-      userGame: game.userGame
+      userGame: uGame
         ? {
-            status: game.userGame.status as any,
-            userRating: game.userGame.userRating,
-            hoursPlayed: game.userGame.hoursPlayed,
-            platform: game.userGame.platform,
-            review: game.userGame.review,
-            gameKnowledge: game.userGame.gameKnowledge,
-            difference: game.userGame.difference,
-            platformDetails: game.userGame.platformDetails,
+            status: uGame.status as any,
+            userRating: uGame.userRating,
+            hoursPlayed: uGame.hoursPlayed,
+            platform: uGame.platform,
+            review: uGame.review,
+            gameKnowledge: uGame.gameKnowledge,
+            difference: uGame.difference,
+            platformDetails: uGame.platformDetails,
           }
         : null,
     };

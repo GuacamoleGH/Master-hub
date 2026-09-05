@@ -23,6 +23,8 @@ import ReviewModal from "@/components/ReviewModal";
 import MoviePoster from "@/components/MoviePoster";
 import StreamingBadge from "@/components/StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
+import MasterHubScoreBadge from "@/components/shared/MasterHubScoreBadge";
+import CommunityReviewsSection from "@/components/shared/CommunityReviewsSection";
 
 export default function MovieDetailPage() {
   const params = useParams();
@@ -206,6 +208,14 @@ export default function MovieDetailPage() {
                 </a>
               )}
             </div>
+
+            {/* Master Hub Score Oficial */}
+            <MasterHubScoreBadge
+              score={movie.masterHubScore || null}
+              totalVotes={movie.masterHubVotes || 0}
+              distribution={movie.masterHubDistribution}
+              themeColor="amber"
+            />
 
             {/* Pills de Géneros */}
             {movie.genres && movie.genres.length > 0 && (
@@ -522,6 +532,14 @@ export default function MovieDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Muro de Reseñas de la Comunidad */}
+      <CommunityReviewsSection
+        reviews={movie.communityReviews || []}
+        title={movie.title}
+        themeColor="amber"
+        onOpenReviewModal={() => setIsReviewModalOpen(true)}
+      />
 
       {/* Modal de Reseña */}
       <ReviewModal
