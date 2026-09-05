@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
+import SoundToggle from "./SoundToggle";
 
 export default function DynamicNavHeader() {
   const pathname = usePathname();
@@ -105,6 +106,8 @@ export default function DynamicNavHeader() {
             </Link>
 
             <div className="w-px h-5 bg-cine-800 hidden sm:block" />
+
+            <SoundToggle />
 
             {session?.user ? (
               <div className="relative">

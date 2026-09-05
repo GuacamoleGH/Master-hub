@@ -103,7 +103,7 @@ export default async function MasterHubPage() {
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
           <span>Centro de Mando Personal</span>
           <span className="text-cine-600">•</span>
-          <span className="text-cine-400">v3.0 Multi-Universo</span>
+          <span className="text-cine-400">v4.0 Multi-Universo & Gamificación</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">

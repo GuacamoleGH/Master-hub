@@ -30,10 +30,14 @@ import GamerLevelBar from "@/components/games/GamerLevelBar";
 import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
+import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
+import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import { UserAchievement } from "@/lib/achievements";
 import { GamerStats } from "@/types/game";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
+import { Camera } from "lucide-react";
 
 interface ProfileResponse {
   profile: {
@@ -55,6 +59,16 @@ export default function GamerProfilePage() {
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  // Logros y Wrapped
+  const [achievementsData, setAchievementsData] = useState<{
+    achievements: UserAchievement[];
+    totalUnlocked: number;
+    totalAvailable: number;
+    completionRate: number;
+    totalXpEarned: number;
+  } | null>(null);
+  const [isWrappedOpen, setIsWrappedOpen] = useState(false);
+
   const handleOpenEdit = () => {
     sounds.playClick();
     if (!session?.user) {
@@ -67,10 +81,19 @@ export default function GamerProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/games/profile");
-      if (res.ok) {
-        const data = await res.json();
+      const [resProfile, resAch] = await Promise.all([
+        fetch("/api/games/profile"),
+        fetch("/api/profile/achievements"),
+      ]);
+
+      if (resProfile.ok) {
+        const data = await resProfile.json();
         setProfileData(data);
+      }
+
+      if (resAch.ok) {
+        const dataAch = await resAch.json();
+        setAchievementsData(dataAch);
       }
     } catch (err) {
       console.error("Error al cargar perfil gamer:", err);
@@ -214,6 +237,18 @@ export default function GamerProfilePage() {
                     </>
                   )}
                 </button>
+
+                <button
+                  onClick={() => {
+                    sounds.shutter();
+                    setIsWrappedOpen(true);
+                  }}
+                  className="px-3.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
+                  title="Generar tarjeta de resumen para redes sociales"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>MasterHub Wrapped</span>
+                </button>
               </div>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg">
@@ -294,6 +329,20 @@ export default function GamerProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* Vitrina de Trofeos & Medallas */}
+      {achievementsData && (
+        <section className="pt-2">
+          <AchievementsShowcase
+            achievements={achievementsData.achievements}
+            totalUnlocked={achievementsData.totalUnlocked}
+            totalAvailable={achievementsData.totalAvailable}
+            completionRate={achievementsData.completionRate}
+            totalXpEarned={achievementsData.totalXpEarned}
+            userName={profile.displayName}
+          />
+        </section>
+      )}
 
       {/* Critic vs You: Gráfica Comparativa con Metacritic */}
       <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-cine-950 space-y-4">
@@ -465,6 +514,26 @@ export default function GamerProfilePage() {
         initialName={profile.displayName}
         initialBio={profile.bio}
         initialAvatar={profile.avatarUrl}
+      />
+
+      {/* Modal de Social Wrapped */}
+      <SocialWrappedModal
+        isOpen={isWrappedOpen}
+        onClose={() => setIsWrappedOpen(false)}
+        user={{
+          displayName: profile.displayName,
+          username: session?.user?.username,
+          avatarUrl: profile.avatarUrl,
+        }}
+        stats={{
+          totalMovies: 0,
+          totalSeries: 0,
+          totalHours: stats.totalHours,
+          totalCompletedGames: stats.totalCompleted,
+          ballKnowledge: null,
+          gameKnowledge: stats.globalGameKnowledge,
+        }}
+        achievements={achievementsData?.achievements || []}
       />
     </div>
   );

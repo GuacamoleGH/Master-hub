@@ -270,7 +270,11 @@ export default function GameReviewModal({
       }
 
       if (res.ok) {
-        sounds.playSuccess();
+        if (status === "PLATINUM") {
+          sounds.achievement();
+        } else {
+          sounds.playSuccess();
+        }
         toast.success(
           "¡Juego registrado!",
           status === "COMPLETED" || status === "PLATINUM"
