@@ -315,11 +315,13 @@ export default function ProfilePage() {
                     Vitrina de Trofeos Cinéfilos
                   </h3>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {achievementsData.totalUnlocked} / {achievementsData.totalAvailable} Desbloqueados
+                    {achievementsData.totalUnlocked} /{" "}
+                    {achievementsData.totalAvailable} Desbloqueados
                   </span>
                 </div>
                 <p className="text-xs text-cine-400 mt-0.5">
-                  {achievementsData.completionRate}% completado · {achievementsData.totalXpEarned} XP acumulados
+                  {achievementsData.completionRate}% completado ·{" "}
+                  {achievementsData.totalXpEarned} XP acumulados
                 </p>
               </div>
             </div>
@@ -329,7 +331,10 @@ export default function ProfilePage() {
               className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black text-xs rounded-xl shadow-gold-glow transition-all cursor-pointer shrink-0"
             >
               <Award className="w-4 h-4" />
-              <span>Ver Vitrina Completa de Logros ({achievementsData.totalAvailable})</span>
+              <span>
+                Ver Vitrina Completa de Logros (
+                {achievementsData.totalAvailable})
+              </span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

@@ -111,7 +111,9 @@ export default function CinephileAchievementsPage() {
                 Vitrina de Trofeos & Medallas Cinéfilas
               </h1>
               <p className="text-xs sm:text-sm text-cine-300 max-w-xl leading-relaxed">
-                Reclama medallas exclusivas registrando tus películas y series vistas, puntuando con precisión frente a IMDb y demostrando tu Sofa Knowledge.
+                Reclama medallas exclusivas registrando tus películas y series
+                vistas, puntuando con precisión frente a IMDb y demostrando tu
+                Sofa Knowledge.
               </p>
             </div>
 

@@ -38,7 +38,6 @@ export default function GameHeader() {
     { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
     { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
     { href: "/games/achievements", label: "Logros", icon: Award },
-    { href: "/games/profile", label: "Perfil Gamer", icon: User },
   ];
 
   const isActive = (href: string) => {
@@ -55,8 +54,8 @@ export default function GameHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-purple-500/20 bg-cine-950/90 backdrop-blur-xl shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Izquierda: Botón Volver al Hub + Logo Gamer + Navegación */}
-        <div className="flex items-center gap-3 lg:gap-5 min-w-0">
+        {/* Izquierda: Botón Volver al Hub + Logo Gamer */}
+        <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/"
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-cine-400 hover:text-white bg-cine-900/80 hover:bg-cine-800 border border-cine-700/80 transition-colors shrink-0"
@@ -66,7 +65,10 @@ export default function GameHeader() {
             <span className="hidden md:inline">Hub Principal</span>
           </Link>
 
-          <Link href="/games" className="flex items-center gap-2.5 group shrink-0">
+          <Link
+            href="/games"
+            className="flex items-center gap-2.5 group shrink-0"
+          >
             <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 group-hover:scale-105 transition-transform shadow-[0_0_12px_rgba(139,92,246,0.3)]">
               <Gamepad2 className="w-5 h-5 text-purple-400" />
             </div>
@@ -79,34 +81,34 @@ export default function GameHeader() {
               </span>
             </div>
           </Link>
-
-          {/* Navegación Desktop al lado del logo */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              const active = isActive(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
-                    active
-                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(139,92,246,0.2)]"
-                      : "text-cine-300 hover:text-white hover:bg-cine-900"
-                  }`}
-                >
-                  <Icon
-                    className={`w-3.5 h-3.5 shrink-0 ${active ? "text-purple-400" : "text-cine-400"}`}
-                  />
-                  <span className="whitespace-nowrap">{link.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
         </div>
 
+        {/* Centro: Navegación Principal Perfectamente Centrada con Espacios Equidistantes */}
+        <nav className="hidden lg:flex items-center justify-center gap-1 xl:gap-2 flex-1 px-4">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+                  active
+                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(139,92,246,0.2)]"
+                    : "text-cine-300 hover:text-white hover:bg-cine-900"
+                }`}
+              >
+                <Icon
+                  className={`w-3.5 h-3.5 shrink-0 ${active ? "text-purple-400" : "text-cine-400"}`}
+                />
+                <span className="whitespace-nowrap">{link.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* Derecha: Audio + Menú de Usuario / Login */}
-        <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <div className="hidden lg:flex items-center justify-end gap-2 shrink-0">
           <SoundToggle />
 
           {/* Menú de Usuario / Botones de Login */}

@@ -4,6 +4,7 @@
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
+  private lastSoundTimestamp: number = 0;
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -562,9 +563,136 @@ class SoundEngine {
     } catch {}
   }
 
+  // Pop de burbuja super limpio y reactivo
+  public playPop(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    this.lastSoundTimestamp = Date.now();
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(850, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.035);
+
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch {}
+  }
+
+  // Toque armónico doble para tabs, filtros y navegación
+  public playTab(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    this.lastSoundTimestamp = Date.now();
+
+    try {
+      const now = ctx.currentTime;
+      const notes = [523.25, 659.25]; // C5, E5
+      notes.forEach((freq, i) => {
+        const start = now + i * 0.025;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.05, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.04);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.045);
+      });
+    } catch {}
+  }
+
+  // Interruptor mecánico (switch / toggle)
+  public playSwitch(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    this.lastSoundTimestamp = Date.now();
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(620, now + 0.02);
+
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.03);
+    } catch {}
+  }
+
+  // Golpe suave tipo ficha / tarjeta de juego o película
+  public playCard(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    this.lastSoundTimestamp = Date.now();
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.03);
+
+      gain.gain.setValueAtTime(0.07, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch {}
+  }
+
   // Aliases ergonómicos
   public click(): void {
     this.playClick();
+  }
+
+  public pop(): void {
+    this.playPop();
+  }
+
+  public tab(): void {
+    this.playTab();
+  }
+
+  public switch(): void {
+    this.playSwitch();
+  }
+
+  public card(): void {
+    this.playCard();
   }
 
   public nav(): void {

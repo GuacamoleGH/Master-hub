@@ -236,15 +236,15 @@ export async function GET() {
     const completedWithHours = userGames.filter(
       (ug) =>
         (ug.status === "COMPLETED" || ug.status === "PLATINUM") &&
-        (ug.hoursPlayed || 0) > 0
+        (ug.hoursPlayed || 0) > 0,
     );
     const averageCompletionHours =
       completedWithHours.length > 0
         ? Math.round(
             completedWithHours.reduce(
               (acc, g) => acc + (g.hoursPlayed || 0),
-              0
-            ) / completedWithHours.length
+              0,
+            ) / completedWithHours.length,
           )
         : null;
 
@@ -261,7 +261,7 @@ export async function GET() {
 
     const totalPlatformAggregatedHours = Object.values(platformHoursMap).reduce(
       (a, b) => a + b,
-      0
+      0,
     );
     const hoursByPlatform = Object.entries(platformHoursMap)
       .map(([platform, hours]) => ({
@@ -280,7 +280,7 @@ export async function GET() {
       .sort((a, b) => b.hours - a.hours);
 
     const ratingDistributionList = Object.entries(ratingDistribution).map(
-      ([rating, count]) => ({ rating: Number(rating), count })
+      ([rating, count]) => ({ rating: Number(rating), count }),
     );
 
     const stats: GamerStats = {
@@ -336,7 +336,7 @@ export async function GET() {
     console.error("Error en /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al calcular estadísticas gamer" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -373,7 +373,7 @@ export async function PATCH(request: NextRequest) {
     console.error("Error en PATCH /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al actualizar perfil gamer" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
