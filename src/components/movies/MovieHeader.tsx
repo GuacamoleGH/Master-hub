@@ -16,6 +16,7 @@ import {
   LogIn,
   LogOut,
   ChevronDown,
+  Share2,
 } from "lucide-react";
 import MovieSearchInput from "./MovieSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -143,6 +144,14 @@ export default function Header() {
                       {session.user.email}
                     </p>
                   </div>
+                  <Link
+                    href={`/u/${session.user.username || session.user.id}`}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-purple-300 hover:bg-cine-800 hover:text-white"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Mi Perfil Público</span>
+                  </Link>
                   <Link
                     href="/profile"
                     onClick={() => setIsUserMenuOpen(false)}
