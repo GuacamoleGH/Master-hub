@@ -6,29 +6,41 @@
 
 ## 📜 Historial de Versiones (Changelog)
 
-### 🏆 v4.0.0 — Gamification, Trophy Room, SFX 2.0 & Social Wrapped _(Versión Actual)_
+### 🏆 v4.0.0 — Multi-Universo Gamificado, Salas de Trofeos, Wipeout Seguro & SFX 2.0 _(Versión Actual)_
 
-- **Sala de Trofeos & Medallas Desbloqueables (`AchievementsShowcase`):**
-  - Motor de evaluación dinámica (`lib/achievements.ts`) con 20 insignias distribuidas en 4 categorías:
-    - 🍿 **Cine & Series**: _Primer Fotograma_, _Sesión Continua_, _Filmoteca Viviente_, _Rey de los Mares_ (opción Pirata 🏴‍☠️), _Atracón de Temporadas_, _Ojo de Halcón Cinéfilo_ (diferencia exacta 0.0 frente a IMDb).
-    - 🎮 **Videojuegos**: _Press Start_, _Victoria Magistral_, _Finisher Legendario_, _Cazador de Platinos_, _Veterano del Vicio_, _No-Life Honorario_ (100+ horas), _Metacritic Sniper_ (diferencia 0.0 frente a Metacritic).
-    - 🌶️ **Comunidad & Crítica**: _Voz en el Desierto_, _Crítico Acreditado_, _Pirómano de Opiniones_ (Hot Take con > 2.5 de diferencia), _Obra Maestra Universal_ (nota perfecta 10/10).
-    - 🧠 **Maestría Multi-Universo**: _Cátedra del Sofá_ (> 80% Sofa Knowledge), _Sabio del Gamepad_ (> 80% Game Knowledge), _Señor Multi-Universo_ (hazaña combinada).
-  - Niveles de rareza visuales (_Bronce_, _Plata_, _Oro_, _Diamante_) con resplandor cromático, puntos XP ganados y barra de progreso general de colección.
-  - Modal interactivo de inspección con audio y seguimiento numérico de requisitos restantes.
-  - Presente en Perfil Cinéfilo (`/profile`), Perfil Gamer (`/games/profile`) y Perfiles Públicos (`/u/[username]`).
-- **MasterHub Wrapped — Tarjeta Social Compartible (`SocialWrappedModal`):**
-  - Generador visual de tarjetas en alta resolución 9:16 (1080x1920) renderizado directamente con **HTML5 Canvas**, optimizado para Instagram Stories, Twitter/X y WhatsApp Status.
-  - Incluye avatar, handle `@username`, métricas clave duales (horas gamer, películas vistas, % Sofa y Game Knowledge) y la vitrina con las 3 mejores medallas del usuario.
-  - Descarga instantánea en archivo PNG de alta calidad y soporte para la **Web Share API** nativa en dispositivos móviles.
-- **Motor de Audio Arcade SFX 2.0 (`lib/sounds.ts`):**
-  - Nuevos efectos sintetizados mediante **Web Audio API** nativa (sin assets externos, sin latencia):
-    - `playAchievement()`: Arpegio triunfal brillante de trofeo desbloqueado.
+- **Salas de Trofeos Dedicadas & Separadas por Universo:**
+  - Separación total e independiente de logros:
+    - 🍿 **Cinephile Hub (`/achievements`)**: 27 trofeos dedicados a películas, series, maratones, directores, calificaciones y Sofa Knowledge.
+    - 🎮 **Gamer Hub (`/games/achievements`)**: 32 trofeos dedicados a horas acumuladas, backlog, completados, platinos y Game Knowledge.
+  - Eliminación de dependencias cruzadas (los logros de videojuegos no se activan sin registros gamer y viceversa).
+  - Niveles de rareza visuales (_Bronce_, _Plata_, _Oro_, _Platino_, _Diamante_) con resplandor cromático, seguimiento numérico de requisitos restantes y puntos XP acumulativos.
+- **MasterHub Wrapped Independiente (`SocialWrappedModal`):**
+  - Generador visual de tarjetas en alta resolución 9:16 (1080x1920) renderizado con **HTML5 Canvas**, optimizado para Instagram Stories, Twitter/X y WhatsApp Status.
+  - Modos independientes para **Cine** (películas, series, Sofa Knowledge y top medallas de cine) y **Videojuegos** (horas gamer, completados, platinos, Game Knowledge y medallas gamer).
+  - Descarga instantánea en formato PNG de alta fidelidad y soporte nativo para **Web Share API** en móviles.
+- **Estadísticas Avanzadas de Perfil:**
+  - **Récords Personales:** Hallmarks destacados como _Mayor Vicio_ (título con más horas registradas), _Obra Maestra_ (nota máxima 10/10) y _Tiempo Promedio de Completado_.
+  - **Desglose de Estado:** Métricas en tiempo real de títulos completados, jugando actualmente, backlog, platinos y abandonados.
+  - **Distribución Gráfica 1-10:** Histograma interactivo con la distribución de notas otorgadas por el usuario.
+- **Zona de Peligro & Wipeout Seguro de Datos (Aislado por Universo):**
+  - Herramienta segura de purgado de datos al pie de los perfiles con impacto directo en la base de datos Supabase PostgreSQL.
+  - **Aislamiento por Universo:** Si se ejecuta desde el Perfil Gamer, purga únicamente la biblioteca de videojuegos (`UserGame`) manteniendo intactas las películas y series. Si se ejecuta desde el Perfil Cinéfilo, purga únicamente películas y series (`UserMovie` / `UserSeries`) manteniendo intactos los videojuegos.
+  - **Múltiples Capas de Seguridad:**
+    1. Desglose explícito de los registros que serán eliminados de forma irreversible.
+    2. Checkbox de consentimiento consciente obligatorio.
+    3. Verificación obligatoria escribiendo la palabra exacta **`ELIMINAR`** en mayúsculas para desbloquear la acción.
+    4. Opción para **Eliminar Cuenta Completa**, la cual actualiza dinámicamente los textos, advertencias y el botón de purga antes de cerrar sesión automáticamente.
+- **Rediseño Armónico del Menú y Launcher:**
+  - Barra de navegación principal (`DynamicNavHeader`) reequilibrada simétricamente con logo a la izquierda, enlaces centrales (`Cine & Series`, `Videojuegos`, `Ranking`, `Reseñas`) y controles de audio/usuario a la derecha.
+  - Alineación de las tarjetas del Launcher (`CinephileHub` y `GamerHub`) a ancho completo (`w-full`), coincidiendo milimétricamente con los bordes de la barra superior.
+- **Motor de Audio Arcade SFX 2.0 & Global Listener (`lib/sounds.ts`):**
+  - Nuevos efectos sintetizados mediante **Web Audio API** nativa (sin latencia, cero dependencias externas):
+    - `playAchievement()`: Arpegio triunfal brillante estilo PlayStation / Steam.
     - `playPirate()`: Tintineo náutico de doblones de oro al marcar la plataforma Pirata 🏴‍☠️.
-    - `playShutter()`: Clic de obturador mecánico de cámara analógica para MasterHub Wrapped.
-    - `playLevelUp()`: Acorde épico ascendente de subida de nivel.
-    - `playTrophyHover()`: Micro-campana armónica al interactuar con las medallas.
-  - Botón de audio interactivo (`SoundToggle`) incorporado en la cabecera principal del Launcher.
+    - `playShutter()`: Clic de obturador mecánico para capturar MasterHub Wrapped.
+    - `playDelete()`: Tono de alerta al ejecutar operaciones destructivas.
+    - `playPop()`, `playTab()`, `playSwitch()`: Retroalimentación táctil suave en elementos interactivos mediante `GlobalSoundListener`.
+  - Botón interactivo de sonido (`SoundToggle`) accesible en la cabecera principal.
 
 ### 🚀 v3.0.0 — User Management & Social Hub
 

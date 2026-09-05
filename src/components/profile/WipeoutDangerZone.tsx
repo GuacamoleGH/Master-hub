@@ -205,12 +205,16 @@ export function WipeoutDangerZone({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-white tracking-tight">
-                    {isGaming
-                      ? "Confirmar Wipeout de Videojuegos"
-                      : "Confirmar Wipeout de Cine & Series"}
+                    {deleteAccount
+                      ? "Confirmar Eliminación Total de Cuenta & Datos"
+                      : isGaming
+                        ? "Confirmar Wipeout de Videojuegos"
+                        : "Confirmar Wipeout de Cine & Series"}
                   </h3>
                   <p className="text-xs text-red-400/90 font-mono">
-                    Acción destructiva permanente
+                    {deleteAccount
+                      ? "Eliminación completa de usuario • Cierre de sesión inmediato"
+                      : "Acción destructiva permanente"}
                   </p>
                 </div>
               </div>
@@ -237,7 +241,28 @@ export function WipeoutDangerZone({
                 </span>
               </div>
 
-              {isGaming ? (
+              {deleteAccount ? (
+                <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
+                  <li>
+                    <strong className="text-red-300">
+                      Catálogo de Cine & Series:
+                    </strong>{" "}
+                    Películas y series vistas, pendientes, notas y críticas en CinephileHub.
+                  </li>
+                  <li>
+                    <strong className="text-red-300">
+                      Biblioteca de Videojuegos:
+                    </strong>{" "}
+                    Horas registradas, títulos, backlog, completados, platinos y críticas en GamerHub.
+                  </li>
+                  <li className="text-rose-400 font-medium">
+                    <strong className="text-rose-300">
+                      Cuenta de Usuario & Sesión:
+                    </strong>{" "}
+                    Tu cuenta se eliminará por completo de la base de datos y se cerrará tu sesión de inmediato.
+                  </li>
+                </ul>
+              ) : isGaming ? (
                 <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
                   <li>
                     <strong className="text-red-300">
@@ -301,10 +326,13 @@ export function WipeoutDangerZone({
                 className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
               />
               <span className="text-xs text-cine-300 leading-normal">
-                He leído las advertencias y comprendo que esta eliminación de
-                datos de{" "}
+                He leído las advertencias y comprendo que esta eliminación de{" "}
                 <strong className="text-white">
-                  {isGaming ? "videojuegos" : "cine y series"}
+                  {deleteAccount
+                    ? "mi cuenta completa y todos mis datos"
+                    : isGaming
+                      ? "datos de videojuegos"
+                      : "datos de cine y series"}
                 </strong>{" "}
                 es{" "}
                 <strong className="text-white">
@@ -352,8 +380,7 @@ export function WipeoutDangerZone({
                 className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
               />
               <span className="text-xs text-cine-400 leading-normal">
-                Eliminar también mi cuenta de usuario y cerrar sesión
-                automáticamente
+                Eliminar también mi cuenta de usuario y cerrar sesión automáticamente
               </span>
             </label>
 
@@ -393,9 +420,11 @@ export function WipeoutDangerZone({
                   <>
                     <Trash2 className="w-4 h-4" />
                     <span>
-                      {isGaming
-                        ? "Purgar Catálogo de Videojuegos"
-                        : "Purgar Catálogo de Cine & Series"}
+                      {deleteAccount
+                        ? "Eliminar Cuenta y Todos los Datos"
+                        : isGaming
+                          ? "Purgar Catálogo de Videojuegos"
+                          : "Purgar Catálogo de Cine & Series"}
                     </span>
                   </>
                 )}
