@@ -27,9 +27,12 @@
   - **Aislamiento por Universo:** Si se ejecuta desde el Perfil Gamer, purga únicamente la biblioteca de videojuegos (`UserGame`) manteniendo intactas las películas y series. Si se ejecuta desde el Perfil Cinéfilo, purga únicamente películas y series (`UserMovie` / `UserSeries`) manteniendo intactos los videojuegos.
   - **Múltiples Capas de Seguridad:**
     1. Desglose explícito de los registros que serán eliminados de forma irreversible.
-    2. Checkbox de consentimiento consciente obligatorio.
+    2. Checkbox de consentimiento consciente obligatorio con textos adaptativos por universo.
     3. Verificación obligatoria escribiendo la palabra exacta **`ELIMINAR`** en mayúsculas para desbloquear la acción.
-    4. Opción para **Eliminar Cuenta Completa**, la cual actualiza dinámicamente los textos, advertencias y el botón de purga antes de cerrar sesión automáticamente.
+    4. Opción para **Eliminar Cuenta Completa**, la cual actualiza dinámicamente los títulos, advertencias, checkboxes y el botón de acción antes de cerrar sesión automáticamente.
+  - **Arquitectura de Modales Robusta (`createPortal` & Body Scroll Lock):**
+    - Montaje directo en `document.body` con capa `z-[100]` y `backdrop-blur-md` total, evitando cortes visuales de la barra superior o conflictos de apilamiento en el viewport.
+    - Alineación vertical milimétrica del escudo de seguridad, botones de confirmación y cancelación centrados, y cabecera simétrica sin descuadres tipográficos.
 - **Rediseño Armónico del Menú y Launcher:**
   - Barra de navegación principal (`DynamicNavHeader`) reequilibrada simétricamente con logo a la izquierda, enlaces centrales (`Cine & Series`, `Videojuegos`, `Ranking`, `Reseñas`) y controles de audio/usuario a la derecha.
   - Alineación de las tarjetas del Launcher (`CinephileHub` y `GamerHub`) a ancho completo (`w-full`), coincidiendo milimétricamente con los bordes de la barra superior.
