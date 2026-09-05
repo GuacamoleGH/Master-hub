@@ -156,21 +156,25 @@ export default function GamerProfilePage() {
               <button
                 type="button"
                 onClick={handleOpenEdit}
-                className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-purple-300 text-[10px] font-bold gap-1 cursor-pointer"
+                className="absolute inset-0 w-full h-full bg-black/80 backdrop-blur-xs opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex flex-col items-center justify-center text-center p-0 m-0 cursor-pointer"
                 title={
                   session?.user ? "Elegir insignia temática" : "Iniciar sesión"
                 }
               >
                 {session?.user ? (
-                  <>
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span>Cambiar</span>
-                  </>
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
+                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                      Cambiar
+                    </span>
+                  </div>
                 ) : (
-                  <>
-                    <LogIn className="w-4 h-4 text-purple-400" />
-                    <span>Entrar</span>
-                  </>
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
+                    <LogIn className="w-5 h-5 text-purple-400" />
+                    <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                      Entrar
+                    </span>
+                  </div>
                 )}
               </button>
             </div>

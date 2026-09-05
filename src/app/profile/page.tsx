@@ -135,7 +135,7 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-5">
             {/* Avatar con botón de cambio */}
-            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center text-3xl">
+            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center">
               {profileData.avatarUrl ? (
                 <img
                   src={profileData.avatarUrl}
@@ -148,21 +148,25 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={handleOpenEdit}
-                className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-amber-300 text-[10px] font-bold gap-1 cursor-pointer"
+                className="absolute inset-0 w-full h-full bg-black/80 backdrop-blur-xs opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex flex-col items-center justify-center text-center p-0 m-0 cursor-pointer"
                 title={
                   session?.user ? "Editar avatar y perfil" : "Iniciar sesión"
                 }
               >
                 {session?.user ? (
-                  <>
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>Cambiar</span>
-                  </>
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
+                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                      Cambiar
+                    </span>
+                  </div>
                 ) : (
-                  <>
-                    <LogIn className="w-4 h-4 text-amber-400" />
-                    <span>Entrar</span>
-                  </>
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
+                    <LogIn className="w-5 h-5 text-amber-400" />
+                    <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                      Entrar
+                    </span>
+                  </div>
                 )}
               </button>
             </div>
