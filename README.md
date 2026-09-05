@@ -6,7 +6,7 @@
 
 ## 📜 Historial de Versiones (Changelog)
 
-### 🚀 v3.0.0 — User Management & Social Hub *(Versión Actual)*
+### 🚀 v3.0.0 — User Management & Social Hub _(Versión Actual)_
 
 - **Autenticación Multi-Proveedor:**
   - Integración completa con **NextAuth.js** con registro seguro y verificación por credenciales (contraseñas encriptadas con `bcryptjs`).
