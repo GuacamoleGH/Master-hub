@@ -15,6 +15,7 @@ interface EditGamerProfileModalProps {
 
 import { PRESET_AVATARS } from "@/lib/avatars";
 import { sounds } from "@/lib/sounds";
+import { useSession } from "next-auth/react";
 
 export default function EditGamerProfileModal({
   isOpen,
@@ -24,6 +25,7 @@ export default function EditGamerProfileModal({
   initialBio,
   initialAvatar,
 }: EditGamerProfileModalProps) {
+  const { data: session } = useSession();
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
@@ -45,7 +47,7 @@ export default function EditGamerProfileModal({
     };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted || !session?.user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

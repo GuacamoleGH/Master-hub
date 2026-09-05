@@ -27,16 +27,21 @@ import GenreChart from "@/components/charts/GenreChart";
 import WatchesTimelineChart from "@/components/charts/WatchesTimelineChart";
 import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
 import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
 export default function ProfilePage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
   const [profileData, setProfileData] = useState<{
     displayName: string;
     avatarUrl: string | null;
     bio: string | null;
   }>({
-    displayName: "Jose",
+    displayName: "Invitado",
     avatarUrl: null,
     bio: "",
   });
@@ -48,6 +53,15 @@ export default function ProfilePage() {
 
   // Modal de edición de perfil cinéfilo
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+
+  const handleOpenEdit = () => {
+    sounds.click();
+    if (!session?.user) {
+      router.push("/login?callbackUrl=/profile");
+      return;
+    }
+    setIsEditProfileOpen(true);
+  };
 
   // Acciones de administración (wipe / seed)
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
@@ -133,15 +147,23 @@ export default function ProfilePage() {
               )}
               <button
                 type="button"
-                onClick={() => {
-                  sounds.click();
-                  setIsEditProfileOpen(true);
-                }}
+                onClick={handleOpenEdit}
                 className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-amber-300 text-[10px] font-bold gap-1 cursor-pointer"
-                title="Editar avatar y perfil"
+                title={
+                  session?.user ? "Editar avatar y perfil" : "Iniciar sesión"
+                }
               >
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>Cambiar</span>
+                {session?.user ? (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Cambiar</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4 text-amber-400" />
+                    <span>Entrar</span>
+                  </>
+                )}
               </button>
             </div>
 
@@ -152,15 +174,25 @@ export default function ProfilePage() {
                   {profileData.displayName}
                 </h1>
                 <button
-                  onClick={() => {
-                    sounds.click();
-                    setIsEditProfileOpen(true);
-                  }}
+                  onClick={handleOpenEdit}
                   className="px-3 py-1 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                  title="Editar perfil cinéfilo"
+                  title={
+                    session?.user
+                      ? "Editar perfil cinéfilo"
+                      : "Inicia sesión para editar tu perfil"
+                  }
                 >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  <span>Editar Perfil</span>
+                  {session?.user ? (
+                    <>
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Editar Perfil</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-3.5 h-3.5" />
+                      <span>Iniciar Sesión</span>
+                    </>
+                  )}
                 </button>
               </div>
 
