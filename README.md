@@ -130,3 +130,29 @@ Si en tu consola de Windows alguna vez te sale `fatal: .git/index: index file sm
 ```bash
 repair-git.bat
 ```
+
+---
+
+## 🌐 Despliegue en Vercel & Variables de Entorno
+
+### 📍 ¿Dónde están las Variables de Entorno en Vercel?
+Para configurar las claves en producción, la ruta en el panel de control de Vercel es:
+> **Tu Proyecto en Vercel** ➔ **Settings** (pestaña superior) ➔ **Environment Variables** (menú lateral izquierdo)
+
+### 📋 Variables requeridas en Vercel:
+
+| Variable | Descripción / Ejemplo |
+| :--- | :--- |
+| `NEXTAUTH_SECRET` | Clave secreta para firmar sesiones JWT de NextAuth (32+ caracteres) |
+| `NEXTAUTH_URL` | URL pública de tu dominio en Vercel (`https://tu-proyecto.vercel.app`) |
+| `DATABASE_URL` | Conexión pooling de Supabase PostgreSQL (`...:6543/postgres?pgbouncer=true`) |
+| `DIRECT_URL` | Conexión directa de Supabase PostgreSQL (`...:5432/postgres`) |
+| `TMDB_API_KEY` | Clave API de The Movie Database |
+| `RAWG_API_KEY` | Clave API de RAWG Video Games |
+| `GOOGLE_CLIENT_ID` | Client ID de Google OAuth (Opcional) |
+| `GOOGLE_CLIENT_SECRET` | Client Secret de Google OAuth (Opcional) |
+| `DISCORD_CLIENT_ID` | Client ID de Discord OAuth (Opcional) |
+| `DISCORD_CLIENT_SECRET` | Client Secret de Discord OAuth (Opcional) |
+
+*Nota: Tras añadir o modificar variables en Vercel, recuerda hacer **Redeploy** del último despliegue para que surtan efecto.*
+
