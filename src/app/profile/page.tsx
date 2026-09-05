@@ -27,10 +27,14 @@ import GenreChart from "@/components/charts/GenreChart";
 import WatchesTimelineChart from "@/components/charts/WatchesTimelineChart";
 import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
 import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
+import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
+import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import { UserAchievement } from "@/lib/achievements";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
+import { Camera } from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -51,6 +55,16 @@ export default function ProfilePage() {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Logros y Wrapped
+  const [achievementsData, setAchievementsData] = useState<{
+    achievements: UserAchievement[];
+    totalUnlocked: number;
+    totalAvailable: number;
+    completionRate: number;
+    totalXpEarned: number;
+  } | null>(null);
+  const [isWrappedOpen, setIsWrappedOpen] = useState(false);
+
   // Modal de edición de perfil cinéfilo
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
@@ -70,11 +84,20 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/profile");
-      if (res.ok) {
-        const data = await res.json();
+      const [resProfile, resAch] = await Promise.all([
+        fetch("/api/profile"),
+        fetch("/api/profile/achievements"),
+      ]);
+
+      if (resProfile.ok) {
+        const data = await resProfile.json();
         setProfileData(data.profile);
         setStats(data.stats);
+      }
+
+      if (resAch.ok) {
+        const dataAch = await resAch.json();
+        setAchievementsData(dataAch);
       }
     } catch (err) {
       console.error("Error al cargar perfil:", err);
@@ -198,6 +221,18 @@ export default function ProfilePage() {
                     </>
                   )}
                 </button>
+
+                <button
+                  onClick={() => {
+                    sounds.shutter();
+                    setIsWrappedOpen(true);
+                  }}
+                  className="px-3.5 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
+                  title="Generar tarjeta de resumen para redes sociales"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>MasterHub Wrapped</span>
+                </button>
               </div>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed">
@@ -251,6 +286,20 @@ export default function ProfilePage() {
         currentLevelBaseXp={stats.currentLevelBaseXp}
         nextLevelXp={stats.nextLevelXp}
       />
+
+      {/* 2.5 Vitrina de Trofeos & Medallas */}
+      {achievementsData && (
+        <section className="pt-2">
+          <AchievementsShowcase
+            achievements={achievementsData.achievements}
+            totalUnlocked={achievementsData.totalUnlocked}
+            totalAvailable={achievementsData.totalAvailable}
+            completionRate={achievementsData.completionRate}
+            totalXpEarned={achievementsData.totalXpEarned}
+            userName={profileData.displayName}
+          />
+        </section>
+      )}
 
       {/* 3. Estadísticas Divertidas Automáticas */}
       <section className="space-y-4">
@@ -556,6 +605,26 @@ export default function ProfilePage() {
         initialName={profileData.displayName}
         initialBio={profileData.bio}
         initialAvatar={profileData.avatarUrl}
+      />
+
+      {/* Modal de Social Wrapped */}
+      <SocialWrappedModal
+        isOpen={isWrappedOpen}
+        onClose={() => setIsWrappedOpen(false)}
+        user={{
+          displayName: profileData.displayName,
+          username: session?.user?.username,
+          avatarUrl: profileData.avatarUrl,
+        }}
+        stats={{
+          totalMovies: stats.totalWatched,
+          totalSeries: 0,
+          totalHours: 0,
+          totalCompletedGames: 0,
+          ballKnowledge: stats.globalBallKnowledge,
+          gameKnowledge: null,
+        }}
+        achievements={achievementsData?.achievements || []}
       />
     </div>
   );

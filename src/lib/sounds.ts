@@ -222,6 +222,181 @@ class SoundEngine {
     } catch {}
   }
 
+  // Desbloqueo épico de trofeo/logro (Arpegio brillante con doble oscilador)
+  public playAchievement(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Secuencia armónica ascendente estilo PlayStation / Steam
+      const notes = [
+        { f: 440.0, t: 0.0, d: 0.1 },   // A4
+        { f: 554.37, t: 0.08, d: 0.1 }, // C#5
+        { f: 659.25, t: 0.16, d: 0.12 }, // E5
+        { f: 880.0, t: 0.24, d: 0.35 },  // A5
+        { f: 1108.73, t: 0.32, d: 0.5 }, // C#6 (acorde final sostenido)
+      ];
+
+      notes.forEach(({ f, t, d }) => {
+        const start = now + t;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(f, start);
+
+        gain.gain.setValueAtTime(0.12, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + d);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + d + 0.02);
+
+        // Capa de armónico superior (brillo / sparkle)
+        const shimmer = ctx.createOscillator();
+        const shimmerGain = ctx.createGain();
+        shimmer.type = "sine";
+        shimmer.frequency.setValueAtTime(f * 2, start);
+        shimmerGain.gain.setValueAtTime(0.03, start);
+        shimmerGain.gain.exponentialRampToValueAtTime(0.001, start + d * 0.8);
+        shimmer.connect(shimmerGain);
+        shimmerGain.connect(ctx.destination);
+        shimmer.start(start);
+        shimmer.stop(start + d);
+      });
+    } catch {}
+  }
+
+  // Sonido de pirata / doblones de oro al marcar la opción pirata
+  public playPirate(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Tintineo metálico de monedas
+      const coins = [
+        { f: 1760, t: 0.0 },
+        { f: 2637, t: 0.07 },
+        { f: 3135, t: 0.15 },
+      ];
+
+      coins.forEach(({ f, t }) => {
+        const start = now + t;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, start);
+        osc.frequency.exponentialRampToValueAtTime(f * 0.9, start + 0.12);
+
+        gain.gain.setValueAtTime(0.08, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.13);
+      });
+    } catch {}
+  }
+
+  // Sonido de obturador de cámara para la tarjeta Wrapped
+  public playShutter(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      // Clic 1: Apertura de obturador
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(1200, now);
+      osc1.frequency.exponentialRampToValueAtTime(200, now + 0.03);
+      gain1.gain.setValueAtTime(0.1, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.04);
+
+      // Clic 2: Cierre mecánico
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(800, now + 0.06);
+      osc2.frequency.exponentialRampToValueAtTime(120, now + 0.11);
+      gain2.gain.setValueAtTime(0.12, now + 0.06);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.06);
+      osc2.stop(now + 0.12);
+    } catch {}
+  }
+
+  // Sonido de Level Up al alcanzar un nuevo hito
+  public playLevelUp(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const notes = [261.63, 329.63, 392.0, 523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((f, i) => {
+        const start = now + i * 0.05;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, start);
+
+        gain.gain.setValueAtTime(0.08, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.21);
+      });
+    } catch {}
+  }
+
+  // Micro-campana al posar el cursor sobre un trofeo
+  public playTrophyHover(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1318.51, now); // E6
+
+      gain.gain.setValueAtTime(0.02, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.07);
+    } catch {}
+  }
+
   // Aliases ergonómicos
   public click(): void {
     this.playClick();
@@ -245,6 +420,26 @@ class SoundEngine {
 
   public fanfare(): void {
     this.playFanfare();
+  }
+
+  public achievement(): void {
+    this.playAchievement();
+  }
+
+  public pirate(): void {
+    this.playPirate();
+  }
+
+  public shutter(): void {
+    this.playShutter();
+  }
+
+  public levelUp(): void {
+    this.playLevelUp();
+  }
+
+  public trophyHover(): void {
+    this.playTrophyHover();
   }
 }
 
