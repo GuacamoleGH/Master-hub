@@ -178,6 +178,6 @@ export default function AvatarPickerModal({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

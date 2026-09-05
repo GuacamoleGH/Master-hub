@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getGameDetail } from "@/lib/rawg";
 import { calculateGameKnowledge, calculateGameXp } from "@/lib/gameKnowledge";
+import { calculateMovieXp } from "@/lib/ballKnowledge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 async function refreshGamerXp(userId: string) {
-  const allUserGames = await prisma.userGame.findMany({
-    where: { userId },
-  });
+  const [allUserGames, allUserMovies, allUserSeries] = await Promise.all([
+    prisma.userGame.findMany({ where: { userId } }),
+    prisma.userMovie.findMany({ where: { userId } }),
+    prisma.userSeries.findMany({ where: { userId } }),
+  ]);
   let totalXp = 0;
   for (const ug of allUserGames) {
     const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
@@ -16,8 +19,18 @@ async function refreshGamerXp(userId: string) {
       ug.status,
       hasReview,
       ug.hoursPlayed,
-      ug.gameKnowledge
+      ug.gameKnowledge,
     );
+  }
+  for (const um of allUserMovies) {
+    const isWatched = um.status === "WATCHED";
+    const hasReview = Boolean(um.review && um.review.trim().length > 0);
+    totalXp += calculateMovieXp(isWatched, hasReview, um.ballKnowledge);
+  }
+  for (const us of allUserSeries) {
+    const isWatched = us.status === "WATCHED";
+    const hasReview = Boolean(us.review && us.review.trim().length > 0);
+    totalXp += calculateMovieXp(isWatched, hasReview, us.ballKnowledge);
   }
 
   await prisma.user.update({

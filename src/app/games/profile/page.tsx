@@ -90,7 +90,7 @@ export default function GamerProfilePage() {
       setIsLoading(true);
       const [resProfile, resAch] = await Promise.all([
         fetch("/api/games/profile"),
-        fetch("/api/profile/achievements"),
+        fetch("/api/profile/achievements?universe=GAMING"),
       ]);
 
       if (resProfile.ok) {
