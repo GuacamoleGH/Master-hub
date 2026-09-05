@@ -742,7 +742,10 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   },
 ];
 
-export function evaluateUserAchievements(data: AchievementEvaluationInput): {
+export function evaluateUserAchievements(
+  data: AchievementEvaluationInput,
+  universe?: "CINE" | "GAMING" | "ALL",
+): {
   achievements: UserAchievement[];
   totalUnlocked: number;
   totalAvailable: number;
@@ -862,7 +865,12 @@ export function evaluateUserAchievements(data: AchievementEvaluationInput): {
   // =========================================================================
   // EVALUACIÓN DE CADA LOGRO
   // =========================================================================
-  const achievements: UserAchievement[] = ACHIEVEMENTS_CATALOG.map((def) => {
+  const targetCatalog =
+    universe && universe !== "ALL"
+      ? ACHIEVEMENTS_CATALOG.filter((a) => a.universe === universe)
+      : ACHIEVEMENTS_CATALOG;
+
+  const achievements: UserAchievement[] = targetCatalog.map((def) => {
     let currentValue = 0;
     let isUnlocked = false;
 

@@ -36,7 +36,7 @@ export default function CinephileAchievementsPage() {
       try {
         setIsLoading(true);
         const [achRes, profRes] = await Promise.all([
-          fetch("/api/profile/achievements"),
+          fetch("/api/profile/achievements?universe=CINE"),
           fetch("/api/profile"),
         ]);
 

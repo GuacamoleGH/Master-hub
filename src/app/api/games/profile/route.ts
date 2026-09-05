@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateGamerLevelAndRank,
+  calculateGameXp,
   classifyHotTake,
 } from "@/lib/gameKnowledge";
 import { GamerStats, HotTake } from "@/types/game";
@@ -256,8 +257,17 @@ export async function GET() {
       abandoned: userGames.filter((ug) => ug.status === "ABANDONED").length,
     };
 
-    const totalXp = user?.totalXp || 0;
-    const levelInfo = calculateGamerLevelAndRank(totalXp);
+    let gamerXp = 0;
+    for (const ug of userGames) {
+      const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
+      gamerXp += calculateGameXp(
+        ug.status,
+        hasReview,
+        ug.hoursPlayed,
+        ug.gameKnowledge,
+      );
+    }
+    const levelInfo = calculateGamerLevelAndRank(gamerXp);
 
     const totalPlatformAggregatedHours = Object.values(platformHoursMap).reduce(
       (a, b) => a + b,
@@ -300,7 +310,7 @@ export async function GET() {
           : null,
       globalGameKnowledge:
         gkCount > 0 ? Number((totalGkSum / gkCount).toFixed(1)) : null,
-      totalXp,
+      totalXp: gamerXp,
       level: levelInfo.level,
       rankTitle: levelInfo.rankTitle,
       rankIcon: levelInfo.rankIcon,

@@ -88,7 +88,7 @@ export default function ProfilePage() {
       setIsLoading(true);
       const [resProfile, resAch] = await Promise.all([
         fetch("/api/profile"),
-        fetch("/api/profile/achievements"),
+        fetch("/api/profile/achievements?universe=CINE"),
       ]);
 
       if (resProfile.ok) {

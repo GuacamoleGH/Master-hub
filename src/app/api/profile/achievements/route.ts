@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const targetUsername = searchParams.get("username");
+    const rawUniverse = searchParams.get("universe");
+    const universe =
+      rawUniverse === "CINE" || rawUniverse === "GAMING" ? rawUniverse : undefined;
 
     let userId: string | null = null;
 
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!userId) {
-      const evaluation = evaluateUserAchievements({});
+      const evaluation = evaluateUserAchievements({}, universe);
       return NextResponse.json(evaluation);
     }
 
@@ -96,16 +99,19 @@ export async function GET(request: NextRequest) {
       0,
     );
 
-    const evaluation = evaluateUserAchievements({
-      movies: userMovies,
-      series: userSeries,
-      games: userGames,
-      stats: {
-        avgBallKnowledge,
-        avgGameKnowledge,
-        totalHours,
+    const evaluation = evaluateUserAchievements(
+      {
+        movies: userMovies,
+        series: userSeries,
+        games: userGames,
+        stats: {
+          avgBallKnowledge,
+          avgGameKnowledge,
+          totalHours,
+        },
       },
-    });
+      universe,
+    );
 
     return NextResponse.json(evaluation);
   } catch (error) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { calculateLevelAndRank } from "@/lib/ballKnowledge";
+import { calculateLevelAndRank, calculateMovieXp } from "@/lib/ballKnowledge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -105,8 +105,20 @@ export async function GET() {
       }
     }
 
-    const totalXp = user?.totalXp || 0;
-    const levelInfo = calculateLevelAndRank(totalXp);
+    let cinemaXp = 0;
+    for (const um of watchedList) {
+      const hasReview = Boolean(um.review && um.review.trim().length > 0);
+      cinemaXp += calculateMovieXp(true, hasReview, um.ballKnowledge);
+    }
+    const allUserSeries = await prisma.userSeries.findMany({
+      where: { userId },
+    });
+    for (const us of allUserSeries) {
+      const isWatched = us.status === "WATCHED";
+      const hasReview = Boolean(us.review && us.review.trim().length > 0);
+      cinemaXp += calculateMovieXp(isWatched, hasReview, us.ballKnowledge);
+    }
+    const levelInfo = calculateLevelAndRank(cinemaXp);
 
     let highestRatedMovie: any = null;
     let lowestRatedMovie: any = null;

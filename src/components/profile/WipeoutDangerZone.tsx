@@ -151,7 +151,7 @@ export function WipeoutDangerZone({
                   {isGaming ? "Wipeout Gamer" : "Wipeout Cinéfilo"}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-cine-400 max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-cine-400 max-w-4xl leading-relaxed">
                 {isGaming ? (
                   <>
                     Purgar de forma permanente todos los registros de
@@ -248,216 +248,218 @@ export function WipeoutDangerZone({
                 </button>
               </div>
 
-            {/* Capa 1: Desglose específico de lo que se destruirá */}
-            <div className="bg-red-950/30 border border-red-500/20 rounded-2xl p-4 text-xs space-y-2.5 text-cine-300">
-              <div className="flex items-center gap-2 font-bold text-red-300">
-                <Lock className="w-4 h-4 text-red-400 shrink-0" />
-                <span>
-                  Se purgarán los siguientes registros asociados a tu cuenta (
-                  <strong className="font-mono text-white font-semibold">
-                    {session?.user?.email || session?.user?.name || "tu perfil"}
-                  </strong>
-                  ):
-                </span>
-              </div>
+              {/* Capa 1: Desglose específico de lo que se destruirá */}
+              <div className="bg-red-950/30 border border-red-500/20 rounded-2xl p-4 text-xs space-y-2.5 text-cine-300">
+                <div className="flex items-center gap-2 font-bold text-red-300">
+                  <Lock className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>
+                    Se purgarán los siguientes registros asociados a tu cuenta (
+                    <strong className="font-mono text-white font-semibold">
+                      {session?.user?.email ||
+                        session?.user?.name ||
+                        "tu perfil"}
+                    </strong>
+                    ):
+                  </span>
+                </div>
 
-              {deleteAccount ? (
-                <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
-                  <li>
-                    <strong className="text-red-300">
-                      Catálogo de Cine & Series:
-                    </strong>{" "}
-                    Películas y series vistas, pendientes, notas y críticas en
-                    CinephileHub.
-                  </li>
-                  <li>
-                    <strong className="text-red-300">
-                      Biblioteca de Videojuegos:
-                    </strong>{" "}
-                    Horas registradas, títulos, backlog, completados, platinos y
-                    críticas en GamerHub.
-                  </li>
-                  <li className="text-rose-400 font-medium">
-                    <strong className="text-rose-300">
-                      Cuenta de Usuario & Sesión:
-                    </strong>{" "}
-                    Tu cuenta se eliminará por completo de la base de datos y se
-                    cerrará tu sesión de inmediato.
-                  </li>
-                </ul>
-              ) : isGaming ? (
-                <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
-                  <li>
-                    <strong className="text-red-300">
-                      Biblioteca de Videojuegos:
-                    </strong>{" "}
-                    Horas registradas, títulos en progreso, backlog,
-                    completados, platinos y críticas personales.
-                  </li>
-                  <li className="text-emerald-400/90 font-medium">
-                    <strong className="text-emerald-300">
-                      CinephileHub Intacto:
-                    </strong>{" "}
-                    Todas tus películas y series vistas se conservarán
-                    exactamente como están.
-                  </li>
-                  <li>
-                    <strong className="text-cine-200">
-                      Ajuste de Experiencia:
-                    </strong>{" "}
-                    Tu XP total se recalculará manteniendo solo los puntos
-                    obtenidos en cine y series.
-                  </li>
-                </ul>
-              ) : (
-                <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
-                  <li>
-                    <strong className="text-red-300">
-                      Catálogo de Cine & Series:
-                    </strong>{" "}
-                    Todas las películas y temporadas vistas, lista de
-                    pendientes, notas y críticas personales.
-                  </li>
-                  <li className="text-emerald-400/90 font-medium">
-                    <strong className="text-emerald-300">
-                      GamerHub Intacto:
-                    </strong>{" "}
-                    Toda tu biblioteca de videojuegos, horas y platinos se
-                    conservarán exactamente como están.
-                  </li>
-                  <li>
-                    <strong className="text-cine-200">
-                      Ajuste de Experiencia:
-                    </strong>{" "}
-                    Tu XP total se recalculará manteniendo solo los puntos
-                    obtenidos en videojuegos.
-                  </li>
-                </ul>
-              )}
-            </div>
-
-            {/* Capa 2: Checkbox de consentimiento consciente */}
-            <label className="flex items-center gap-3 p-3 rounded-xl bg-cine-900/60 border border-cine-800 hover:border-red-500/30 transition-colors cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={confirmedCheck}
-                onChange={(e) => {
-                  sounds.switch();
-                  setConfirmedCheck(e.target.checked);
-                }}
-                disabled={isWiping}
-                className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
-              />
-              <span className="text-xs text-cine-300 leading-normal">
-                He leído las advertencias y comprendo que esta eliminación de{" "}
-                <strong className="text-white">
-                  {deleteAccount
-                    ? "mi cuenta completa y todos mis datos"
-                    : isGaming
-                      ? "datos de videojuegos"
-                      : "datos de cine y series"}
-                </strong>{" "}
-                es{" "}
-                <strong className="text-white">
-                  definitiva e irreversible
-                </strong>
-                .
-              </span>
-            </label>
-
-            {/* Capa 3: Escribir obligatoriamente la palabra ELIMINAR */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-cine-300 block">
-                Escribe la palabra{" "}
-                <span className="font-mono font-bold text-red-400">
-                  ELIMINAR
-                </span>{" "}
-                en mayúsculas para confirmar:
-              </label>
-              <input
-                type="text"
-                value={typedWord}
-                onChange={(e) => setTypedWord(e.target.value)}
-                disabled={isWiping}
-                placeholder="ELIMINAR"
-                autoComplete="off"
-                className="w-full px-4 py-2.5 rounded-xl bg-cine-900 border border-cine-700/80 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-sm font-mono text-white placeholder-cine-600 outline-none transition-all tracking-wider"
-              />
-              {typedWord && typedWord !== "ELIMINAR" && (
-                <p className="text-[11px] text-amber-400/90 font-mono">
-                  Escribe exactamente "ELIMINAR" (todo en mayúsculas).
-                </p>
-              )}
-            </div>
-
-            {/* Opción adicional: Eliminar también la cuenta completa */}
-            <label className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900/30 border border-cine-800/80 hover:border-cine-700 transition-colors cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={deleteAccount}
-                onChange={(e) => {
-                  sounds.switch();
-                  setDeleteAccount(e.target.checked);
-                }}
-                disabled={isWiping}
-                className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
-              />
-              <span className="text-xs text-cine-400 leading-normal">
-                Eliminar también mi cuenta de usuario y cerrar sesión
-                automáticamente
-              </span>
-            </label>
-
-            {errorMessage && (
-              <div className="p-3 rounded-xl bg-red-950/50 border border-red-500/50 text-xs text-red-300">
-                {errorMessage}
-              </div>
-            )}
-
-            {/* Botones de acción centrados */}
-            <div className="flex items-center justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isWiping}
-                className="px-5 py-2.5 rounded-xl bg-cine-900 hover:bg-cine-800 text-cine-300 hover:text-white border border-cine-700 text-xs font-semibold transition-all cursor-pointer"
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                onClick={handleWipeout}
-                disabled={!canExecute}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all shadow-lg ${
-                  canExecute
-                    ? "bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white shadow-red-600/40 cursor-pointer animate-pulse"
-                    : "bg-cine-900 text-cine-600 border border-cine-800 cursor-not-allowed opacity-60"
-                }`}
-              >
-                {isWiping ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Purgando registros...</span>
-                  </>
+                {deleteAccount ? (
+                  <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
+                    <li>
+                      <strong className="text-red-300">
+                        Catálogo de Cine & Series:
+                      </strong>{" "}
+                      Películas y series vistas, pendientes, notas y críticas en
+                      CinephileHub.
+                    </li>
+                    <li>
+                      <strong className="text-red-300">
+                        Biblioteca de Videojuegos:
+                      </strong>{" "}
+                      Horas registradas, títulos, backlog, completados, platinos
+                      y críticas en GamerHub.
+                    </li>
+                    <li className="text-rose-400 font-medium">
+                      <strong className="text-rose-300">
+                        Cuenta de Usuario & Sesión:
+                      </strong>{" "}
+                      Tu cuenta se eliminará por completo de la base de datos y
+                      se cerrará tu sesión de inmediato.
+                    </li>
+                  </ul>
+                ) : isGaming ? (
+                  <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
+                    <li>
+                      <strong className="text-red-300">
+                        Biblioteca de Videojuegos:
+                      </strong>{" "}
+                      Horas registradas, títulos en progreso, backlog,
+                      completados, platinos y críticas personales.
+                    </li>
+                    <li className="text-emerald-400/90 font-medium">
+                      <strong className="text-emerald-300">
+                        CinephileHub Intacto:
+                      </strong>{" "}
+                      Todas tus películas y series vistas se conservarán
+                      exactamente como están.
+                    </li>
+                    <li>
+                      <strong className="text-cine-200">
+                        Ajuste de Experiencia:
+                      </strong>{" "}
+                      Tu XP total se recalculará manteniendo solo los puntos
+                      obtenidos en cine y series.
+                    </li>
+                  </ul>
                 ) : (
-                  <>
-                    <Trash2 className="w-4 h-4" />
-                    <span>
-                      {deleteAccount
-                        ? "Eliminar Cuenta y Todos los Datos"
-                        : isGaming
-                          ? "Purgar Catálogo de Videojuegos"
-                          : "Purgar Catálogo de Cine & Series"}
-                    </span>
-                  </>
+                  <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
+                    <li>
+                      <strong className="text-red-300">
+                        Catálogo de Cine & Series:
+                      </strong>{" "}
+                      Todas las películas y temporadas vistas, lista de
+                      pendientes, notas y críticas personales.
+                    </li>
+                    <li className="text-emerald-400/90 font-medium">
+                      <strong className="text-emerald-300">
+                        GamerHub Intacto:
+                      </strong>{" "}
+                      Toda tu biblioteca de videojuegos, horas y platinos se
+                      conservarán exactamente como están.
+                    </li>
+                    <li>
+                      <strong className="text-cine-200">
+                        Ajuste de Experiencia:
+                      </strong>{" "}
+                      Tu XP total se recalculará manteniendo solo los puntos
+                      obtenidos en videojuegos.
+                    </li>
+                  </ul>
                 )}
-              </button>
+              </div>
+
+              {/* Capa 2: Checkbox de consentimiento consciente */}
+              <label className="flex items-center gap-3 p-3 rounded-xl bg-cine-900/60 border border-cine-800 hover:border-red-500/30 transition-colors cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={confirmedCheck}
+                  onChange={(e) => {
+                    sounds.switch();
+                    setConfirmedCheck(e.target.checked);
+                  }}
+                  disabled={isWiping}
+                  className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
+                />
+                <span className="text-xs text-cine-300 leading-normal">
+                  He leído las advertencias y comprendo que esta eliminación de{" "}
+                  <strong className="text-white">
+                    {deleteAccount
+                      ? "mi cuenta completa y todos mis datos"
+                      : isGaming
+                        ? "datos de videojuegos"
+                        : "datos de cine y series"}
+                  </strong>{" "}
+                  es{" "}
+                  <strong className="text-white">
+                    definitiva e irreversible
+                  </strong>
+                  .
+                </span>
+              </label>
+
+              {/* Capa 3: Escribir obligatoriamente la palabra ELIMINAR */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-cine-300 block">
+                  Escribe la palabra{" "}
+                  <span className="font-mono font-bold text-red-400">
+                    ELIMINAR
+                  </span>{" "}
+                  en mayúsculas para confirmar:
+                </label>
+                <input
+                  type="text"
+                  value={typedWord}
+                  onChange={(e) => setTypedWord(e.target.value)}
+                  disabled={isWiping}
+                  placeholder="ELIMINAR"
+                  autoComplete="off"
+                  className="w-full px-4 py-2.5 rounded-xl bg-cine-900 border border-cine-700/80 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-sm font-mono text-white placeholder-cine-600 outline-none transition-all tracking-wider"
+                />
+                {typedWord && typedWord !== "ELIMINAR" && (
+                  <p className="text-[11px] text-amber-400/90 font-mono">
+                    Escribe exactamente "ELIMINAR" (todo en mayúsculas).
+                  </p>
+                )}
+              </div>
+
+              {/* Opción adicional: Eliminar también la cuenta completa */}
+              <label className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900/30 border border-cine-800/80 hover:border-cine-700 transition-colors cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={deleteAccount}
+                  onChange={(e) => {
+                    sounds.switch();
+                    setDeleteAccount(e.target.checked);
+                  }}
+                  disabled={isWiping}
+                  className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
+                />
+                <span className="text-xs text-cine-400 leading-normal">
+                  Eliminar también mi cuenta de usuario y cerrar sesión
+                  automáticamente
+                </span>
+              </label>
+
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-red-950/50 border border-red-500/50 text-xs text-red-300">
+                  {errorMessage}
+                </div>
+              )}
+
+              {/* Botones de acción centrados */}
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isWiping}
+                  className="px-5 py-2.5 rounded-xl bg-cine-900 hover:bg-cine-800 text-cine-300 hover:text-white border border-cine-700 text-xs font-semibold transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleWipeout}
+                  disabled={!canExecute}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all shadow-lg ${
+                    canExecute
+                      ? "bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white shadow-red-600/40 cursor-pointer animate-pulse"
+                      : "bg-cine-900 text-cine-600 border border-cine-800 cursor-not-allowed opacity-60"
+                  }`}
+                >
+                  {isWiping ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Purgando registros...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>
+                        {deleteAccount
+                          ? "Eliminar Cuenta y Todos los Datos"
+                          : isGaming
+                            ? "Purgar Catálogo de Videojuegos"
+                            : "Purgar Catálogo de Cine & Series"}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
