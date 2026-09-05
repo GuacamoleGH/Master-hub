@@ -110,45 +110,52 @@ export default function GameSearchInput({
             <button
               key={game.id}
               onClick={() => handleSelect(game.id)}
-              className="w-full px-4 py-2.5 flex items-center gap-3 text-left hover:bg-purple-950/40 transition-colors group"
+              className="w-full px-4 py-3 flex items-center justify-between gap-4 text-left hover:bg-purple-950/40 transition-colors group"
             >
-              {/* Carátula */}
-              <div className="w-11 h-14 bg-cine-900 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 relative">
-                {game.backgroundImage ? (
-                  <img
-                    src={game.backgroundImage}
-                    alt={game.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-cine-600">
-                    <Gamepad2 className="w-5 h-5" />
-                  </div>
-                )}
-              </div>
-
-              {/* Datos del juego */}
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-white text-sm group-hover:text-purple-300 transition-colors truncate">
-                  {game.title}
-                </div>
-                <div className="flex items-center gap-2 text-xs text-cine-400 mt-0.5">
-                  {game.released && <span>{game.released.split("-")[0]}</span>}
-                  {game.platforms.length > 0 && (
-                    <span className="truncate max-w-[140px] text-cine-500">
-                      • {game.platforms.slice(0, 2).join(", ")}
-                    </span>
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                {/* Carátula */}
+                <div className="w-12 h-16 bg-cine-900 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 relative shadow-md">
+                  {game.backgroundImage ? (
+                    <img
+                      src={game.backgroundImage}
+                      alt={game.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-cine-600">
+                      <Gamepad2 className="w-6 h-6" />
+                    </div>
                   )}
+                </div>
+
+                {/* Datos del juego */}
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-white text-sm sm:text-base group-hover:text-purple-300 transition-colors truncate">
+                    {game.title}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-cine-400 mt-1 flex-wrap">
+                    {game.released && (
+                      <span className="font-mono text-purple-300 font-bold bg-purple-950/60 px-2 py-0.5 rounded border border-purple-500/30">
+                        {game.released.split("-")[0]}
+                      </span>
+                    )}
+                    {game.platforms.length > 0 && (
+                      <span className="truncate max-w-[280px] sm:max-w-[360px] text-cine-400">
+                        {game.platforms.join(" • ")}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Metacritic Badge */}
               {game.metacritic && (
-                <div className="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold">
-                  {game.metacritic}
+                <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold shadow-sm">
+                  <span className="text-[10px] uppercase text-purple-400 font-semibold">Meta</span>
+                  <span className="text-white font-black text-sm">{game.metacritic}</span>
                 </div>
               )}
             </button>
