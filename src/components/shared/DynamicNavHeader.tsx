@@ -1,12 +1,51 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import {
+  ArrowLeft,
+  Film,
+  Gamepad2,
+  LogIn,
+  LogOut,
+  User,
+  ChevronDown,
+  Trophy,
+  MessageSquare,
+  Share2,
+} from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
 
 export default function DynamicNavHeader() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Páginas de Autenticación
+  if (pathname === "/login" || pathname === "/register") {
+    return (
+      <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-xs font-semibold text-cine-400 hover:text-white transition-colors bg-cine-900/80 px-3 py-1.5 rounded-xl border border-cine-800"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Volver al Hub</span>
+          </Link>
+          <Link
+            href="/"
+            className="font-extrabold text-white text-base tracking-tight"
+          >
+            Master<span className="text-purple-400">Hub</span>
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   // Universo de Videojuegos
   if (pathname.startsWith("/games")) {
@@ -15,7 +54,151 @@ export default function DynamicNavHeader() {
 
   // Launcher Principal (Centro de Mando)
   if (pathname === "/") {
-    return null;
+    return (
+      <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 via-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center">
+              <span className="text-sm font-black text-white">MH</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-white text-base tracking-tight">
+                Master<span className="text-purple-400">Hub</span>
+              </span>
+              <span className="text-[9px] uppercase tracking-widest text-cine-400 font-mono -mt-1">
+                Centro de Mando
+              </span>
+            </div>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/movies"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Film className="w-3.5 h-3.5 text-amber-400" />
+              <span>Cine & Series</span>
+            </Link>
+
+            <Link
+              href="/games"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
+              <span>Videojuegos</span>
+            </Link>
+
+            <Link
+              href="/leaderboard"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ranking</span>
+            </Link>
+
+            <Link
+              href="/reviews"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
+              <span>Reseñas</span>
+            </Link>
+
+            <div className="w-px h-5 bg-cine-800 hidden sm:block" />
+
+            {session?.user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cine-900 hover:bg-cine-800 border border-cine-700/80 transition-colors"
+                >
+                  {session.user.image ? (
+                    <img
+                      src={session.user.image}
+                      alt={session.user.name || "Usuario"}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold flex items-center justify-center">
+                      {(session.user.name ||
+                        session.user.username ||
+                        "U")[0].toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-xs font-semibold text-white max-w-[100px] truncate">
+                    {session.user.name || session.user.username}
+                  </span>
+                  <ChevronDown className="w-3 h-3 text-cine-400" />
+                </button>
+
+                {isMenuOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-48 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
+                    onMouseLeave={() => setIsMenuOpen(false)}
+                  >
+                    <div className="px-3 py-2 border-b border-cine-800">
+                      <p className="text-xs font-bold text-white truncate">
+                        {session.user.name || session.user.username}
+                      </p>
+                      <p className="text-[10px] text-cine-400 truncate font-mono">
+                        {session.user.email}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/u/${session.user.username || session.user.id}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-purple-300 hover:bg-cine-800 hover:text-white"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Mi Perfil Público</span>
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
+                    >
+                      <Film className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Perfil Cinéfilo</span>
+                    </Link>
+                    <Link
+                      href="/games/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-cine-200 hover:bg-cine-800 hover:text-white"
+                    >
+                      <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Perfil Gamer</span>
+                    </Link>
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Cerrar Sesión</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-md shadow-purple-600/20 transition-all"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Iniciar Sesión</span>
+                </Link>
+                <Link
+                  href="/register"
+                  className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-purple-300 bg-cine-900 hover:bg-cine-800 border border-purple-500/40 transition-all"
+                >
+                  <span>Crear Cuenta</span>
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+    );
   }
 
   // Universo de Películas

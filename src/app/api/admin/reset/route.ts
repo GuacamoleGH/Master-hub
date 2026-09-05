@@ -1,9 +1,18 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { CURATED_MOVIES } from "@/lib/mockData";
 import { calculateBallKnowledge } from "@/lib/ballKnowledge";
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  let targetUserId = session?.user?.id;
+  if (!targetUserId) {
+    const firstUser = await prisma.user.findFirst();
+    targetUserId = firstUser?.id;
+  }
+
   try {
     const body = await request.json();
     const action = body.action || "wipe";
@@ -66,20 +75,22 @@ export async function POST(request: NextRequest) {
             diff = res.difference;
           }
 
-          await prisma.userMovie.create({
-            data: {
-              movieId: movie.id,
-              status: item.userMovie.status,
-              userRating: item.userMovie.userRating ?? null,
-              review: item.userMovie.review ?? null,
-              watchedDate: item.userMovie.watchedDate
-                ? new Date(item.userMovie.watchedDate)
-                : null,
-              ballKnowledge: bk,
-              difference: diff,
-            },
-          });
-
+          if (targetUserId) {
+            await prisma.userMovie.create({
+              data: {
+                userId: targetUserId,
+                movieId: movie.id,
+                status: item.userMovie.status,
+                userRating: item.userMovie.userRating ?? null,
+                review: item.userMovie.review ?? null,
+                watchedDate: item.userMovie.watchedDate
+                  ? new Date(item.userMovie.watchedDate)
+                  : null,
+                ballKnowledge: bk,
+                difference: diff,
+              },
+            });
+          }
           if (item.userMovie.status === "WATCHED") {
             totalXp += 100;
             if (item.userMovie.review) totalXp += 50;

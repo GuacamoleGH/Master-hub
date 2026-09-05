@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSeriesDetail } from "@/lib/tmdb";
 import { calculateBallKnowledge, calculateMovieXp } from "@/lib/ballKnowledge";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-async function refreshUserXp() {
-  const allUserMovies = await prisma.userMovie.findMany();
-  const allUserSeries = await prisma.userSeries.findMany();
+async function refreshUserXp(userId: string) {
+  const allUserMovies = await prisma.userMovie.findMany({ where: { userId } });
+  const allUserSeries = await prisma.userSeries.findMany({ where: { userId } });
   let totalXp = 0;
   for (const um of allUserMovies) {
     const isWatched = um.status === "WATCHED";
@@ -18,20 +20,20 @@ async function refreshUserXp() {
     totalXp += calculateMovieXp(isWatched, hasReview, us.ballKnowledge);
   }
 
-  await prisma.userProfile.upsert({
-    where: { id: "user-default" },
-    update: { totalXp },
-    create: {
-      id: "user-default",
-      displayName: "Jose",
-      totalXp,
-    },
+  await prisma.user.update({
+    where: { id: userId },
+    data: { totalXp },
   });
 }
 
 export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ items: [] });
+  }
+
   const { searchParams } = new URL(request.url);
-  const status = searchParams.get("status"); // 'WATCHLIST' | 'WATCHED'
+  const status = searchParams.get("status");
   const genre = searchParams.get("genre");
   const platform = searchParams.get("platform");
   const sort = searchParams.get("sort") || "recent";
@@ -39,7 +41,10 @@ export async function GET(request: NextRequest) {
   const ratingMax = searchParams.get("ratingMax");
 
   try {
-    const whereClause: any = {};
+    const whereClause: any = {
+      userId: session.user.id,
+    };
+
     if (status) {
       whereClause.status = status;
     }
@@ -67,7 +72,6 @@ export async function GET(request: NextRequest) {
       orderBy,
     });
 
-    // Procesar campos JSON y filtros en memoria
     let results = records.map((r) => {
       let genres: string[] = [];
       let streamingPlatforms: string[] = [];
@@ -110,14 +114,12 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Filtrar por género si aplica
     if (genre && genre !== "all") {
       results = results.filter((item) =>
-        item.series.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
+        item.series.genres.some((g) => g.toLowerCase() === genre.toLowerCase())
       );
     }
 
-    // Filtrar por plataforma si aplica
     if (platform && platform !== "all") {
       const cleanPlat = platform.toLowerCase();
       results = results.filter((item) => {
@@ -127,7 +129,7 @@ export async function GET(request: NextRequest) {
         if (
           item.series.streamingPlatforms &&
           item.series.streamingPlatforms.some((p) =>
-            p.toLowerCase().includes(cleanPlat),
+            p.toLowerCase().includes(cleanPlat)
           )
         ) {
           return true;
@@ -136,20 +138,19 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Ordenamiento por campos de Series si aplica
     if (sort === "imdbRatingDesc") {
       results.sort(
-        (a, b) => (b.series.imdbRating || 0) - (a.series.imdbRating || 0),
+        (a, b) => (b.series.imdbRating || 0) - (a.series.imdbRating || 0)
       );
     } else if (sort === "imdbRatingAsc") {
       results.sort(
-        (a, b) => (a.series.imdbRating || 0) - (b.series.imdbRating || 0),
+        (a, b) => (a.series.imdbRating || 0) - (b.series.imdbRating || 0)
       );
     } else if (sort === "title") {
       results.sort((a, b) => a.series.name.localeCompare(b.series.name));
     } else if (sort === "yearDesc") {
       results.sort(
-        (a, b) => (b.series.firstAirYear || 0) - (a.series.firstAirYear || 0),
+        (a, b) => (b.series.firstAirYear || 0) - (a.series.firstAirYear || 0)
       );
     }
 
@@ -158,31 +159,40 @@ export async function GET(request: NextRequest) {
     console.error("Error en GET /api/user-series:", error);
     return NextResponse.json(
       { error: "Error al listar series del usuario" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: "Debes iniciar sesión para guardar series en tu lista." },
+      { status: 401 }
+    );
+  }
+
+  const userId = session.user.id;
+
   try {
     const body = await request.json();
     const {
       tmdbId,
-      status, // 'WATCHLIST' | 'WATCHED'
-      userRating, // float 0-10 or null
-      review, // string or null
-      platform, // string or null
-      watchedDate, // ISO string or null
+      status,
+      userRating,
+      review,
+      platform,
+      watchedDate,
     } = body;
 
     if (!tmdbId || !status) {
       return NextResponse.json(
         { error: "Faltan parámetros requeridos (tmdbId, status)" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    // 1. Asegurar que la serie existe en nuestra base de datos
     let series = await prisma.series.findUnique({
       where: { tmdbId: Number(tmdbId) },
     });
@@ -192,7 +202,7 @@ export async function POST(request: NextRequest) {
       if (!detail) {
         return NextResponse.json(
           { error: "No se pudo obtener información de la serie desde TMDB" },
-          { status: 404 },
+          { status: 404 }
         );
       }
 
@@ -216,13 +226,12 @@ export async function POST(request: NextRequest) {
           cast: JSON.stringify(detail.cast),
           imdbRating: detail.imdbRating,
           streamingPlatforms: JSON.stringify(
-            detail.streamingPlatforms || ["Pirata / Stremio"],
+            detail.streamingPlatforms || ["Pirata / Stremio"]
           ),
         },
       });
     }
 
-    // 2. Calcular Ball Knowledge si está vista y tiene nota
     let ballKnowledge: number | null = null;
     let difference: number | null = null;
 
@@ -239,12 +248,16 @@ export async function POST(request: NextRequest) {
     const dateToSave = watchedDate
       ? new Date(watchedDate)
       : status === "WATCHED"
-        ? new Date()
-        : null;
+      ? new Date()
+      : null;
 
-    // 3. Upsert UserSeries con plataforma
     const userSeries = await prisma.userSeries.upsert({
-      where: { seriesId: series.id },
+      where: {
+        userId_seriesId: {
+          userId,
+          seriesId: series.id,
+        },
+      },
       update: {
         status,
         userRating: typeof userRating === "number" ? userRating : null,
@@ -255,6 +268,7 @@ export async function POST(request: NextRequest) {
         difference,
       },
       create: {
+        userId,
         seriesId: series.id,
         status,
         userRating: typeof userRating === "number" ? userRating : null,
@@ -266,43 +280,55 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 4. Actualizar XP del perfil
-    await refreshUserXp();
+    await refreshUserXp(userId);
 
     return NextResponse.json({ success: true, userSeries });
   } catch (error) {
     console.error("Error en POST /api/user-series:", error);
     return NextResponse.json(
       { error: "Error al registrar la serie" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: "Debes iniciar sesión para modificar tu lista de series." },
+      { status: 401 }
+    );
+  }
+
+  const userId = session.user.id;
   const { searchParams } = new URL(request.url);
   const userSeriesId = searchParams.get("id");
   const seriesId = searchParams.get("seriesId");
 
   try {
     if (userSeriesId) {
-      await prisma.userSeries.delete({ where: { id: userSeriesId } });
+      await prisma.userSeries.deleteMany({
+        where: { id: userSeriesId, userId },
+      });
     } else if (seriesId) {
-      await prisma.userSeries.deleteMany({ where: { seriesId } });
+      await prisma.userSeries.deleteMany({
+        where: { seriesId, userId },
+      });
     } else {
       return NextResponse.json(
         { error: "Falta parámetro id o seriesId" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    await refreshUserXp();
+    await refreshUserXp(userId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error en DELETE /api/user-series:", error);
     return NextResponse.json(
       { error: "Error al eliminar registro de serie" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

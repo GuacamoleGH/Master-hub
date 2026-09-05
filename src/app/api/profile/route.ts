@@ -1,24 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { calculateLevelAndRank } from "@/lib/ballKnowledge";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
-    let profile = await prisma.userProfile.findUnique({
-      where: { id: "user-default" },
-    });
-
-    if (!profile) {
-      profile = await prisma.userProfile.create({
-        data: {
-          id: "user-default",
-          displayName: "Jose",
-          totalXp: 0,
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      const levelInfo = calculateLevelAndRank(0);
+      return NextResponse.json({
+        profile: {
+          displayName: "Invitado",
+          avatarUrl: null,
+          bio: "Inicia sesión para guardar tu historial y subir de nivel.",
+        },
+        stats: {
+          totalWatched: 0,
+          totalWatchlist: 0,
+          totalReviews: 0,
+          averageRating: null,
+          averageImdbRating: null,
+          globalBallKnowledge: null,
+          averageDifference: null,
+          ...levelInfo,
+          topGenre: null,
+          highestRatedMovie: null,
+          lowestRatedMovie: null,
+          biggestW: null,
+          biggestL: null,
+          ratingDistribution: [],
+          genreCounts: [],
+          watchesByMonth: [],
+          decadesCount: [],
         },
       });
     }
 
+    const userId = session.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
     const allRecords = await prisma.userMovie.findMany({
+      where: { userId },
       include: {
         movie: true,
       },
@@ -26,15 +51,14 @@ export async function GET() {
 
     const watchedList = allRecords.filter((r) => r.status === "WATCHED");
     const watchlistCount = allRecords.filter(
-      (r) => r.status === "WATCHLIST",
+      (r) => r.status === "WATCHLIST"
     ).length;
     const reviewedCount = watchedList.filter(
-      (r) => r.review && r.review.trim().length > 0,
+      (r) => r.review && r.review.trim().length > 0
     ).length;
 
-    // Métricas de notas y Ball Knowledge
     const ratedList = watchedList.filter(
-      (r) => typeof r.userRating === "number",
+      (r) => typeof r.userRating === "number"
     );
     const totalRated = ratedList.length;
 
@@ -46,45 +70,44 @@ export async function GET() {
     if (totalRated > 0) {
       const sumUserRatings = ratedList.reduce(
         (acc, curr) => acc + (curr.userRating || 0),
-        0,
+        0
       );
       averageRating = Number((sumUserRatings / totalRated).toFixed(1));
 
       const moviesWithImdb = ratedList.filter(
-        (r) => typeof r.movie.imdbRating === "number",
+        (r) => typeof r.movie.imdbRating === "number"
       );
       if (moviesWithImdb.length > 0) {
         const sumImdb = moviesWithImdb.reduce(
           (acc, curr) => acc + (curr.movie.imdbRating || 0),
-          0,
+          0
         );
         averageImdbRating = Number(
-          (sumImdb / moviesWithImdb.length).toFixed(1),
+          (sumImdb / moviesWithImdb.length).toFixed(1)
         );
 
         const bkList = moviesWithImdb.filter(
-          (r) => typeof r.ballKnowledge === "number",
+          (r) => typeof r.ballKnowledge === "number"
         );
         if (bkList.length > 0) {
           const sumBk = bkList.reduce(
             (acc, curr) => acc + (curr.ballKnowledge || 0),
-            0,
+            0
           );
           globalBallKnowledge = Number((sumBk / bkList.length).toFixed(1));
 
           const sumDiff = bkList.reduce(
             (acc, curr) => acc + Math.abs(curr.difference || 0),
-            0,
+            0
           );
           averageDifference = Number((sumDiff / bkList.length).toFixed(1));
         }
       }
     }
 
-    // Nivel cinéfilo y XP
-    const levelInfo = calculateLevelAndRank(profile.totalXp);
+    const totalXp = user?.totalXp || 0;
+    const levelInfo = calculateLevelAndRank(totalXp);
 
-    // Rankings personales: Highest, Lowest, Biggest W, Biggest L
     let highestRatedMovie: any = null;
     let lowestRatedMovie: any = null;
     let biggestW: any = null;
@@ -92,7 +115,7 @@ export async function GET() {
 
     if (ratedList.length > 0) {
       const sortedByRating = [...ratedList].sort(
-        (a, b) => (b.userRating || 0) - (a.userRating || 0),
+        (a, b) => (b.userRating || 0) - (a.userRating || 0)
       );
       highestRatedMovie = {
         title: sortedByRating[0].movie.title,
@@ -108,12 +131,11 @@ export async function GET() {
       const bkRecords = ratedList.filter(
         (r) =>
           typeof r.ballKnowledge === "number" &&
-          typeof r.movie.imdbRating === "number",
+          typeof r.movie.imdbRating === "number"
       );
       if (bkRecords.length > 0) {
-        // Biggest W: mayor coincidencia (mayor BK y menor abs(diff))
         const sortedW = [...bkRecords].sort(
-          (a, b) => (b.ballKnowledge || 0) - (a.ballKnowledge || 0),
+          (a, b) => (b.ballKnowledge || 0) - (a.ballKnowledge || 0)
         );
         biggestW = {
           title: sortedW[0].movie.title,
@@ -124,9 +146,8 @@ export async function GET() {
           diff: sortedW[0].difference,
         };
 
-        // Biggest L: mayor discrepancia (menor BK)
         const sortedL = [...bkRecords].sort(
-          (a, b) => (a.ballKnowledge || 0) - (b.ballKnowledge || 0),
+          (a, b) => (a.ballKnowledge || 0) - (b.ballKnowledge || 0)
         );
         biggestL = {
           title: sortedL[0].movie.title,
@@ -139,7 +160,6 @@ export async function GET() {
       }
     }
 
-    // Distribución de notas (redondeadas al entero más cercano 0..10)
     const ratingBuckets: { [key: number]: number } = {};
     for (let i = 0; i <= 10; i++) ratingBuckets[i] = 0;
     for (const r of ratedList) {
@@ -153,9 +173,7 @@ export async function GET() {
       count: ratingBuckets[Number(k)],
     }));
 
-    // Conteo por géneros
-    const genreMap: { [key: string]: { count: number; totalScore: number } } =
-      {};
+    const genreMap: { [key: string]: { count: number; totalScore: number } } = {};
     for (const r of watchedList) {
       let genres: string[] = [];
       try {
@@ -183,11 +201,10 @@ export async function GET() {
 
     const topGenre = genreCounts.length > 0 ? genreCounts[0].genre : null;
 
-    // Películas vistas por mes
     const monthMap: { [key: string]: number } = {};
     for (const r of watchedList) {
       if (r.watchedDate) {
-        const key = r.watchedDate.toISOString().substring(0, 7); // YYYY-MM
+        const key = r.watchedDate.toISOString().substring(0, 7);
         monthMap[key] = (monthMap[key] || 0) + 1;
       }
     }
@@ -198,7 +215,6 @@ export async function GET() {
         count: monthMap[month],
       }));
 
-    // Conteo por décadas
     const decadeMap: { [key: string]: number } = {};
     for (const r of watchedList) {
       if (r.movie.year) {
@@ -215,9 +231,9 @@ export async function GET() {
 
     return NextResponse.json({
       profile: {
-        displayName: profile.displayName,
-        avatarUrl: profile.avatarUrl,
-        bio: profile.bio,
+        displayName: user?.name || user?.username || "Cinéfilo",
+        avatarUrl: user?.image || null,
+        bio: user?.bio || null,
       },
       stats: {
         totalWatched: watchedList.length,
@@ -243,37 +259,43 @@ export async function GET() {
     console.error("Error en GET /api/profile:", error);
     return NextResponse.json(
       { error: "Error al obtener estadísticas del perfil" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function PATCH(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { displayName, bio, avatarUrl } = body;
 
-    const updated = await prisma.userProfile.upsert({
-      where: { id: "user-default" },
-      update: {
-        displayName: displayName || undefined,
-        bio: bio !== undefined ? bio : undefined,
-        avatarUrl: avatarUrl !== undefined ? avatarUrl : undefined,
-      },
-      create: {
-        id: "user-default",
-        displayName: displayName || "Cinéfilo",
-        bio,
-        avatarUrl,
+    const updated = await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        name: displayName ? displayName.trim() : undefined,
+        bio: bio !== undefined ? bio.trim() : undefined,
+        image: avatarUrl !== undefined ? avatarUrl.trim() || null : undefined,
       },
     });
 
-    return NextResponse.json({ success: true, profile: updated });
+    return NextResponse.json({
+      success: true,
+      profile: {
+        displayName: updated.name || updated.username,
+        bio: updated.bio,
+        avatarUrl: updated.image,
+      },
+    });
   } catch (error) {
     console.error("Error en PATCH /api/profile:", error);
     return NextResponse.json(
       { error: "Error al actualizar perfil" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

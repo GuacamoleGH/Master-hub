@@ -74,7 +74,7 @@ prueba/
 ### 2. 🎮 Gamer Hub (`/games/...`)
 
 - **Integración RAWG API y Enlace Externo:** Catálogo con carátulas, screenshots, trailers y botón con enlace directo a la ficha oficial de RAWG.
-- **Registro Multi-Plataforma Granular (v2.1):** Posibilidad de registrar horas independientes (ej: *Steam: 60h*, *PS4: 30h*) y estado independiente por cada plataforma (*Completado en PC*, *Jugando en Xbox*).
+- **Registro Multi-Plataforma Granular (v2.1):** Posibilidad de registrar horas independientes (ej: _Steam: 60h_, _PS4: 30h_) y estado independiente por cada plataforma (_Completado en PC_, _Jugando en Xbox_).
 - **Estadísticas Avanzadas de Plataforma (v2.1):** Paneles y gráficos de horas acumuladas, número de juegos y porcentaje de dedicación por cada consola/tienda.
 - **Catálogo Retro & Moderno:** Soporte para PC (Steam, Epic, GOG, Game Pass, Battle.net), Xbox (Series, One, 360, Clásica), PlayStation (PS5, PS4, PS3, PS2, PS1, Vita), Nintendo (Switch, Wii, GameCube, N64, 3DS, GBA) y Steam Deck / Portátiles.
 - **Motor Game Knowledge (GK):**

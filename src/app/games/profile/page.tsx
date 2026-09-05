@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  LogIn,
   Gamepad2,
   Trophy,
   Clock,
@@ -14,6 +15,7 @@ import {
   Edit3,
   Trash2,
   RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -29,6 +31,7 @@ import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import { GamerStats } from "@/types/game";
+import { sounds } from "@/lib/sounds";
 
 interface ProfileResponse {
   profile: {
@@ -126,17 +129,29 @@ export default function GamerProfilePage() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
-                alt={profile.displayName}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0"
-              />
-            ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-purple-900/60 border-2 border-purple-400/50 flex items-center justify-center text-purple-300 flex-shrink-0">
+            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
+              {profile.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <Gamepad2 className="w-10 h-10" />
-              </div>
-            )}
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setIsEditOpen(true);
+                }}
+                className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-purple-300 text-[10px] font-bold gap-1 cursor-pointer"
+                title="Elegir insignia temática"
+              >
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span>Cambiar</span>
+              </button>
+            </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
@@ -153,8 +168,11 @@ export default function GamerProfilePage() {
                   {profile.displayName}
                 </h1>
                 <button
-                  onClick={() => setIsEditOpen(true)}
-                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                  onClick={() => {
+                    sounds.playClick();
+                    setIsEditOpen(true);
+                  }}
+                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" /> Editar Perfil
                 </button>
@@ -398,55 +416,6 @@ export default function GamerProfilePage() {
           )}
         </section>
       </div>
-
-      {/* Gestión de Datos y Reinicio de Videojuegos */}
-      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-cine-950 space-y-4">
-        <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-            Gestión de la Base de Datos de Videojuegos
-          </h3>
-          <p className="text-xs text-cine-400 mt-0.5">
-            Administra los registros de tus videojuegos en Supabase. Puedes
-            reiniciar para empezar tu historial desde cero o restaurar los datos
-            de demostración curados.
-          </p>
-        </div>
-
-        {adminMsg && (
-          <div className="p-3 bg-purple-950/70 border border-purple-500/40 rounded-xl text-purple-300 text-xs font-semibold">
-            {adminMsg}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            onClick={() => handleAdminAction("wipe")}
-            disabled={isActionLoading}
-            className="px-4 py-2.5 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-700/80 text-rose-300 font-semibold rounded-xl text-xs transition-colors flex items-center gap-2"
-          >
-            {isActionLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Trash2 className="w-3.5 h-3.5" />
-            )}
-            Vaciar Base de Datos (Empezar desde cero)
-          </button>
-
-          <button
-            onClick={() => handleAdminAction("seed")}
-            disabled={isActionLoading}
-            className="px-4 py-2.5 bg-cine-900 hover:bg-cine-800 border border-purple-500/40 text-purple-300 hover:text-white font-semibold rounded-xl text-xs transition-colors flex items-center gap-2"
-          >
-            {isActionLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="w-3.5 h-3.5" />
-            )}
-            Recargar Catálogo de Demostración
-          </button>
-        </div>
-      </section>
 
       {/* Modal para Editar Perfil Gamer */}
       <EditGamerProfileModal

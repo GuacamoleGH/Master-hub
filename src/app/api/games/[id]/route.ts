@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getGameDetail } from "@/lib/rawg";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
   const idOrRawg = params.id;
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
 
   try {
     const isNum = !isNaN(Number(idOrRawg));
@@ -15,7 +19,7 @@ export async function GET(
         ? { OR: [{ id: idOrRawg }, { rawgId: Number(idOrRawg) }] }
         : { id: idOrRawg },
       include: {
-        userGame: true,
+        userGames: userId ? { where: { userId } } : false,
       },
     });
 
@@ -43,6 +47,76 @@ export async function GET(
           parsedScreenshots = JSON.parse(dbGame.screenshots);
       } catch {}
 
+      // Obtener todas las valoraciones y reseñas de la comunidad para este videojuego
+      const allCommunityUserGames = await prisma.userGame.findMany({
+        where: {
+          gameId: dbGame.id,
+          OR: [
+            { review: { not: null, gt: "" } },
+            { userRating: { not: null } },
+          ],
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true,
+              totalXp: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      const validRatings: number[] = [];
+      const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const communityReviews = [];
+
+      for (const ug of allCommunityUserGames) {
+        if (typeof ug.userRating === "number" && ug.userRating > 0) {
+          validRatings.push(ug.userRating);
+          const starIndex =
+            Math.min(10, Math.max(1, Math.round(ug.userRating))) - 1;
+          distribution[starIndex]++;
+        }
+        if (ug.review && ug.review.trim().length > 0) {
+          const username =
+            ug.user.username ||
+            ug.user.name?.toLowerCase().replace(/\s+/g, "") ||
+            `user_${ug.user.id.slice(-5)}`;
+          communityReviews.push({
+            id: ug.id,
+            user: {
+              id: ug.user.id,
+              username,
+              name: ug.user.name,
+              image: ug.user.image,
+              totalXp: ug.user.totalXp,
+            },
+            userRating: ug.userRating,
+            review: ug.review,
+            platform: ug.platform,
+            hoursPlayed: ug.hoursPlayed,
+            knowledgeScore: ug.gameKnowledge,
+            knowledgeType: "game" as const,
+            date: (ug.completedDate || ug.updatedAt).toISOString(),
+          });
+        }
+      }
+
+      const masterHubScore =
+        validRatings.length > 0
+          ? Number(
+              (
+                validRatings.reduce((a, b) => a + b, 0) / validRatings.length
+              ).toFixed(1),
+            )
+          : null;
+
+      const userGame = (dbGame as any).userGames?.[0] || null;
+
       return NextResponse.json({
         game: {
           id: dbGame.id,
@@ -59,35 +133,38 @@ export async function GET(
           description: dbGame.description,
           screenshots: parsedScreenshots,
           trailerUrl: dbGame.trailerUrl,
-          userGame: dbGame.userGame
+          masterHubScore,
+          masterHubVotes: validRatings.length,
+          masterHubDistribution: distribution,
+          communityReviews,
+          userGame: userGame
             ? {
-                id: dbGame.userGame.id,
-                status: dbGame.userGame.status,
-                userRating: dbGame.userGame.userRating,
-                hoursPlayed: dbGame.userGame.hoursPlayed,
-                platform: dbGame.userGame.platform,
-                platformDetails: dbGame.userGame.platformDetails
+                id: userGame.id,
+                status: userGame.status,
+                userRating: userGame.userRating,
+                hoursPlayed: userGame.hoursPlayed,
+                platform: userGame.platform,
+                platformDetails: userGame.platformDetails
                   ? (() => {
                       try {
-                        return JSON.parse(dbGame.userGame.platformDetails);
+                        return JSON.parse(userGame.platformDetails);
                       } catch {
                         return null;
                       }
                     })()
                   : null,
-                review: dbGame.userGame.review,
-                completedDate: dbGame.userGame.completedDate
-                  ? dbGame.userGame.completedDate.toISOString()
+                review: userGame.review,
+                completedDate: userGame.completedDate
+                  ? userGame.completedDate.toISOString()
                   : null,
-                gameKnowledge: dbGame.userGame.gameKnowledge,
-                difference: dbGame.userGame.difference,
+                gameKnowledge: userGame.gameKnowledge,
+                difference: userGame.difference,
               }
             : null,
         },
       });
     }
 
-    // 2. Si no está en DB pero es un ID numérico de RAWG, consultar la API externa
     if (isNum) {
       const rawgDetail = await getGameDetail(Number(idOrRawg));
       if (rawgDetail) {
