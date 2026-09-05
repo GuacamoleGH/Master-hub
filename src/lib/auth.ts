@@ -131,5 +131,8 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    process.env.SECRET ||
+    "f4d99c4b7b25ad81ef546c10928a38cbe22b9c7b198da34502d9c0e5a87ef892",
 };
