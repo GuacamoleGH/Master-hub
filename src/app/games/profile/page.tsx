@@ -165,8 +165,8 @@ export default function GamerProfilePage() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
+          <div className="flex items-center gap-5 sm:gap-6">
+            <div className="relative group/avatar w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-400 shadow-[0_0_20px_rgba(139,92,246,0.4)] flex-shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
@@ -174,7 +174,7 @@ export default function GamerProfilePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Gamepad2 className="w-10 h-10" />
+                <Gamepad2 className="w-12 h-12" />
               )}
               <button
                 type="button"
@@ -186,14 +186,14 @@ export default function GamerProfilePage() {
               >
                 {session?.user ? (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
-                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <Sparkles className="w-6 h-6 text-purple-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Cambiar
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
-                    <LogIn className="w-5 h-5 text-purple-400" />
+                    <LogIn className="w-6 h-6 text-purple-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Entrar
                     </span>
@@ -202,24 +202,24 @@ export default function GamerProfilePage() {
               </button>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono uppercase tracking-widest text-purple-400 font-bold">
                   Perfil de Jugador
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
                   {stats.rankTitle}
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3.5">
                 <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {profile.displayName}
                 </h1>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2.5 sm:gap-3">
                   <button
                     onClick={handleOpenEdit}
-                    className="w-full justify-center px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                    className="w-full justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                     title={
                       session?.user
                         ? "Editar perfil gamer"
@@ -244,7 +244,7 @@ export default function GamerProfilePage() {
                       sounds.shutter();
                       setIsWrappedOpen(true);
                     }}
-                    className="w-full justify-center px-3.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
+                    className="w-full justify-center px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
                     title="Generar tarjeta de resumen para redes sociales"
                   >
                     <Camera className="w-3.5 h-3.5" />
@@ -253,7 +253,7 @@ export default function GamerProfilePage() {
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-cine-300 max-w-lg">
+              <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed">
                 {profile.bio ||
                   "Jugador y analista del catálogo universal de videojuegos."}
               </p>
