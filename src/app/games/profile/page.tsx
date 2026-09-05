@@ -340,6 +340,7 @@ export default function GamerProfilePage() {
             completionRate={achievementsData.completionRate}
             totalXpEarned={achievementsData.totalXpEarned}
             userName={profile.displayName}
+            universe="GAMING"
           />
         </section>
       )}
@@ -520,6 +521,7 @@ export default function GamerProfilePage() {
       <SocialWrappedModal
         isOpen={isWrappedOpen}
         onClose={() => setIsWrappedOpen(false)}
+        universe="GAMING"
         user={{
           displayName: profile.displayName,
           username: session?.user?.username,
@@ -530,6 +532,7 @@ export default function GamerProfilePage() {
           totalSeries: 0,
           totalHours: stats.totalHours,
           totalCompletedGames: stats.totalCompleted,
+          totalPlatinum: stats.totalPlatinum,
           ballKnowledge: null,
           gameKnowledge: stats.globalGameKnowledge,
         }}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Sparkles,
   Download,
@@ -20,6 +21,7 @@ import { useToast } from "@/components/shared/ToastContext";
 interface SocialWrappedModalProps {
   isOpen: boolean;
   onClose: () => void;
+  universe?: "CINE" | "GAMING";
   user: {
     displayName: string;
     username?: string | null;
@@ -30,6 +32,7 @@ interface SocialWrappedModalProps {
     totalSeries?: number;
     totalHours?: number;
     totalCompletedGames?: number;
+    totalPlatinum?: number;
     ballKnowledge?: number | null;
     gameKnowledge?: number | null;
   };
@@ -39,6 +42,7 @@ interface SocialWrappedModalProps {
 export default function SocialWrappedModal({
   isOpen,
   onClose,
+  universe = "CINE",
   user,
   stats,
   achievements = [],
@@ -47,9 +51,34 @@ export default function SocialWrappedModal({
   const toast = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  const isGaming = universe === "GAMING";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      sounds.modalOpen();
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const unlockedAchievements = achievements
-    .filter((a) => a.isUnlocked)
+    .filter((a) => {
+      if (!a.isUnlocked) return false;
+      if (isGaming) {
+        return a.universe === "GAMING" || a.universe === "BOTH";
+      }
+      return a.universe === "CINE" || a.universe === "BOTH";
+    })
     .slice(0, 3);
 
   // Generador Canvas
@@ -68,27 +97,45 @@ export default function SocialWrappedModal({
 
     // 1. Fondo Oscuro Profundo
     const bgGradient = ctx.createLinearGradient(0, 0, W, H);
-    bgGradient.addColorStop(0, "#080b14");
-    bgGradient.addColorStop(0.5, "#0b0f19");
-    bgGradient.addColorStop(1, "#05070d");
+    if (isGaming) {
+      bgGradient.addColorStop(0, "#060714");
+      bgGradient.addColorStop(0.5, "#0b0e24");
+      bgGradient.addColorStop(1, "#04050d");
+    } else {
+      bgGradient.addColorStop(0, "#08090d");
+      bgGradient.addColorStop(0.5, "#0e111a");
+      bgGradient.addColorStop(1, "#06070a");
+    }
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, W, H);
 
     // 2. Luces ambientales y destellos radiales
-    const glow1 = ctx.createRadialGradient(900, 200, 50, 900, 200, 600);
-    glow1.addColorStop(0, "rgba(245, 158, 11, 0.25)");
-    glow1.addColorStop(1, "rgba(245, 158, 11, 0)");
+    const glow1 = ctx.createRadialGradient(900, 200, 50, 900, 200, 650);
+    if (isGaming) {
+      glow1.addColorStop(0, "rgba(168, 85, 247, 0.35)");
+      glow1.addColorStop(1, "rgba(168, 85, 247, 0)");
+    } else {
+      glow1.addColorStop(0, "rgba(245, 158, 11, 0.35)");
+      glow1.addColorStop(1, "rgba(245, 158, 11, 0)");
+    }
     ctx.fillStyle = glow1;
     ctx.fillRect(0, 0, W, H);
 
-    const glow2 = ctx.createRadialGradient(200, 1600, 50, 200, 1600, 700);
-    glow2.addColorStop(0, "rgba(139, 92, 246, 0.3)");
-    glow2.addColorStop(1, "rgba(139, 92, 246, 0)");
+    const glow2 = ctx.createRadialGradient(200, 1600, 50, 200, 1600, 750);
+    if (isGaming) {
+      glow2.addColorStop(0, "rgba(6, 182, 212, 0.3)");
+      glow2.addColorStop(1, "rgba(6, 182, 212, 0)");
+    } else {
+      glow2.addColorStop(0, "rgba(217, 119, 6, 0.25)");
+      glow2.addColorStop(1, "rgba(217, 119, 6, 0)");
+    }
     ctx.fillStyle = glow2;
     ctx.fillRect(0, 0, W, H);
 
     // Borde exterior estilizado
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.strokeStyle = isGaming
+      ? "rgba(168, 85, 247, 0.25)"
+      : "rgba(245, 158, 11, 0.25)";
     ctx.lineWidth = 12;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
@@ -99,14 +146,26 @@ export default function SocialWrappedModal({
     }
 
     // 3. Encabezado MasterHub
-    ctx.fillStyle = "#f59e0b";
+    ctx.fillStyle = isGaming ? "#a855f7" : "#f59e0b";
     ctx.font = "bold 32px monospace";
     ctx.textAlign = "left";
-    ctx.fillText("MASTERHUB • v4.0", 100, 140);
+    ctx.fillText(
+      isGaming
+        ? "MASTERHUB • GAMER WRAPPED"
+        : "MASTERHUB • CINEPHILE WRAPPED",
+      100,
+      140,
+    );
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
     ctx.font = "24px sans-serif";
-    ctx.fillText("RESUMEN DE UNIVERSO", 100, 180);
+    ctx.fillText(
+      isGaming
+        ? "RESUMEN DE AVENTURAS & PLATINOS"
+        : "HISTORIAL DEL SÉPTIMO ARTE & SERIES",
+      100,
+      180,
+    );
 
     // Fecha / Año
     ctx.textAlign = "right";
@@ -117,8 +176,10 @@ export default function SocialWrappedModal({
     // 4. Tarjeta del Usuario
     const cardY = 240;
     const cardH = 260;
-    ctx.fillStyle = "rgba(17, 24, 39, 0.75)";
-    ctx.strokeStyle = "rgba(245, 158, 11, 0.3)";
+    ctx.fillStyle = "rgba(17, 24, 39, 0.8)";
+    ctx.strokeStyle = isGaming
+      ? "rgba(168, 85, 247, 0.4)"
+      : "rgba(245, 158, 11, 0.4)";
     ctx.lineWidth = 3;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
@@ -150,7 +211,7 @@ export default function SocialWrappedModal({
           avatarY + avatarSize / 2,
           avatarSize / 2,
           0,
-          Math.PI * 2
+          Math.PI * 2,
         );
         ctx.clip();
         ctx.drawImage(img, avatarX, avatarY, avatarSize, avatarSize);
@@ -165,10 +226,15 @@ export default function SocialWrappedModal({
         avatarX,
         avatarY,
         avatarX + avatarSize,
-        avatarY + avatarSize
+        avatarY + avatarSize,
       );
-      grad.addColorStop(0, "#f59e0b");
-      grad.addColorStop(1, "#8b5cf6");
+      if (isGaming) {
+        grad.addColorStop(0, "#a855f7");
+        grad.addColorStop(1, "#06b6d4");
+      } else {
+        grad.addColorStop(0, "#f59e0b");
+        grad.addColorStop(1, "#d97706");
+      }
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(
@@ -176,7 +242,7 @@ export default function SocialWrappedModal({
         avatarY + avatarSize / 2,
         avatarSize / 2,
         0,
-        Math.PI * 2
+        Math.PI * 2,
       );
       ctx.fill();
 
@@ -184,12 +250,10 @@ export default function SocialWrappedModal({
       ctx.font = "black 54px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const initial = (user.displayName || "C")[0].toUpperCase();
-      ctx.fillText(
-        initial,
-        avatarX + avatarSize / 2,
-        avatarY + avatarSize / 2
-      );
+      const initial = (
+        user.displayName || (isGaming ? "G" : "C")
+      )[0].toUpperCase();
+      ctx.fillText(initial, avatarX + avatarSize / 2, avatarY + avatarSize / 2);
     }
 
     // Datos de texto del usuario
@@ -199,12 +263,12 @@ export default function SocialWrappedModal({
     ctx.font = "bold 48px sans-serif";
     ctx.fillText(user.displayName, avatarX + avatarSize + 40, avatarY + 65);
 
-    ctx.fillStyle = "#9ca3af";
+    ctx.fillStyle = isGaming ? "#c084fc" : "#fbbf24";
     ctx.font = "28px monospace";
     ctx.fillText(
-      user.username ? `@${user.username}` : "@explorador",
+      user.username ? `@${user.username}` : isGaming ? "@gamer" : "@cinefilo",
       avatarX + avatarSize + 40,
-      avatarY + 115
+      avatarY + 115,
     );
 
     // 5. SECCIÓN DE ESTADÍSTICAS (4 CAJAS GIGANTES)
@@ -212,66 +276,132 @@ export default function SocialWrappedModal({
     const boxW = (W - 240) / 2;
     const boxH = 240;
 
-    // Caja 1: Cine Visto
-    drawStatBox(
-      ctx,
-      100,
-      statsY,
-      boxW,
-      boxH,
-      "PELÍCULAS",
-      (stats.totalMovies || 0).toString(),
-      "vistas y analizadas",
-      "#f59e0b",
-      "rgba(245, 158, 11, 0.15)"
-    );
+    if (isGaming) {
+      // Caja 1: Videojuegos
+      drawStatBox(
+        ctx,
+        100,
+        statsY,
+        boxW,
+        boxH,
+        "VIDEOJUEGOS",
+        (stats.totalCompletedGames || 0).toString(),
+        "títulos completados",
+        "#a855f7",
+        "rgba(168, 85, 247, 0.15)",
+      );
 
-    // Caja 2: Sofa Knowledge
-    drawStatBox(
-      ctx,
-      100 + boxW + 40,
-      statsY,
-      boxW,
-      boxH,
-      "SOFA KNOWLEDGE",
-      stats.ballKnowledge ? `${stats.ballKnowledge}%` : "—",
-      "precisión frente a IMDb",
-      "#10b981",
-      "rgba(16, 185, 129, 0.15)"
-    );
+      // Caja 2: Horas Gamer
+      drawStatBox(
+        ctx,
+        100 + boxW + 40,
+        statsY,
+        boxW,
+        boxH,
+        "HORAS EN PANTALLA",
+        `${Math.round(stats.totalHours || 0)}h`,
+        "tiempo de juego total",
+        "#06b6d4",
+        "rgba(6, 182, 212, 0.15)",
+      );
 
-    // Caja 3: Horas de Juego
-    drawStatBox(
-      ctx,
-      100,
-      statsY + boxH + 35,
-      boxW,
-      boxH,
-      "HORAS GAMER",
-      `${Math.round(stats.totalHours || 0)}h`,
-      "tiempo de juego total",
-      "#06b6d4",
-      "rgba(6, 182, 212, 0.15)"
-    );
+      // Caja 3: Trofeos Platino
+      drawStatBox(
+        ctx,
+        100,
+        statsY + boxH + 35,
+        boxW,
+        boxH,
+        "TROFEOS PLATINO",
+        (stats.totalPlatinum || 0).toString(),
+        "títulos dominados al 100%",
+        "#eab308",
+        "rgba(234, 179, 8, 0.15)",
+      );
 
-    // Caja 4: Game Knowledge
-    drawStatBox(
-      ctx,
-      100 + boxW + 40,
-      statsY + boxH + 35,
-      boxW,
-      boxH,
-      "GAME KNOWLEDGE",
-      stats.gameKnowledge ? `${stats.gameKnowledge}%` : "—",
-      "precisión frente a Metacritic",
-      "#a855f7",
-      "rgba(168, 85, 247, 0.15)"
-    );
+      // Caja 4: Game Knowledge
+      drawStatBox(
+        ctx,
+        100 + boxW + 40,
+        statsY + boxH + 35,
+        boxW,
+        boxH,
+        "GAME KNOWLEDGE",
+        stats.gameKnowledge ? `${stats.gameKnowledge}%` : "—",
+        "precisión con Metacritic",
+        "#38bdf8",
+        "rgba(56, 189, 248, 0.15)",
+      );
+    } else {
+      // Caja 1: Cine Visto
+      drawStatBox(
+        ctx,
+        100,
+        statsY,
+        boxW,
+        boxH,
+        "PELÍCULAS",
+        (stats.totalMovies || 0).toString(),
+        "vistas en catálogo",
+        "#f59e0b",
+        "rgba(245, 158, 11, 0.15)",
+      );
+
+      // Caja 2: Series en Seguimiento
+      drawStatBox(
+        ctx,
+        100 + boxW + 40,
+        statsY,
+        boxW,
+        boxH,
+        "SERIES",
+        (stats.totalSeries || 0).toString(),
+        "en seguimiento o vistas",
+        "#eab308",
+        "rgba(234, 179, 8, 0.15)",
+      );
+
+      // Caja 3: Sofa Knowledge
+      drawStatBox(
+        ctx,
+        100,
+        statsY + boxH + 35,
+        boxW,
+        boxH,
+        "SOFA KNOWLEDGE",
+        stats.ballKnowledge ? `${stats.ballKnowledge}%` : "—",
+        "precisión frente a IMDb",
+        "#10b981",
+        "rgba(16, 185, 129, 0.15)",
+      );
+
+      // Caja 4: Rango Cinéfilo
+      const rankName =
+        stats.ballKnowledge && stats.ballKnowledge >= 75
+          ? "Cátedra de Oro"
+          : stats.ballKnowledge && stats.ballKnowledge >= 50
+            ? "Crítico Experto"
+            : "Cinéfilo Activo";
+      drawStatBox(
+        ctx,
+        100 + boxW + 40,
+        statsY + boxH + 35,
+        boxW,
+        boxH,
+        "RANGO CULTURAL",
+        rankName,
+        "índice de criterio",
+        "#f59e0b",
+        "rgba(245, 158, 11, 0.15)",
+      );
+    }
 
     // 6. VITRINA DE MEDALLAS / TOP LOGROS
     const trophySectionY = 1130;
     ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
-    ctx.strokeStyle = "rgba(168, 85, 247, 0.35)";
+    ctx.strokeStyle = isGaming
+      ? "rgba(168, 85, 247, 0.4)"
+      : "rgba(245, 158, 11, 0.4)";
     ctx.lineWidth = 3;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
@@ -283,14 +413,20 @@ export default function SocialWrappedModal({
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 38px sans-serif";
-    ctx.fillText("🏆 Vitrina de Medallas Insignia", 150, trophySectionY + 80);
+    ctx.fillText(
+      isGaming ? "🏆 Vitrina Gamer Insignia" : "🏆 Vitrina Cinéfila Insignia",
+      150,
+      trophySectionY + 80,
+    );
 
     ctx.fillStyle = "#9ca3af";
     ctx.font = "24px sans-serif";
     ctx.fillText(
-      "Mayores hazañas culturales alcanzadas en la plataforma",
+      isGaming
+        ? "Mayores trofeos y hazañas alcanzadas en videojuegos"
+        : "Mayores hazañas culturales alcanzadas en el séptimo arte",
       150,
-      trophySectionY + 120
+      trophySectionY + 120,
     );
 
     // Dibujar hasta 3 medallas
@@ -299,9 +435,11 @@ export default function SocialWrappedModal({
       ctx.font = "italic 28px sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(
-        "Continúa explorando catálogo para desbloquear medallas.",
+        isGaming
+          ? "Sigue jugando y desbloqueando trofeos para tu vitrina."
+          : "Continúa explorando catálogo para desbloquear medallas.",
         W / 2,
-        trophySectionY + 280
+        trophySectionY + 280,
       );
     } else {
       unlockedAchievements.forEach((ach, idx) => {
@@ -312,10 +450,10 @@ export default function SocialWrappedModal({
           ach.rarity === "DIAMOND"
             ? "#06b6d4"
             : ach.rarity === "GOLD"
-            ? "#eab308"
-            : ach.rarity === "SILVER"
-            ? "#cbd5e1"
-            : "#d97706";
+              ? "#eab308"
+              : ach.rarity === "SILVER"
+                ? "#cbd5e1"
+                : "#d97706";
         ctx.beginPath();
         ctx.arc(180, itemY + 25, 24, 0, Math.PI * 2);
         ctx.fill();
@@ -331,7 +469,7 @@ export default function SocialWrappedModal({
 
         // Badge de XP
         ctx.textAlign = "right";
-        ctx.fillStyle = "#f59e0b";
+        ctx.fillStyle = isGaming ? "#a855f7" : "#f59e0b";
         ctx.font = "bold 24px monospace";
         ctx.fillText(`+${ach.xp} XP`, W - 150, itemY + 35);
       });
@@ -342,19 +480,25 @@ export default function SocialWrappedModal({
     ctx.textAlign = "center";
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 32px sans-serif";
-    ctx.fillText("MasterHub • Centro de Mando Multi-Universo", W / 2, footerY);
+    ctx.fillText(
+      isGaming
+        ? "MasterHub Gaming • Conectado con Metacritic & RAWG"
+        : "MasterHub Cinephile • Pasión por el Séptimo Arte",
+      W / 2,
+      footerY,
+    );
 
     ctx.fillStyle = "#9ca3af";
     ctx.font = "24px monospace";
     ctx.fillText(
-      user.username
-        ? `masterhub.app/u/${user.username}`
-        : "masterhub.app",
+      user.username ? `masterhub.app/u/${user.username}` : "masterhub.app",
       W / 2,
-      footerY + 45
+      footerY + 45,
     );
 
-    ctx.fillStyle = "rgba(245, 158, 11, 0.7)";
+    ctx.fillStyle = isGaming
+      ? "rgba(168, 85, 247, 0.8)"
+      : "rgba(245, 158, 11, 0.8)";
     ctx.font = "20px sans-serif";
     ctx.fillText("Hecho con pasión por Guacamole", W / 2, footerY + 90);
 
@@ -373,7 +517,7 @@ export default function SocialWrappedModal({
     value: string,
     sub: string,
     accentColor: string,
-    accentBg: string
+    accentBg: string,
   ) => {
     ctx.fillStyle = "rgba(17, 24, 39, 0.7)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
@@ -401,19 +545,20 @@ export default function SocialWrappedModal({
 
   useEffect(() => {
     if (isOpen) {
-      sounds.shutter();
       setTimeout(() => {
         drawCard();
       }, 100);
     }
-  }, [isOpen]);
+  }, [isOpen, universe]);
 
   const handleDownload = () => {
     if (!dataUrl) return;
-    sounds.shutter();
+    sounds.success();
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.download = `masterhub-wrapped-${user.username || "perfil"}.png`;
+    a.download = isGaming
+      ? `gamer-wrapped-${user.username || "perfil"}.png`
+      : `cinephile-wrapped-${user.username || "perfil"}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -421,17 +566,25 @@ export default function SocialWrappedModal({
   };
 
   const handleShare = async () => {
-    sounds.click();
+    sounds.coin();
+    const fileName = isGaming ? "gamer-wrapped.png" : "cinephile-wrapped.png";
+    const shareTitle = isGaming
+      ? `Gamer Wrapped de ${user.displayName}`
+      : `Cinephile Wrapped de ${user.displayName}`;
+    const shareText = isGaming
+      ? `¡Mira mis estadísticas gamer en MasterHub! #MasterHub #Gaming #Videojuegos`
+      : `¡Mira mis estadísticas de cine y series en MasterHub! #MasterHub #Cine #Peliculas`;
+
     if (navigator.share && dataUrl) {
       try {
         const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], "masterhub-wrapped.png", {
+        const file = new File([blob], fileName, {
           type: "image/png",
         });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
-            title: `MasterHub de ${user.displayName}`,
-            text: `¡Mira mis estadísticas en MasterHub! #MasterHub #Cine #Gaming`,
+            title: shareTitle,
+            text: shareText,
             files: [file],
           });
           return;
@@ -449,20 +602,23 @@ export default function SocialWrappedModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in"
-      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn"
+      onClick={() => {
+        sounds.modalClose();
+        onClose();
+      }}
     >
       <div
-        className="w-full max-w-2xl max-h-[95vh] rounded-3xl bg-cine-950 border border-cine-800 p-5 sm:p-7 shadow-2xl flex flex-col relative overflow-hidden"
+        className="w-full max-w-2xl max-h-[95vh] rounded-3xl bg-cine-950 border border-cine-800 p-5 sm:p-7 shadow-2xl flex flex-col relative overflow-hidden animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={() => {
-            sounds.click();
+            sounds.modalClose();
             onClose();
           }}
           className="absolute top-5 right-5 p-2 rounded-xl bg-cine-900 text-cine-400 hover:text-white hover:bg-cine-800 transition-colors z-20"
@@ -471,15 +627,27 @@ export default function SocialWrappedModal({
         </button>
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
-            <Camera className="w-5 h-5" />
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+              isGaming
+                ? "bg-purple-500/20 text-purple-400 border-purple-500/40"
+                : "bg-amber-500/20 text-amber-400 border-amber-500/40"
+            }`}
+          >
+            {isGaming ? (
+              <Gamepad2 className="w-5 h-5" />
+            ) : (
+              <Film className="w-5 h-5" />
+            )}
           </div>
           <div>
             <h3 className="text-xl font-black text-white tracking-tight">
-              MasterHub Wrapped
+              {isGaming ? "Gamer Wrapped" : "Cinephile Wrapped"}
             </h3>
             <p className="text-xs text-cine-400">
-              Tarjeta visual lista para historias de Instagram, X y WhatsApp.
+              {isGaming
+                ? "Tarjeta de hazañas gamer lista para Instagram, X y Discord."
+                : "Tarjeta de cinefilia lista para historias de Instagram, X y WhatsApp."}
             </p>
           </div>
         </div>
@@ -490,8 +658,14 @@ export default function SocialWrappedModal({
 
           {isGenerating ? (
             <div className="flex flex-col items-center justify-center p-12 text-cine-400 gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-              <span className="text-sm font-medium">Renderizando tu tarjeta en alta resolución...</span>
+              <Loader2
+                className={`w-8 h-8 animate-spin ${
+                  isGaming ? "text-purple-400" : "text-amber-400"
+                }`}
+              />
+              <span className="text-sm font-medium">
+                Renderizando tu tarjeta en alta resolución...
+              </span>
             </div>
           ) : dataUrl ? (
             <img
@@ -507,7 +681,11 @@ export default function SocialWrappedModal({
           <button
             onClick={handleDownload}
             disabled={!dataUrl}
-            className="py-3 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-cine-950 font-black text-sm transition-all shadow-gold-glow flex items-center justify-center gap-2 disabled:opacity-50"
+            className={`py-3 px-5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
+              isGaming
+                ? "bg-purple-600 hover:bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                : "bg-amber-500 hover:bg-amber-400 text-cine-950 shadow-gold-glow"
+            }`}
           >
             <Download className="w-4 h-4" />
             <span>Descargar Imagen (PNG)</span>
@@ -515,13 +693,18 @@ export default function SocialWrappedModal({
           <button
             onClick={handleShare}
             disabled={!dataUrl}
-            className="py-3 px-5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] flex items-center justify-center gap-2 disabled:opacity-50"
+            className={`py-3 px-5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${
+              isGaming
+                ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                : "bg-purple-600 hover:bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+            }`}
           >
             <Share2 className="w-4 h-4" />
             <span>Compartir en Redes</span>
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

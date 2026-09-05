@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
           platform: true,
           review: true,
           ballKnowledge: true,
+          isFavorite: true,
           createdAt: true,
         },
       }),
@@ -64,6 +65,8 @@ export async function GET(request: NextRequest) {
           userRating: true,
           difference: true,
           hoursPlayed: true,
+          platform: true,
+          isFavorite: true,
           review: true,
           gameKnowledge: true,
           createdAt: true,
@@ -90,7 +93,7 @@ export async function GET(request: NextRequest) {
 
     const totalHours = userGames.reduce(
       (acc, g) => acc + (Number(g.hoursPlayed) || 0),
-      0
+      0,
     );
 
     const evaluation = evaluateUserAchievements({
@@ -109,7 +112,7 @@ export async function GET(request: NextRequest) {
     console.error("Error en GET /api/profile/achievements:", error);
     return NextResponse.json(
       { error: "Error al evaluar logros" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

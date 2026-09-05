@@ -1,11 +1,13 @@
 export type AchievementCategory = "CINE" | "GAMING" | "CRITIC" | "MASTERY";
 export type AchievementRarity = "BRONZE" | "SILVER" | "GOLD" | "DIAMOND";
+export type AchievementUniverse = "CINE" | "GAMING" | "BOTH";
 
 export interface AchievementDefinition {
   id: string;
   title: string;
   description: string;
   category: AchievementCategory;
+  universe: AchievementUniverse;
   rarity: AchievementRarity;
   iconName: string;
   xp: number;
@@ -27,6 +29,7 @@ export interface AchievementEvaluationInput {
     platform?: string | null;
     review?: string | null;
     ballKnowledge?: number | null;
+    isFavorite?: boolean;
     createdAt?: string | Date;
   }>;
   series?: Array<{
@@ -43,8 +46,10 @@ export interface AchievementEvaluationInput {
     userRating?: number | null;
     difference?: number | null;
     hoursPlayed?: number | null;
+    platform?: string | null;
     review?: string | null;
     gameKnowledge?: number | null;
+    isFavorite?: boolean;
     createdAt?: string | Date;
   }>;
   stats?: {
@@ -55,12 +60,15 @@ export interface AchievementEvaluationInput {
 }
 
 export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
-  // CINE & SERIES
+  // ==========================
+  // UNIVERSO: CINE & SERIES
+  // ==========================
   {
     id: "cine_first_movie",
     title: "Primer Fotograma",
     description: "Registra tu primera película vista en el catálogo.",
     category: "CINE",
+    universe: "CINE",
     rarity: "BRONZE",
     iconName: "Film",
     xp: 15,
@@ -71,6 +79,7 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
     title: "Sesión Continua",
     description: "Registra 10 o más películas vistas.",
     category: "CINE",
+    universe: "CINE",
     rarity: "SILVER",
     iconName: "Clapperboard",
     xp: 35,
@@ -81,16 +90,40 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
     title: "Filmoteca Viviente",
     description: "Alcanza 25 o más películas vistas en tu historial.",
     category: "CINE",
+    universe: "CINE",
     rarity: "GOLD",
     iconName: "Sparkles",
     xp: 75,
     targetValue: 25,
   },
   {
+    id: "cine_gold_50",
+    title: "Cinéfilo de Oro",
+    description: "Alcanza la colosal cifra de 50 películas vistas.",
+    category: "CINE",
+    universe: "CINE",
+    rarity: "GOLD",
+    iconName: "Crown",
+    xp: 120,
+    targetValue: 50,
+  },
+  {
+    id: "cine_god_100",
+    title: "Dios del Séptimo Arte",
+    description: "Centenario cinematográfico: 100 películas registradas.",
+    category: "CINE",
+    universe: "CINE",
+    rarity: "DIAMOND",
+    iconName: "Flame",
+    xp: 200,
+    targetValue: 100,
+  },
+  {
     id: "cine_pirate_captain",
     title: "Rey de los Mares",
     description: "Registra un título disfrutado en plataforma Pirata 🏴‍☠️.",
     category: "CINE",
+    universe: "CINE",
     rarity: "BRONZE",
     iconName: "Skull",
     xp: 20,
@@ -101,28 +134,88 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
     title: "Atracón de Temporadas",
     description: "Registra al menos 3 series vistas o seguidas.",
     category: "CINE",
+    universe: "CINE",
     rarity: "SILVER",
     iconName: "Tv",
     xp: 35,
     targetValue: 3,
   },
   {
+    id: "cine_series_master",
+    title: "Maestro de Series",
+    description: "Alcanza 8 o más series registradas en seguimiento.",
+    category: "CINE",
+    universe: "CINE",
+    rarity: "GOLD",
+    iconName: "Sparkles",
+    xp: 80,
+    targetValue: 8,
+  },
+  {
     id: "cine_bullseye",
     title: "Ojo de Halcón Cinéfilo",
     description: "Consigue una diferencia exacta de 0.0 frente a la nota de IMDb.",
     category: "CINE",
+    universe: "CINE",
     rarity: "GOLD",
     iconName: "Target",
     xp: 60,
     targetValue: 1,
   },
+  {
+    id: "cine_favorites_collector",
+    title: "Galería de Favoritas",
+    description: "Marca al menos 5 películas en tu lista de favoritas.",
+    category: "CINE",
+    universe: "CINE",
+    rarity: "SILVER",
+    iconName: "Star",
+    xp: 40,
+    targetValue: 5,
+  },
+  {
+    id: "cine_critic_voice",
+    title: "Pluma Cinéfila",
+    description: "Escribe al menos 5 reseñas redactadas en películas o series.",
+    category: "CINE",
+    universe: "CINE",
+    rarity: "SILVER",
+    iconName: "Feather",
+    xp: 45,
+    targetValue: 5,
+  },
+  {
+    id: "cine_masterpiece_hunter",
+    title: "Devoto del Diez",
+    description: "Otorga una puntuación de 10/10 a al menos 3 películas.",
+    category: "CINE",
+    universe: "CINE",
+    rarity: "SILVER",
+    iconName: "Award",
+    xp: 40,
+    targetValue: 3,
+  },
+  {
+    id: "mastery_sofa_scholar",
+    title: "Cátedra del Sofá",
+    description: "Mantén un Sofa Knowledge promedio superior al 80% (mín. 3 películas).",
+    category: "MASTERY",
+    universe: "CINE",
+    rarity: "GOLD",
+    iconName: "Brain",
+    xp: 70,
+    targetValue: 80,
+  },
 
-  // GAMING
+  // ==========================
+  // UNIVERSO: GAMING
+  // ==========================
   {
     id: "game_press_start",
     title: "Press Start",
     description: "Registra tu primer videojuego en tu biblioteca.",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "BRONZE",
     iconName: "Gamepad2",
     xp: 15,
@@ -133,6 +226,7 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
     title: "Victoria Magistral",
     description: "Marca tu primer videojuego como Completado.",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "BRONZE",
     iconName: "CheckCircle",
     xp: 25,
@@ -143,26 +237,51 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
     title: "Finisher Legendario",
     description: "Completa 5 o más videojuegos en tu historial.",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "SILVER",
     iconName: "Trophy",
     xp: 50,
     targetValue: 5,
   },
   {
+    id: "game_backlog_slayer",
+    title: "Cazador de Backlog",
+    description: "Completa 10 videojuegos de tu catálogo.",
+    category: "GAMING",
+    universe: "GAMING",
+    rarity: "GOLD",
+    iconName: "Zap",
+    xp: 90,
+    targetValue: 10,
+  },
+  {
     id: "game_platinum_hunter",
     title: "Cazador de Platinos",
-    description: "Alcanza el estatus Platino en al menos un videojuego.",
+    description: "Alcanza el estatus Platino / 100% en al menos un videojuego.",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "GOLD",
     iconName: "Award",
     xp: 75,
     targetValue: 1,
   },
   {
+    id: "game_platinum_trio",
+    title: "Trilogía de Platino",
+    description: "Consigue 3 o más títulos completados al 100% (Platino).",
+    category: "GAMING",
+    universe: "GAMING",
+    rarity: "DIAMOND",
+    iconName: "Crown",
+    xp: 150,
+    targetValue: 3,
+  },
+  {
     id: "game_veteran_hours",
     title: "Veterano del Vicio",
     description: "Acumula más de 30 horas registradas de juego.",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "SILVER",
     iconName: "Clock",
     xp: 40,
@@ -173,28 +292,88 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
     title: "No-Life Honorario",
     description: "Acumula más de 100 horas registradas en videojuegos.",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "DIAMOND",
     iconName: "Zap",
     xp: 120,
     targetValue: 100,
   },
   {
+    id: "game_titan_200h",
+    title: "Titán del Gaming",
+    description: "Supera la barrera épica de 200 horas registradas.",
+    category: "GAMING",
+    universe: "GAMING",
+    rarity: "DIAMOND",
+    iconName: "Flame",
+    xp: 220,
+    targetValue: 200,
+  },
+  {
     id: "game_metacritic_sniper",
     title: "Metacritic Sniper",
     description: "Coincide exactamente con la nota de Metacritic (diferencia 0.0).",
     category: "GAMING",
+    universe: "GAMING",
     rarity: "GOLD",
     iconName: "Crosshair",
     xp: 60,
     targetValue: 1,
   },
+  {
+    id: "game_collector_arcade",
+    title: "Coleccionista Arcade",
+    description: "Añade 15 o más videojuegos a tu biblioteca gamer.",
+    category: "GAMING",
+    universe: "GAMING",
+    rarity: "SILVER",
+    iconName: "Sparkles",
+    xp: 45,
+    targetValue: 15,
+  },
+  {
+    id: "game_multi_platform",
+    title: "Multi-Consola",
+    description: "Juega títulos en al menos 3 plataformas distintas.",
+    category: "GAMING",
+    universe: "GAMING",
+    rarity: "SILVER",
+    iconName: "Compass",
+    xp: 40,
+    targetValue: 3,
+  },
+  {
+    id: "game_critic_voice",
+    title: "Analista del Gamepad",
+    description: "Escribe reseñas analíticas en al menos 3 videojuegos.",
+    category: "GAMING",
+    universe: "GAMING",
+    rarity: "SILVER",
+    iconName: "Feather",
+    xp: 40,
+    targetValue: 3,
+  },
+  {
+    id: "mastery_game_sage",
+    title: "Sabio del Gamepad",
+    description: "Mantén un Game Knowledge promedio superior al 80% (mín. 3 juegos).",
+    category: "MASTERY",
+    universe: "GAMING",
+    rarity: "GOLD",
+    iconName: "Compass",
+    xp: 70,
+    targetValue: 80,
+  },
 
-  // CRITIC & COMMUNITY
+  // ==========================
+  // UNIVERSALES (AMBOS UNIVERSOS)
+  // ==========================
   {
     id: "critic_first_words",
     title: "Voz en el Desierto",
-    description: "Escribe tu primera reseña con texto.",
+    description: "Escribe tu primera reseña con opinión escrita.",
     category: "CRITIC",
+    universe: "BOTH",
     rarity: "BRONZE",
     iconName: "MessageSquare",
     xp: 15,
@@ -203,70 +382,61 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "critic_top_reviewer",
     title: "Crítico Acreditado",
-    description: "Escribe al menos 5 reseñas detalladas.",
+    description: "Escribe al menos 8 reseñas detalladas en la plataforma.",
     category: "CRITIC",
+    universe: "BOTH",
     rarity: "SILVER",
     iconName: "Feather",
-    xp: 45,
-    targetValue: 5,
+    xp: 50,
+    targetValue: 8,
   },
   {
     id: "critic_hot_take",
     title: "Pirómano de Opiniones",
     description: "Deja una Hot Take con más de 2.5 puntos de diferencia con la crítica.",
     category: "CRITIC",
+    universe: "BOTH",
     rarity: "SILVER",
     iconName: "Flame",
     xp: 40,
     targetValue: 1,
   },
   {
+    id: "critic_hater_diploma",
+    title: "Hater Diplomado",
+    description: "Puntúa un título con una nota implacable de 3/10 o inferior.",
+    category: "CRITIC",
+    universe: "BOTH",
+    rarity: "BRONZE",
+    iconName: "Skull",
+    xp: 20,
+    targetValue: 1,
+  },
+  {
     id: "critic_perfectionist",
     title: "Obra Maestra Universal",
-    description: "Otorga una calificación perfecta de 10/10 a un título.",
+    description: "Otorga una calificación perfecta de 10/10 a cualquier obra.",
     category: "CRITIC",
+    universe: "BOTH",
     rarity: "BRONZE",
     iconName: "Star",
     xp: 20,
     targetValue: 1,
-  },
-
-  // MASTERY
-  {
-    id: "mastery_sofa_scholar",
-    title: "Cátedra del Sofá",
-    description: "Mantén un Sofa Knowledge promedio superior al 80%.",
-    category: "MASTERY",
-    rarity: "GOLD",
-    iconName: "Brain",
-    xp: 70,
-    targetValue: 80,
-  },
-  {
-    id: "mastery_game_sage",
-    title: "Sabio del Gamepad",
-    description: "Mantén un Game Knowledge promedio superior al 80%.",
-    category: "MASTERY",
-    rarity: "GOLD",
-    iconName: "Compass",
-    xp: 70,
-    targetValue: 80,
   },
   {
     id: "mastery_omnipresent",
     title: "Señor Multi-Universo",
     description: "Registra al menos 10 películas y 25 horas de videojuegos.",
     category: "MASTERY",
+    universe: "BOTH",
     rarity: "DIAMOND",
     iconName: "Crown",
     xp: 150,
-    targetValue: 35, // 10 movies + 25 hours
+    targetValue: 35,
   },
 ];
 
-export function evaluateUserAchievements(
-  data: AchievementEvaluationInput,
-): {
+export function evaluateUserAchievements(data: AchievementEvaluationInput): {
   achievements: UserAchievement[];
   totalUnlocked: number;
   totalAvailable: number;
@@ -293,27 +463,77 @@ export function evaluateUserAchievements(
     movies.filter((m) => m.platform === "Pirata").length +
     series.filter((s) => s.platform === "Pirata").length;
 
+  // Favoritas de cine
+  const movieFavoritesCount = movies.filter((m) => m.isFavorite).length;
+
+  // Películas con 10/10
+  const cineTensCount = movies.filter((m) => m.userRating === 10).length;
+
+  // Reseñas de cine y series
+  const cineReviewsCount =
+    movies.filter((m) => m.review && m.review.trim().length > 0).length +
+    series.filter((s) => s.review && s.review.trim().length > 0).length;
+
+  // Reseñas de juegos
+  const gameReviewsCount = games.filter(
+    (g) => g.review && g.review.trim().length > 0,
+  ).length;
+
   // Películas o series con diferencia exacta de 0
   const zeroDiffCineCount = [...movies, ...series].filter(
-    (item) => item.difference !== null && item.difference !== undefined && Math.abs(item.difference) < 0.05,
+    (item) =>
+      item.difference !== null &&
+      item.difference !== undefined &&
+      Math.abs(item.difference) < 0.05,
   ).length;
 
   // Juegos con diferencia exacta de 0
   const zeroDiffGameCount = games.filter(
-    (g) => g.difference !== null && g.difference !== undefined && Math.abs(g.difference) < 0.05,
+    (g) =>
+      g.difference !== null &&
+      g.difference !== undefined &&
+      Math.abs(g.difference) < 0.05,
   ).length;
 
-  // Reseñas con texto
-  const textReviewsCount = [
-    ...movies.filter((m) => m.review && m.review.trim().length > 0),
-    ...series.filter((s) => s.review && s.review.trim().length > 0),
-    ...games.filter((g) => g.review && g.review.trim().length > 0),
-  ].length;
+  // Reseñas con texto totales
+  const textReviewsCount = cineReviewsCount + gameReviewsCount;
 
   // Hot takes (> 2.5 de diferencia)
   const hotTakesCount = [
-    ...movies.filter((m) => m.difference !== null && m.difference !== undefined && Math.abs(m.difference) >= 2.5),
-    ...games.filter((g) => g.difference !== null && g.difference !== undefined && Math.abs(g.difference) >= 2.5),
+    ...movies.filter(
+      (m) =>
+        m.difference !== null &&
+        m.difference !== undefined &&
+        Math.abs(m.difference) >= 2.5,
+    ),
+    ...games.filter(
+      (g) =>
+        g.difference !== null &&
+        g.difference !== undefined &&
+        Math.abs(g.difference) >= 2.5,
+    ),
+  ].length;
+
+  // Puntuaciones muy bajas (<= 3) para Hater Diplomado
+  const lowRatingsCount = [
+    ...movies.filter(
+      (m) =>
+        m.userRating !== null &&
+        m.userRating !== undefined &&
+        m.userRating <= 3,
+    ),
+    ...series.filter(
+      (s) =>
+        s.userRating !== null &&
+        s.userRating !== undefined &&
+        s.userRating <= 3,
+    ),
+    ...games.filter(
+      (g) =>
+        g.userRating !== null &&
+        g.userRating !== undefined &&
+        g.userRating <= 3,
+    ),
   ].length;
 
   // Puntuaciones perfectas (10)
@@ -322,6 +542,13 @@ export function evaluateUserAchievements(
     ...series.filter((s) => s.userRating === 10),
     ...games.filter((g) => g.userRating === 10),
   ].length;
+
+  // Plataformas distintas en gaming
+  const uniqueGamingPlatforms = new Set(
+    games
+      .map((g) => g.platform)
+      .filter((p): p is string => Boolean(p && p.trim().length > 0)),
+  ).size;
 
   // Promedios
   const ballKnowledgeAvg = data.stats?.avgBallKnowledge ?? 0;
@@ -332,6 +559,7 @@ export function evaluateUserAchievements(
     let isUnlocked = false;
 
     switch (def.id) {
+      // Cine
       case "cine_first_movie":
         currentValue = watchedMovies.length;
         isUnlocked = currentValue >= def.targetValue;
@@ -344,6 +572,14 @@ export function evaluateUserAchievements(
         currentValue = watchedMovies.length;
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "cine_gold_50":
+        currentValue = watchedMovies.length;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "cine_god_100":
+        currentValue = watchedMovies.length;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
       case "cine_pirate_captain":
         currentValue = pirateTitlesCount;
         isUnlocked = currentValue >= def.targetValue;
@@ -352,11 +588,33 @@ export function evaluateUserAchievements(
         currentValue = watchedSeries.length;
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "cine_series_master":
+        currentValue = watchedSeries.length;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
       case "cine_bullseye":
         currentValue = zeroDiffCineCount;
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "cine_favorites_collector":
+        currentValue = movieFavoritesCount;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "cine_critic_voice":
+        currentValue = cineReviewsCount;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "cine_masterpiece_hunter":
+        currentValue = cineTensCount;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "mastery_sofa_scholar":
+        currentValue = Math.round(ballKnowledgeAvg);
+        isUnlocked =
+          currentValue >= def.targetValue && watchedMovies.length >= 3;
+        break;
 
+      // Gaming
       case "game_press_start":
         currentValue = games.length;
         isUnlocked = currentValue >= def.targetValue;
@@ -369,7 +627,15 @@ export function evaluateUserAchievements(
         currentValue = completedGames.length;
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "game_backlog_slayer":
+        currentValue = completedGames.length;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
       case "game_platinum_hunter":
+        currentValue = platinumGames.length;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "game_platinum_trio":
         currentValue = platinumGames.length;
         isUnlocked = currentValue >= def.targetValue;
         break;
@@ -381,11 +647,32 @@ export function evaluateUserAchievements(
         currentValue = Math.round(totalHours);
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "game_titan_200h":
+        currentValue = Math.round(totalHours);
+        isUnlocked = currentValue >= def.targetValue;
+        break;
       case "game_metacritic_sniper":
         currentValue = zeroDiffGameCount;
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "game_collector_arcade":
+        currentValue = games.length;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "game_multi_platform":
+        currentValue = uniqueGamingPlatforms;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "game_critic_voice":
+        currentValue = gameReviewsCount;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
+      case "mastery_game_sage":
+        currentValue = Math.round(gameKnowledgeAvg);
+        isUnlocked = currentValue >= def.targetValue && games.length >= 3;
+        break;
 
+      // Universales
       case "critic_first_words":
         currentValue = textReviewsCount;
         isUnlocked = currentValue >= def.targetValue;
@@ -398,26 +685,21 @@ export function evaluateUserAchievements(
         currentValue = hotTakesCount;
         isUnlocked = currentValue >= def.targetValue;
         break;
+      case "critic_hater_diploma":
+        currentValue = lowRatingsCount;
+        isUnlocked = currentValue >= def.targetValue;
+        break;
       case "critic_perfectionist":
         currentValue = perfectRatingsCount;
         isUnlocked = currentValue >= def.targetValue;
         break;
-
-      case "mastery_sofa_scholar":
-        currentValue = Math.round(ballKnowledgeAvg);
-        isUnlocked = currentValue >= def.targetValue && watchedMovies.length >= 3;
-        break;
-      case "mastery_game_sage":
-        currentValue = Math.round(gameKnowledgeAvg);
-        isUnlocked = currentValue >= def.targetValue && games.length >= 3;
-        break;
-      case "mastery_omnipresent":
-        // 10 pelis + 25h = 35 puntos de hito combinado
+      case "mastery_omnipresent": {
         const cinePart = Math.min(watchedMovies.length, 10);
         const gamePart = Math.min(Math.round(totalHours), 25);
         currentValue = cinePart + gamePart;
         isUnlocked = watchedMovies.length >= 10 && totalHours >= 25;
         break;
+      }
       default:
         break;
     }
