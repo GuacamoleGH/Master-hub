@@ -200,6 +200,62 @@ export async function GET() {
 
     hotTakes.sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference));
 
+    // Hallmarks y Récords Personales
+    const gamesWithHours = userGames
+      .filter((g) => (g.hoursPlayed || 0) > 0)
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+    const longestGame =
+      gamesWithHours.length > 0
+        ? {
+            title: gamesWithHours[0].game.title,
+            cover: gamesWithHours[0].game.backgroundImage,
+            hours: gamesWithHours[0].hoursPlayed || 0,
+          }
+        : null;
+
+    const ratedGames = userGames
+      .filter((g) => typeof g.userRating === "number")
+      .sort((a, b) => (b.userRating || 0) - (a.userRating || 0));
+    const highestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[0].game.title,
+            cover: ratedGames[0].game.backgroundImage,
+            rating: ratedGames[0].userRating || 0,
+          }
+        : null;
+    const lowestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[ratedGames.length - 1].game.title,
+            cover: ratedGames[ratedGames.length - 1].game.backgroundImage,
+            rating: ratedGames[ratedGames.length - 1].userRating || 0,
+          }
+        : null;
+
+    const completedWithHours = userGames.filter(
+      (ug) =>
+        (ug.status === "COMPLETED" || ug.status === "PLATINUM") &&
+        (ug.hoursPlayed || 0) > 0
+    );
+    const averageCompletionHours =
+      completedWithHours.length > 0
+        ? Math.round(
+            completedWithHours.reduce(
+              (acc, g) => acc + (g.hoursPlayed || 0),
+              0
+            ) / completedWithHours.length
+          )
+        : null;
+
+    const statusBreakdown = {
+      completed: totalCompleted,
+      playing: totalPlaying,
+      backlog: totalBacklog,
+      platinum: totalPlatinum,
+      abandoned: userGames.filter((ug) => ug.status === "ABANDONED").length,
+    };
+
     const totalXp = user?.totalXp || 0;
     const levelInfo = calculateGamerLevelAndRank(totalXp);
 
@@ -260,6 +316,11 @@ export async function GET() {
       hoursByPlatform,
       hoursByGenre,
       ratingDistribution: ratingDistributionList,
+      longestGame,
+      highestRatedGame,
+      lowestRatedGame,
+      averageCompletionHours,
+      statusBreakdown,
     };
 
     return NextResponse.json({

@@ -132,4 +132,27 @@ export interface GamerStats {
   }[];
   hoursByGenre: { genre: string; hours: number }[];
   ratingDistribution: { rating: number; count: number }[];
+  longestGame?: {
+    title: string;
+    cover: string | null;
+    hours: number;
+  } | null;
+  highestRatedGame?: {
+    title: string;
+    cover: string | null;
+    rating: number;
+  } | null;
+  lowestRatedGame?: {
+    title: string;
+    cover: string | null;
+    rating: number;
+  } | null;
+  averageCompletionHours?: number | null;
+  statusBreakdown?: {
+    completed: number;
+    playing: number;
+    backlog: number;
+    platinum: number;
+    abandoned: number;
+  };
 }
