@@ -31,6 +31,8 @@ import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import { GamerStats } from "@/types/game";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
 
 interface ProfileResponse {
@@ -44,11 +46,23 @@ interface ProfileResponse {
 }
 
 export default function GamerProfilePage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
   const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
+
+  const handleOpenEdit = () => {
+    sounds.playClick();
+    if (!session?.user) {
+      router.push("/login?callbackUrl=/games/profile");
+      return;
+    }
+    setIsEditOpen(true);
+  };
 
   const fetchProfile = async () => {
     try {
@@ -141,15 +155,27 @@ export default function GamerProfilePage() {
               )}
               <button
                 type="button"
-                onClick={() => {
-                  sounds.playClick();
-                  setIsEditOpen(true);
-                }}
-                className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-purple-300 text-[10px] font-bold gap-1 cursor-pointer"
-                title="Elegir insignia temática"
+                onClick={handleOpenEdit}
+                className="absolute inset-0 w-full h-full bg-black/80 backdrop-blur-xs opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 flex flex-col items-center justify-center text-center p-0 m-0 cursor-pointer"
+                title={
+                  session?.user ? "Elegir insignia temática" : "Iniciar sesión"
+                }
               >
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span>Cambiar</span>
+                {session?.user ? (
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
+                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                      Cambiar
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
+                    <LogIn className="w-5 h-5 text-purple-400" />
+                    <span className="text-[11px] font-bold tracking-wide leading-none text-center">
+                      Entrar
+                    </span>
+                  </div>
+                )}
               </button>
             </div>
 
@@ -168,13 +194,25 @@ export default function GamerProfilePage() {
                   {profile.displayName}
                 </h1>
                 <button
-                  onClick={() => {
-                    sounds.playClick();
-                    setIsEditOpen(true);
-                  }}
+                  onClick={handleOpenEdit}
                   className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                  title={
+                    session?.user
+                      ? "Editar perfil gamer"
+                      : "Inicia sesión para editar tu perfil"
+                  }
                 >
-                  <Edit3 className="w-3.5 h-3.5" /> Editar Perfil
+                  {session?.user ? (
+                    <>
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Editar Perfil</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="w-3.5 h-3.5" />
+                      <span>Iniciar Sesión</span>
+                    </>
+                  )}
                 </button>
               </div>
 
