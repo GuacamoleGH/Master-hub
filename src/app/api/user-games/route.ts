@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
 
     if (genre && genre !== "all") {
       results = results.filter((item) =>
-        item.game.genres.some((g) => g.toLowerCase() === genre.toLowerCase())
+        item.game.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
       );
     }
 
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
       results = results.filter(
         (item) =>
           (item.platform && item.platform.toLowerCase().includes(cleanPlat)) ||
-          item.game.platforms.some((p) => p.toLowerCase().includes(cleanPlat))
+          item.game.platforms.some((p) => p.toLowerCase().includes(cleanPlat)),
       );
     }
 
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
       results.sort((a, b) => a.game.title.localeCompare(b.game.title));
     } else if (sort === "metacriticDesc") {
       results.sort(
-        (a, b) => (b.game.metacritic || 0) - (a.game.metacritic || 0)
+        (a, b) => (b.game.metacritic || 0) - (a.game.metacritic || 0),
       );
     }
 
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
     console.error("Error en GET /api/user-games:", error);
     return NextResponse.json(
       { error: "Error al listar videojuegos" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -167,8 +167,11 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json(
-      { error: "Debes iniciar sesión para registrar videojuegos en tu colección." },
-      { status: 401 }
+      {
+        error:
+          "Debes iniciar sesión para registrar videojuegos en tu colección.",
+      },
+      { status: 401 },
     );
   }
 
@@ -190,7 +193,7 @@ export async function POST(request: NextRequest) {
     if (!rawgId || !status) {
       return NextResponse.json(
         { error: "Faltan parámetros requeridos (rawgId, status)" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -203,7 +206,7 @@ export async function POST(request: NextRequest) {
       if (!detail) {
         return NextResponse.json(
           { error: "No se pudo obtener información del juego desde RAWG" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -239,8 +242,8 @@ export async function POST(request: NextRequest) {
     const dateToSave = completedDate
       ? new Date(completedDate)
       : isFinished
-      ? new Date()
-      : null;
+        ? new Date()
+        : null;
 
     let finalHoursPlayed = typeof hoursPlayed === "number" ? hoursPlayed : null;
     let serializedPlatformDetails: string | null = null;
@@ -256,7 +259,7 @@ export async function POST(request: NextRequest) {
           ) {
             finalHoursPlayed = parsed.reduce(
               (acc: number, p: any) => acc + (Number(p.hours) || 0),
-              0
+              0,
             );
           }
         } catch {}
@@ -265,7 +268,7 @@ export async function POST(request: NextRequest) {
         if (finalHoursPlayed === null && platformDetails.length > 0) {
           finalHoursPlayed = platformDetails.reduce(
             (acc: number, p: any) => acc + (Number(p.hours) || 0),
-            0
+            0,
           );
         }
       }
@@ -314,7 +317,7 @@ export async function POST(request: NextRequest) {
     console.error("Error en POST /api/user-games:", error);
     return NextResponse.json(
       { error: "Error al registrar videojuego" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -324,7 +327,7 @@ export async function DELETE(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: "Debes iniciar sesión para modificar tu colección." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -345,7 +348,7 @@ export async function DELETE(request: NextRequest) {
     } else {
       return NextResponse.json(
         { error: "Falta parámetro id o gameId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -355,7 +358,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Error en DELETE /api/user-games:", error);
     return NextResponse.json(
       { error: "Error al eliminar registro de videojuego" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

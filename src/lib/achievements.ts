@@ -145,7 +145,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_legend_200",
     title: "Leyenda de la Butaca",
-    description: "Alcanza la cifra legendaria de 200 películas o series vistas.",
+    description:
+      "Alcanza la cifra legendaria de 200 películas o series vistas.",
     category: "CINE",
     universe: "CINE",
     rarity: "DIAMOND",
@@ -204,7 +205,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_watchlist_hoarder",
     title: "Diógenes Cinéfilo",
-    description: "Guarda al menos 10 películas o series en tu lista de pendientes.",
+    description:
+      "Guarda al menos 10 películas o series en tu lista de pendientes.",
     category: "CINE",
     universe: "CINE",
     rarity: "BRONZE",
@@ -226,7 +228,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_streaming_hopper",
     title: "Nómada del Streaming",
-    description: "Disfruta de obras en al menos 3 servicios de streaming distintos.",
+    description:
+      "Disfruta de obras en al menos 3 servicios de streaming distintos.",
     category: "CINE",
     universe: "CINE",
     rarity: "SILVER",
@@ -237,7 +240,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_favorites_collector",
     title: "Galería de Favoritas",
-    description: "Marca al menos 5 películas o series en tu lista de favoritas.",
+    description:
+      "Marca al menos 5 películas o series en tu lista de favoritas.",
     category: "CINE",
     universe: "CINE",
     rarity: "SILVER",
@@ -261,7 +265,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_first_review",
     title: "Primera Crítica",
-    description: "Escribe tu primera reseña con opinión escrita en cine o series.",
+    description:
+      "Escribe tu primera reseña con opinión escrita en cine o series.",
     category: "CRITIC",
     universe: "CINE",
     rarity: "BRONZE",
@@ -294,7 +299,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_bullseye",
     title: "Ojo de Halcón Cinéfilo",
-    description: "Consigue una diferencia exacta de 0.0 frente a la nota de IMDb.",
+    description:
+      "Consigue una diferencia exacta de 0.0 frente a la nota de IMDb.",
     category: "CRITIC",
     universe: "CINE",
     rarity: "GOLD",
@@ -305,7 +311,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_double_bullseye",
     title: "Francotirador de IMDb",
-    description: "Coincide exactamente con la nota de IMDb (0.0) en 3 títulos distintos.",
+    description:
+      "Coincide exactamente con la nota de IMDb (0.0) en 3 títulos distintos.",
     category: "CRITIC",
     universe: "CINE",
     rarity: "DIAMOND",
@@ -316,7 +323,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_hot_take",
     title: "Pirómano del Séptimo Arte",
-    description: "Deja una Hot Take cinéfila con más de 2.5 puntos de diferencia con IMDb.",
+    description:
+      "Deja una Hot Take cinéfila con más de 2.5 puntos de diferencia con IMDb.",
     category: "CRITIC",
     universe: "CINE",
     rarity: "SILVER",
@@ -327,7 +335,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_hater",
     title: "Crítico Despiadado",
-    description: "Puntúa una película o serie con una nota implacable de 3/10 o inferior.",
+    description:
+      "Puntúa una película o serie con una nota implacable de 3/10 o inferior.",
     category: "CRITIC",
     universe: "CINE",
     rarity: "BRONZE",
@@ -338,7 +347,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_masterpiece_hunter",
     title: "Devoto del Diez",
-    description: "Otorga una calificación de 10/10 a al menos 3 películas o series.",
+    description:
+      "Otorga una calificación de 10/10 a al menos 3 películas o series.",
     category: "CRITIC",
     universe: "CINE",
     rarity: "SILVER",
@@ -351,7 +361,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_sofa_scholar",
     title: "Cátedra del Sofá",
-    description: "Mantén un Sofa Knowledge promedio superior al 80% (mín. 3 películas).",
+    description:
+      "Mantén un Sofa Knowledge promedio superior al 80% (mín. 3 películas).",
     category: "MASTERY",
     universe: "CINE",
     rarity: "GOLD",
@@ -362,7 +373,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "cine_sofa_god",
     title: "Sabiduría Cinematográfica",
-    description: "Alcanza un Sofa Knowledge supremo superior al 90% (mín. 5 obras).",
+    description:
+      "Alcanza un Sofa Knowledge supremo superior al 90% (mín. 5 obras).",
     category: "MASTERY",
     universe: "CINE",
     rarity: "DIAMOND",
@@ -607,7 +619,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_platform_titan",
     title: "Gamer Universal",
-    description: "Registra videojuegos jugados en 5 o más plataformas diferentes.",
+    description:
+      "Registra videojuegos jugados en 5 o más plataformas diferentes.",
     category: "GAMING",
     universe: "GAMING",
     rarity: "GOLD",
@@ -618,7 +631,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_favorites_collector",
     title: "Hall of Fame Gamer",
-    description: "Marca al menos 3 videojuegos como tus favoritos indiscutibles.",
+    description:
+      "Marca al menos 3 videojuegos como tus favoritos indiscutibles.",
     category: "GAMING",
     universe: "GAMING",
     rarity: "SILVER",
@@ -631,7 +645,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_first_review",
     title: "Primer Veredicto",
-    description: "Escribe tu primera reseña con opinión escrita de un videojuego.",
+    description:
+      "Escribe tu primera reseña con opinión escrita de un videojuego.",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "BRONZE",
@@ -653,7 +668,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_critic_gold",
     title: "Periodista del Videojuego",
-    description: "Escribe al menos 8 análisis o reseñas detalladas de videojuegos.",
+    description:
+      "Escribe al menos 8 análisis o reseñas detalladas de videojuegos.",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "GOLD",
@@ -664,7 +680,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_metacritic_sniper",
     title: "Metacritic Sniper",
-    description: "Coincide exactamente con la nota de Metacritic (diferencia 0.0).",
+    description:
+      "Coincide exactamente con la nota de Metacritic (diferencia 0.0).",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "GOLD",
@@ -675,7 +692,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_double_sniper",
     title: "Francotirador de Metacritic",
-    description: "Clava la nota de Metacritic (0.0) en 3 videojuegos distintos.",
+    description:
+      "Clava la nota de Metacritic (0.0) en 3 videojuegos distintos.",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "DIAMOND",
@@ -686,7 +704,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_hot_take",
     title: "Pirómano del Mando",
-    description: "Deja una Hot Take gamer con más de 2.5 puntos de diferencia con Metacritic.",
+    description:
+      "Deja una Hot Take gamer con más de 2.5 puntos de diferencia con Metacritic.",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "SILVER",
@@ -697,7 +716,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_hater",
     title: "Hater del Gamepad",
-    description: "Puntúa un videojuego con una nota implacable de 3/10 o inferior.",
+    description:
+      "Puntúa un videojuego con una nota implacable de 3/10 o inferior.",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "BRONZE",
@@ -708,7 +728,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_masterpiece_hunter",
     title: "Joya de Diez",
-    description: "Otorga una calificación perfecta de 10/10 a al menos 2 videojuegos.",
+    description:
+      "Otorga una calificación perfecta de 10/10 a al menos 2 videojuegos.",
     category: "CRITIC",
     universe: "GAMING",
     rarity: "SILVER",
@@ -721,7 +742,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_game_sage",
     title: "Sabio del Gamepad",
-    description: "Mantén un Game Knowledge promedio superior al 80% (mín. 3 juegos).",
+    description:
+      "Mantén un Game Knowledge promedio superior al 80% (mín. 3 juegos).",
     category: "MASTERY",
     universe: "GAMING",
     rarity: "GOLD",
@@ -732,7 +754,8 @@ export const ACHIEVEMENTS_CATALOG: AchievementDefinition[] = [
   {
     id: "game_knowledge_god",
     title: "Oráculo de los Videojuegos",
-    description: "Alcanza un Game Knowledge supremo superior al 90% (mín. 5 juegos).",
+    description:
+      "Alcanza un Game Knowledge supremo superior al 90% (mín. 5 juegos).",
     category: "MASTERY",
     universe: "GAMING",
     rarity: "DIAMOND",
@@ -777,7 +800,9 @@ export function evaluateUserAchievements(
   const cineStreamingCount = new Set(
     [...movies, ...series]
       .map((item) => item.platform)
-      .filter((p): p is string => Boolean(p && p !== "Pirata" && p.trim().length > 0)),
+      .filter((p): p is string =>
+        Boolean(p && p !== "Pirata" && p.trim().length > 0),
+      ),
   ).size;
 
   const cineReviewsCount =
@@ -841,9 +866,7 @@ export function evaluateUserAchievements(
 
   const gameHaterCount = games.filter(
     (g) =>
-      g.userRating !== null &&
-      g.userRating !== undefined &&
-      g.userRating <= 3,
+      g.userRating !== null && g.userRating !== undefined && g.userRating <= 3,
   ).length;
 
   const zeroDiffGameCount = games.filter(
@@ -1074,9 +1097,7 @@ export function evaluateUserAchievements(
     .reduce((acc, a) => acc + a.xp, 0);
   const totalPossibleXp = achievements.reduce((acc, a) => acc + a.xp, 0);
   const completionRate =
-    totalAvailable > 0
-      ? Math.round((totalUnlocked / totalAvailable) * 100)
-      : 0;
+    totalAvailable > 0 ? Math.round((totalUnlocked / totalAvailable) * 100) : 0;
 
   return {
     achievements,

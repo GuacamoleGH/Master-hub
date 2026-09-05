@@ -10,7 +10,9 @@ export async function GET(request: NextRequest) {
     const targetUsername = searchParams.get("username");
     const rawUniverse = searchParams.get("universe");
     const universe =
-      rawUniverse === "CINE" || rawUniverse === "GAMING" ? rawUniverse : undefined;
+      rawUniverse === "CINE" || rawUniverse === "GAMING"
+        ? rawUniverse
+        : undefined;
 
     let userId: string | null = null;
 

@@ -51,14 +51,14 @@ export async function GET() {
 
     const watchedList = allRecords.filter((r) => r.status === "WATCHED");
     const watchlistCount = allRecords.filter(
-      (r) => r.status === "WATCHLIST"
+      (r) => r.status === "WATCHLIST",
     ).length;
     const reviewedCount = watchedList.filter(
-      (r) => r.review && r.review.trim().length > 0
+      (r) => r.review && r.review.trim().length > 0,
     ).length;
 
     const ratedList = watchedList.filter(
-      (r) => typeof r.userRating === "number"
+      (r) => typeof r.userRating === "number",
     );
     const totalRated = ratedList.length;
 
@@ -70,35 +70,35 @@ export async function GET() {
     if (totalRated > 0) {
       const sumUserRatings = ratedList.reduce(
         (acc, curr) => acc + (curr.userRating || 0),
-        0
+        0,
       );
       averageRating = Number((sumUserRatings / totalRated).toFixed(1));
 
       const moviesWithImdb = ratedList.filter(
-        (r) => typeof r.movie.imdbRating === "number"
+        (r) => typeof r.movie.imdbRating === "number",
       );
       if (moviesWithImdb.length > 0) {
         const sumImdb = moviesWithImdb.reduce(
           (acc, curr) => acc + (curr.movie.imdbRating || 0),
-          0
+          0,
         );
         averageImdbRating = Number(
-          (sumImdb / moviesWithImdb.length).toFixed(1)
+          (sumImdb / moviesWithImdb.length).toFixed(1),
         );
 
         const bkList = moviesWithImdb.filter(
-          (r) => typeof r.ballKnowledge === "number"
+          (r) => typeof r.ballKnowledge === "number",
         );
         if (bkList.length > 0) {
           const sumBk = bkList.reduce(
             (acc, curr) => acc + (curr.ballKnowledge || 0),
-            0
+            0,
           );
           globalBallKnowledge = Number((sumBk / bkList.length).toFixed(1));
 
           const sumDiff = bkList.reduce(
             (acc, curr) => acc + Math.abs(curr.difference || 0),
-            0
+            0,
           );
           averageDifference = Number((sumDiff / bkList.length).toFixed(1));
         }
@@ -127,7 +127,7 @@ export async function GET() {
 
     if (ratedList.length > 0) {
       const sortedByRating = [...ratedList].sort(
-        (a, b) => (b.userRating || 0) - (a.userRating || 0)
+        (a, b) => (b.userRating || 0) - (a.userRating || 0),
       );
       highestRatedMovie = {
         title: sortedByRating[0].movie.title,
@@ -143,11 +143,11 @@ export async function GET() {
       const bkRecords = ratedList.filter(
         (r) =>
           typeof r.ballKnowledge === "number" &&
-          typeof r.movie.imdbRating === "number"
+          typeof r.movie.imdbRating === "number",
       );
       if (bkRecords.length > 0) {
         const sortedW = [...bkRecords].sort(
-          (a, b) => (b.ballKnowledge || 0) - (a.ballKnowledge || 0)
+          (a, b) => (b.ballKnowledge || 0) - (a.ballKnowledge || 0),
         );
         biggestW = {
           title: sortedW[0].movie.title,
@@ -159,7 +159,7 @@ export async function GET() {
         };
 
         const sortedL = [...bkRecords].sort(
-          (a, b) => (a.ballKnowledge || 0) - (b.ballKnowledge || 0)
+          (a, b) => (a.ballKnowledge || 0) - (b.ballKnowledge || 0),
         );
         biggestL = {
           title: sortedL[0].movie.title,
@@ -185,7 +185,8 @@ export async function GET() {
       count: ratingBuckets[Number(k)],
     }));
 
-    const genreMap: { [key: string]: { count: number; totalScore: number } } = {};
+    const genreMap: { [key: string]: { count: number; totalScore: number } } =
+      {};
     for (const r of watchedList) {
       let genres: string[] = [];
       try {
@@ -271,7 +272,7 @@ export async function GET() {
     console.error("Error en GET /api/profile:", error);
     return NextResponse.json(
       { error: "Error al obtener estadísticas del perfil" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -307,7 +308,7 @@ export async function PATCH(request: NextRequest) {
     console.error("Error en PATCH /api/profile:", error);
     return NextResponse.json(
       { error: "Error al actualizar perfil" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
