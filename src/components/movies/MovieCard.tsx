@@ -14,6 +14,8 @@ import ReviewModal from "./ReviewModal";
 import MoviePoster from "./MoviePoster";
 import StreamingBadge from "./StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 interface MovieCardProps {
   movie: {
@@ -47,6 +49,7 @@ export default function MovieCard({
 }: MovieCardProps) {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const toast = useToast();
 
   const isWatchlist = userMovie?.status === "WATCHLIST";
   const isWatched = userMovie?.status === "WATCHED";
@@ -61,8 +64,14 @@ export default function MovieCard({
         await fetch(`/api/user-movies?movieId=${movie.id}`, {
           method: "DELETE",
         });
+        sounds.playDelete();
+        toast.toast({
+          type: "info",
+          title: "Eliminada de tu Watchlist",
+          description: movie.title,
+        });
       } else {
-        await fetch("/api/user-movies", {
+        const res = await fetch("/api/user-movies", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -70,6 +79,16 @@ export default function MovieCard({
             status: "WATCHLIST",
           }),
         });
+
+        if (res.status === 401) {
+          toast.guestPrompt("guardar películas en tu Watchlist");
+          return;
+        }
+
+        if (res.ok) {
+          sounds.playSuccess();
+          toast.success("¡Añadida a tu Watchlist!", movie.title);
+        }
       }
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -82,6 +101,7 @@ export default function MovieCard({
   const handleOpenReview = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    sounds.playClick();
     setIsReviewModalOpen(true);
   };
 

@@ -18,6 +18,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import GameSearchInput from "./GameSearchInput";
+import SoundToggle from "@/components/shared/SoundToggle";
+import { sounds } from "@/lib/sounds";
 
 export default function GameHeader() {
   const pathname = usePathname();
@@ -96,6 +98,9 @@ export default function GameHeader() {
 
           <div className="w-px h-5 bg-cine-800 mx-1" />
 
+          {/* Selector de Sonido */}
+          <SoundToggle />
+
           {/* Menú de Usuario / Botones de Login */}
           {session?.user ? (
             <div className="relative">
@@ -111,7 +116,9 @@ export default function GameHeader() {
                   />
                 ) : (
                   <div className="w-5 h-5 rounded-lg bg-purple-500/20 text-purple-400 text-[11px] font-bold flex items-center justify-center">
-                    {(session.user.name || session.user.username || "U")[0].toUpperCase()}
+                    {(session.user.name ||
+                      session.user.username ||
+                      "U")[0].toUpperCase()}
                   </div>
                 )}
                 <span className="text-xs font-semibold text-cine-200 max-w-[90px] truncate">
@@ -170,8 +177,9 @@ export default function GameHeader() {
           )}
         </nav>
 
-        {/* Botón menú móvil */}
+        {/* Botón menú móvil y sonido */}
         <div className="flex items-center gap-2 lg:hidden">
+          <SoundToggle />
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 rounded-xl text-cine-400 hover:text-white hover:bg-cine-900 border border-cine-800"
@@ -196,7 +204,9 @@ export default function GameHeader() {
           {session?.user ? (
             <div className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900 border border-cine-800 mb-2">
               <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 text-xs font-bold flex items-center justify-center">
-                {(session.user.name || session.user.username || "U")[0].toUpperCase()}
+                {(session.user.name ||
+                  session.user.username ||
+                  "U")[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-white truncate">
@@ -211,7 +221,9 @@ export default function GameHeader() {
             <div className="p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/30 mb-2 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-white">Modo Invitado</p>
-                <p className="text-[10px] text-cine-400">Inicia sesión para guardar tu progreso</p>
+                <p className="text-[10px] text-cine-400">
+                  Inicia sesión para guardar tu progreso
+                </p>
               </div>
               <Link
                 href="/login"

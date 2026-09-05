@@ -13,14 +13,8 @@ interface EditGamerProfileModalProps {
   initialAvatar: string | null;
 }
 
-const AVATAR_PRESETS = [
-  "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=80",
-];
+import { PRESET_AVATARS } from "@/lib/avatars";
+import { sounds } from "@/lib/sounds";
 
 export default function EditGamerProfileModal({
   isOpen,
@@ -69,6 +63,7 @@ export default function EditGamerProfileModal({
       });
 
       if (res.ok) {
+        sounds.playSuccess();
         onSaved();
         onClose();
       }
@@ -153,24 +148,28 @@ export default function EditGamerProfileModal({
             </div>
 
             {/* Presets */}
-            <div className="flex gap-2 pt-1 overflow-x-auto pb-1">
-              {AVATAR_PRESETS.map((url, i) => (
+            <div className="flex gap-2 pt-1 overflow-x-auto pb-1 scrollbar-thin">
+              {PRESET_AVATARS.map((preset) => (
                 <button
                   type="button"
-                  key={i}
-                  onClick={() => setAvatarUrl(url)}
-                  className={`relative w-10 h-10 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
-                    avatarUrl === url
-                      ? "border-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)] scale-105"
-                      : "border-transparent hover:border-purple-400"
+                  key={preset.id}
+                  onClick={() => {
+                    sounds.playClick();
+                    setAvatarUrl(preset.dataUrl);
+                  }}
+                  title={preset.name}
+                  className={`relative w-11 h-11 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                    avatarUrl === preset.dataUrl
+                      ? "border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.6)] scale-105"
+                      : "border-cine-800 hover:border-purple-400"
                   }`}
                 >
                   <img
-                    src={url}
-                    alt={`Preset ${i}`}
+                    src={preset.dataUrl}
+                    alt={preset.name}
                     className="w-full h-full object-cover"
                   />
-                  {avatarUrl === url && (
+                  {avatarUrl === preset.dataUrl && (
                     <div className="absolute inset-0 bg-cyan-500/20 flex items-center justify-center">
                       <Check className="w-4 h-4 text-cyan-300 stroke-[3]" />
                     </div>
