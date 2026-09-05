@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Brain,
   Award,
+  ArrowRight,
 } from "lucide-react";
 import { ProfileStats } from "@/types/movie";
 import CinephileLevelBar from "@/components/CinephileLevelBar";
@@ -155,10 +156,10 @@ export default function ProfilePage() {
     <div className="space-y-12 pb-20">
       {/* 1. Cabecera del Perfil */}
       <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-cine-800 bg-gradient-to-r from-cine-900 via-cine-950 to-cine-900 shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-5 sm:gap-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar con botón de cambio */}
-            <div className="relative group/avatar w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center">
+            <div className="relative group/avatar w-24 h-24 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
               {profileData.avatarUrl ? (
                 <img
                   src={profileData.avatarUrl}
@@ -195,7 +196,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Datos Personales */}
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
               {stats?.rankTitle && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
@@ -207,52 +208,15 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-3.5">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  {profileData.displayName}
-                </h1>
-                <div className="flex flex-col gap-2.5 sm:gap-3">
-                  <button
-                    onClick={handleOpenEdit}
-                    className="w-full justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                    title={
-                      session?.user
-                        ? "Editar perfil cinéfilo"
-                        : "Inicia sesión para editar tu perfil"
-                    }
-                  >
-                    {session?.user ? (
-                      <>
-                        <Edit2 className="w-3.5 h-3.5" />
-                        <span>Editar Perfil</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="w-3.5 h-3.5" />
-                        <span>Iniciar Sesión</span>
-                      </>
-                    )}
-                  </button>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+                {profileData.displayName}
+              </h1>
 
-                  <button
-                    onClick={() => {
-                      sounds.shutter();
-                      setIsWrappedOpen(true);
-                    }}
-                    className="w-full justify-center px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
-                    title="Generar tarjeta de resumen para redes sociales"
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span>MasterHub Wrapped</span>
-                  </button>
-                </div>
-              </div>
-
-              <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed">
+              <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed pt-0.5">
                 {profileData.bio || "Explorador y crítico del séptimo arte."}
               </p>
 
-              <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-cine-400">
+              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-cine-400">
                 <span className="font-semibold text-white">
                   {stats?.totalWatched ?? 0}
                 </span>{" "}
@@ -267,10 +231,47 @@ export default function ProfilePage() {
                 en Watchlist
               </div>
             </div>
+
+            {/* Columna de Botones de Acción */}
+            <div className="flex flex-row sm:flex-col gap-2.5 sm:gap-2.5 shrink-0 self-start sm:self-center">
+              <button
+                onClick={handleOpenEdit}
+                className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title={
+                  session?.user
+                    ? "Editar perfil cinéfilo"
+                    : "Inicia sesión para editar tu perfil"
+                }
+              >
+                {session?.user ? (
+                  <>
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Editar Perfil</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Iniciar Sesión</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  sounds.shutter();
+                  setIsWrappedOpen(true);
+                }}
+                className="justify-center px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
+                title="Generar tarjeta de resumen para redes sociales"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>MasterHub Wrapped</span>
+              </button>
+            </div>
           </div>
 
           {/* Sello Gigante de Sofa Knowledge Global */}
-          <div className="glass-card p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-cine-950/80 flex flex-col items-center text-center gap-1 shadow-gold-glow w-full sm:w-auto">
+          <div className="glass-card p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-cine-950/80 flex flex-col items-center text-center gap-1 shadow-gold-glow w-full lg:w-auto shrink-0">
             <span className="text-[11px] uppercase font-bold tracking-widest text-amber-400 flex items-center gap-1">
               🛋️ SOFA KNOWLEDGE SCORE
             </span>
@@ -300,18 +301,71 @@ export default function ProfilePage() {
         nextLevelXp={stats.nextLevelXp}
       />
 
-      {/* 2.5 Vitrina de Trofeos & Medallas */}
+      {/* 2.5 Vitrina de Trofeos Cinéfilos - Banner Resumen Destacado */}
       {achievementsData && (
-        <section className="pt-2">
-          <AchievementsShowcase
-            achievements={achievementsData.achievements}
-            totalUnlocked={achievementsData.totalUnlocked}
-            totalAvailable={achievementsData.totalAvailable}
-            completionRate={achievementsData.completionRate}
-            totalXpEarned={achievementsData.totalXpEarned}
-            userName={profileData.displayName}
-            universe="CINE"
-          />
+        <section className="glass-panel p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-950 to-cine-900 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                <Trophy className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white">
+                    Vitrina de Trofeos Cinéfilos
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    {achievementsData.totalUnlocked} / {achievementsData.totalAvailable} Desbloqueados
+                  </span>
+                </div>
+                <p className="text-xs text-cine-400 mt-0.5">
+                  {achievementsData.completionRate}% completado · {achievementsData.totalXpEarned} XP acumulados
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/achievements"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black text-xs rounded-xl shadow-gold-glow transition-all cursor-pointer shrink-0"
+            >
+              <Award className="w-4 h-4" />
+              <span>Ver Vitrina Completa de Logros ({achievementsData.totalAvailable})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Muestra de Trofeos Destacados */}
+          <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {achievementsData.achievements.slice(0, 6).map((ach) => (
+              <Link
+                key={ach.id}
+                href="/achievements"
+                className={`p-3 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 hover:scale-[1.02] cursor-pointer ${
+                  ach.isUnlocked
+                    ? "bg-amber-950/30 border-amber-500/40 text-amber-200 shadow-[0_0_10px_rgba(245,158,11,0.15)]"
+                    : "bg-cine-900/40 border-cine-800 text-cine-500 opacity-60"
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${
+                    ach.isUnlocked
+                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
+                      : "bg-cine-800 text-cine-600"
+                  }`}
+                >
+                  {ach.isUnlocked ? "🏆" : "🔒"}
+                </div>
+                <div className="min-w-0 w-full">
+                  <p className="text-xs font-bold text-white truncate">
+                    {ach.title}
+                  </p>
+                  <p className="text-[10px] text-cine-400 font-mono mt-0.5">
+                    +{ach.xp} XP
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
