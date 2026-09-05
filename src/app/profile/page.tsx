@@ -196,43 +196,45 @@ export default function ProfilePage() {
 
             {/* Datos Personales */}
             <div className="space-y-1">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                   {profileData.displayName}
                 </h1>
-                <button
-                  onClick={handleOpenEdit}
-                  className="px-3 py-1 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                  title={
-                    session?.user
-                      ? "Editar perfil cinéfilo"
-                      : "Inicia sesión para editar tu perfil"
-                  }
-                >
-                  {session?.user ? (
-                    <>
-                      <Edit2 className="w-3.5 h-3.5" />
-                      <span>Editar Perfil</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="w-3.5 h-3.5" />
-                      <span>Iniciar Sesión</span>
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col gap-1.5">
+                  <button
+                    onClick={handleOpenEdit}
+                    className="w-full justify-center px-3 py-1 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                    title={
+                      session?.user
+                        ? "Editar perfil cinéfilo"
+                        : "Inicia sesión para editar tu perfil"
+                    }
+                  >
+                    {session?.user ? (
+                      <>
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>Editar Perfil</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span>Iniciar Sesión</span>
+                      </>
+                    )}
+                  </button>
 
-                <button
-                  onClick={() => {
-                    sounds.shutter();
-                    setIsWrappedOpen(true);
-                  }}
-                  className="px-3.5 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
-                  title="Generar tarjeta de resumen para redes sociales"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>MasterHub Wrapped</span>
-                </button>
+                  <button
+                    onClick={() => {
+                      sounds.shutter();
+                      setIsWrappedOpen(true);
+                    }}
+                    className="w-full justify-center px-3.5 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
+                    title="Generar tarjeta de resumen para redes sociales"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>MasterHub Wrapped</span>
+                  </button>
+                </div>
               </div>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed">
