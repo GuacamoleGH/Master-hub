@@ -29,7 +29,7 @@ async function calculateRemainingTotalXp(userId: string) {
       ug.status,
       hasReview,
       ug.hoursPlayed,
-      ug.gameKnowledge
+      ug.gameKnowledge,
     );
   }
   return totalXp;
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Debes iniciar sesión para realizar esta acción." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           error:
             "Palabra de confirmación no válida. Debes escribir exactamente la palabra ELIMINAR en mayúsculas.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (!existingUser) {
       return NextResponse.json(
         { error: "Usuario no encontrado en la base de datos." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
         error:
           "Ocurrió un error en el servidor al intentar purgar los datos. Inténtalo nuevamente.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
