@@ -129,7 +129,7 @@ export default function MovieSearchInput() {
   };
 
   return (
-    <div ref={wrapperRef} className="relative w-full max-w-lg">
+    <div ref={wrapperRef} className="relative w-full">
       <form onSubmit={handleSearchSubmit} className="relative">
         <div className="relative flex items-center bg-cine-900/90 border border-cine-700/80 rounded-xl focus-within:border-amber-500/70 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all shadow-inner overflow-hidden">
           <Search className="absolute left-3.5 w-4 h-4 text-cine-400 pointer-events-none" />

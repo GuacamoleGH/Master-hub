@@ -76,13 +76,8 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Buscador Central */}
-        <div className="flex-1 max-w-xs xl:max-w-sm hidden sm:block">
-          <MovieSearchInput />
-        </div>
-
         {/* Navegación Desktop */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
+        <nav className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -209,9 +204,11 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Buscador en móvil debajo de la cabecera */}
-      <div className="sm:hidden px-4 pb-3">
-        <MovieSearchInput />
+      {/* Barra de Búsqueda Dedicada (Sub-barra elegante debajo del menú) */}
+      <div className="border-t border-cine-800/80 bg-cine-950/70 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-2.5 shadow-inner">
+        <div className="max-w-2xl mx-auto w-full">
+          <MovieSearchInput />
+        </div>
       </div>
 
       {/* Menú desplegable móvil */}
