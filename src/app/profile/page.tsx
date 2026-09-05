@@ -26,6 +26,7 @@ import RatingDistributionChart from "@/components/charts/RatingDistributionChart
 import GenreChart from "@/components/charts/GenreChart";
 import WatchesTimelineChart from "@/components/charts/WatchesTimelineChart";
 import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
+import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -45,12 +46,8 @@ export default function ProfilePage() {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Edición de perfil
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState("");
-  const [editBio, setEditBio] = useState("");
-  const [editAvatar, setEditAvatar] = useState("");
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  // Modal de edición de perfil cinéfilo
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   // Acciones de administración (wipe / seed)
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
@@ -64,9 +61,6 @@ export default function ProfilePage() {
         const data = await res.json();
         setProfileData(data.profile);
         setStats(data.stats);
-        setEditName(data.profile.displayName);
-        setEditBio(data.profile.bio || "");
-        setEditAvatar(data.profile.avatarUrl || "");
       }
     } catch (err) {
       console.error("Error al cargar perfil:", err);
@@ -78,51 +72,6 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchProfile();
   }, []);
-
-  const handleSelectPresetAvatar = async (dataUrl: string) => {
-    setEditAvatar(dataUrl);
-    setProfileData((prev) => ({ ...prev, avatarUrl: dataUrl }));
-    try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: dataUrl }),
-      });
-      if (res.ok) {
-        toast.success(
-          "¡Avatar actualizado!",
-          "Se ha guardado tu nueva insignia temática.",
-        );
-        fetchProfile();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSavingProfile(true);
-    try {
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName: editName.trim(),
-          bio: editBio.trim(),
-          avatarUrl: editAvatar.trim() || null,
-        }),
-      });
-      if (res.ok) {
-        setIsEditing(false);
-        fetchProfile();
-      }
-    } catch (err) {
-      console.error("Error al guardar perfil:", err);
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
 
   const handleAdminAction = async (action: "wipe" | "seed") => {
     const confirmText =
@@ -171,8 +120,8 @@ export default function ProfilePage() {
       <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-cine-800 bg-gradient-to-r from-cine-900 via-cine-950 to-cine-900 shadow-2xl relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-5">
-            {/* Avatar */}
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center text-3xl">
+            {/* Avatar con botón de cambio */}
+            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center text-3xl">
               {profileData.avatarUrl ? (
                 <img
                   src={profileData.avatarUrl}
@@ -182,20 +131,36 @@ export default function ProfilePage() {
               ) : (
                 <User className="w-10 h-10 text-cine-500" />
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.click();
+                  setIsEditProfileOpen(true);
+                }}
+                className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-amber-300 text-[10px] font-bold gap-1 cursor-pointer"
+                title="Editar avatar y perfil"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>Cambiar</span>
+              </button>
             </div>
 
             {/* Datos Personales */}
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                   {profileData.displayName}
                 </h1>
                 <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="p-1.5 text-cine-400 hover:text-amber-400 hover:bg-cine-800 rounded-lg transition-colors"
-                  title="Editar perfil"
+                  onClick={() => {
+                    sounds.click();
+                    setIsEditProfileOpen(true);
+                  }}
+                  className="px-3 py-1 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                  title="Editar perfil cinéfilo"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
+                  <span>Editar Perfil</span>
                 </button>
               </div>
 
@@ -237,65 +202,6 @@ export default function ProfilePage() {
             </p>
           </div>
         </div>
-
-        {/* Formulario desplegable de edición rápida */}
-        {isEditing && (
-          <form
-            onSubmit={handleSaveProfile}
-            className="mt-6 pt-6 border-t border-cine-800 grid grid-cols-1 sm:grid-cols-3 gap-4"
-          >
-            <div>
-              <label className="text-xs text-cine-400 font-medium">
-                Nombre para mostrar
-              </label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full mt-1 px-3 py-2 bg-cine-950 border border-cine-700 rounded-xl text-xs text-white focus:border-amber-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-cine-400 font-medium">
-                URL del Avatar (foto)
-              </label>
-              <input
-                type="url"
-                value={editAvatar}
-                onChange={(e) => setEditAvatar(e.target.value)}
-                placeholder="https://..."
-                className="w-full mt-1 px-3 py-2 bg-cine-950 border border-cine-700 rounded-xl text-xs text-white focus:border-amber-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-cine-400 font-medium">
-                Biografía
-              </label>
-              <input
-                type="text"
-                value={editBio}
-                onChange={(e) => setEditBio(e.target.value)}
-                className="w-full mt-1 px-3 py-2 bg-cine-950 border border-cine-700 rounded-xl text-xs text-white focus:border-amber-500"
-              />
-            </div>
-            <div className="sm:col-span-3 flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-3 py-1.5 text-xs text-cine-400 hover:text-white rounded-lg hover:bg-cine-800"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSavingProfile}
-                className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold rounded-lg text-xs shadow-gold-glow flex items-center gap-1.5"
-              >
-                <Check className="w-3.5 h-3.5" /> Guardar cambios
-              </button>
-            </div>
-          </form>
-        )}
       </div>
 
       {/* 2. Mi Carrera Cinematográfica (Niveles y Gamificación) */}
@@ -605,6 +511,16 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* Modal Moderno de Edición de Perfil Cinéfilo */}
+      <EditCinephileProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        onSaved={fetchProfile}
+        initialName={profileData.displayName}
+        initialBio={profileData.bio}
+        initialAvatar={profileData.avatarUrl}
+      />
     </div>
   );
 }
