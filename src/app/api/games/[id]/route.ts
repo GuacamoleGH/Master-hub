@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const idOrRawg = params.id;
   const session = await getServerSession(authOptions);
@@ -47,6 +47,74 @@ export async function GET(
           parsedScreenshots = JSON.parse(dbGame.screenshots);
       } catch {}
 
+      // Obtener todas las valoraciones y reseñas de la comunidad para este videojuego
+      const allCommunityUserGames = await prisma.userGame.findMany({
+        where: {
+          gameId: dbGame.id,
+          OR: [
+            { review: { not: null, gt: "" } },
+            { userRating: { not: null } },
+          ],
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true,
+              totalXp: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      const validRatings: number[] = [];
+      const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const communityReviews = [];
+
+      for (const ug of allCommunityUserGames) {
+        if (typeof ug.userRating === "number" && ug.userRating > 0) {
+          validRatings.push(ug.userRating);
+          const starIndex =
+            Math.min(10, Math.max(1, Math.round(ug.userRating))) - 1;
+          distribution[starIndex]++;
+        }
+        if (ug.review && ug.review.trim().length > 0) {
+          const username =
+            ug.user.username ||
+            ug.user.name?.toLowerCase().replace(/\s+/g, "") ||
+            `user_${ug.user.id.slice(-5)}`;
+          communityReviews.push({
+            id: ug.id,
+            user: {
+              id: ug.user.id,
+              username,
+              name: ug.user.name,
+              image: ug.user.image,
+              totalXp: ug.user.totalXp,
+            },
+            userRating: ug.userRating,
+            review: ug.review,
+            platform: ug.platform,
+            hoursPlayed: ug.hoursPlayed,
+            knowledgeScore: ug.gameKnowledge,
+            knowledgeType: "game" as const,
+            date: (ug.completedDate || ug.updatedAt).toISOString(),
+          });
+        }
+      }
+
+      const masterHubScore =
+        validRatings.length > 0
+          ? Number(
+              (
+                validRatings.reduce((a, b) => a + b, 0) / validRatings.length
+              ).toFixed(1),
+            )
+          : null;
+
       const userGame = (dbGame as any).userGames?.[0] || null;
 
       return NextResponse.json({
@@ -65,6 +133,10 @@ export async function GET(
           description: dbGame.description,
           screenshots: parsedScreenshots,
           trailerUrl: dbGame.trailerUrl,
+          masterHubScore,
+          masterHubVotes: validRatings.length,
+          masterHubDistribution: distribution,
+          communityReviews,
           userGame: userGame
             ? {
                 id: userGame.id,
@@ -102,13 +174,13 @@ export async function GET(
 
     return NextResponse.json(
       { error: "Videojuego no encontrado" },
-      { status: 404 }
+      { status: 404 },
     );
   } catch (error) {
     console.error("Error en /api/games/[id]:", error);
     return NextResponse.json(
       { error: "Error al obtener el videojuego" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

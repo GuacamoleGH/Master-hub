@@ -17,6 +17,7 @@ import {
   PlusCircle,
   Trophy,
   Crown,
+  MessageSquare,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -97,6 +98,22 @@ export default async function MasterHubPage() {
     }
   } catch {}
 
+  // Estadísticas globales de reseñas comunitarias
+  let reviewCount = 0;
+  try {
+    const movieReviews = await prisma.userMovie.count({
+      where: {
+        OR: [{ review: { not: null } }, { userRating: { not: null } }],
+      },
+    });
+    const gameReviews = await prisma.userGame.count({
+      where: {
+        OR: [{ review: { not: null } }, { userRating: { not: null } }],
+      },
+    });
+    reviewCount = movieReviews + gameReviews;
+  } catch {}
+
   return (
     <div className="min-h-[75vh] flex flex-col justify-center space-y-12 pb-16 pt-4 animate-fade-in">
       {/* Cabecera del Centro de Mando */}
@@ -122,39 +139,87 @@ export default async function MasterHubPage() {
         </p>
       </div>
 
-      {/* Banner de Salón de la Fama / Leaderboard */}
-      <div className="max-w-5xl mx-auto w-full">
+      {/* Banners Comunitarios: Ranking y Reseñas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto w-full">
+        {/* Banner 1: Salón de la Fama / Leaderboard */}
         <Link
           href="/leaderboard"
-          className="group relative overflow-hidden rounded-3xl border border-amber-500/30 hover:border-amber-400/60 bg-gradient-to-r from-amber-500/10 via-cine-900/90 to-purple-500/10 p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-[0_0_30px_rgba(245,158,11,0.2)]"
+          className="group relative overflow-hidden rounded-3xl border border-amber-500/30 hover:border-amber-400/60 bg-gradient-to-br from-amber-500/10 via-cine-900/90 to-purple-500/10 p-5 sm:p-6 flex flex-col justify-between gap-4 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-[0_0_30px_rgba(245,158,11,0.2)]"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-105 transition-transform shadow-gold-glow">
-              <Trophy className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400" />
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-105 transition-transform shadow-gold-glow">
+              <Trophy className="w-6 h-6 text-amber-400" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
                   <Crown className="w-3 h-3 fill-amber-400" />
-                  Salón de la Fama Comunitario
+                  Salón de la Fama
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  Nuevo v3.3
+                  Ranking
                 </span>
               </div>
-              <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-amber-300 transition-colors">
-                Ranking de Cinéfilos & Gamers
+              <h3 className="text-lg font-black text-white group-hover:text-amber-300 transition-colors mt-1">
+                Podio de Cinéfilos & Gamers
               </h3>
-              <p className="text-xs text-cine-300 max-w-xl mt-0.5">
-                Descubre el podio olímpico de Sofa Knowledge y Game Knowledge.
-                Consulta las posiciones y compara tu nivel con los mejores.
+              <p className="text-xs text-cine-300 mt-1">
+                Compara tu Sofa Knowledge y Game Knowledge frente a los mejores
+                de la comunidad.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-black text-amber-400 bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-slate-950 px-4 py-2.5 rounded-xl border border-amber-500/30 transition-all shrink-0">
-            <span>Ver Podio & Ranking</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          <div className="flex items-center justify-between pt-2 border-t border-amber-500/20">
+            <span className="text-[11px] font-mono text-amber-400/80">
+              Top usuarios & puntuaciones
+            </span>
+            <div className="flex items-center gap-1.5 text-xs font-black text-amber-400 bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-slate-950 px-3 py-1.5 rounded-xl border border-amber-500/30 transition-all shrink-0">
+              <span>Ver Ranking</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Banner 2: Reseñas de la Comunidad */}
+        <Link
+          href="/reviews"
+          className="group relative overflow-hidden rounded-3xl border border-pink-500/30 hover:border-pink-400/60 bg-gradient-to-br from-pink-500/10 via-cine-900/90 to-purple-500/10 p-5 sm:p-6 flex flex-col justify-between gap-4 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+              <MessageSquare className="w-6 h-6 text-pink-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-pink-400" />
+                  Muro Comunitario
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                  Nuevo v3.4
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-white group-hover:text-pink-300 transition-colors mt-1">
+                Reseñas & Hot Takes
+              </h3>
+              <p className="text-xs text-cine-300 mt-1">
+                Descubre qué opina la gente. Filtra por más recientes, obras
+                maestras (10★) o discrepancias.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-pink-500/20">
+            <span className="text-[11px] font-mono text-pink-400/80">
+              {reviewCount > 0
+                ? `${reviewCount} opiniones registradas`
+                : "Cine & Videojuegos"}
+            </span>
+            <div className="flex items-center gap-1.5 text-xs font-black text-pink-400 bg-pink-500/10 group-hover:bg-pink-500 group-hover:text-slate-950 px-3 py-1.5 rounded-xl border border-pink-500/30 transition-all shrink-0">
+              <span>Explorar Reseñas</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
           </div>
         </Link>
       </div>

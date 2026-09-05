@@ -18,6 +18,7 @@ import {
   Sparkles,
   Share2,
   Trophy,
+  MessageSquare,
 } from "lucide-react";
 import GameSearchInput from "./GameSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -33,12 +34,15 @@ export default function GameHeader() {
     { href: "/games", label: "Inicio", icon: Gamepad2 },
     { href: "/games/backlog", label: "Backlog", icon: Bookmark },
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
+    { href: "/reviews?category=gaming", label: "Reseñas", icon: MessageSquare },
     { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
     { href: "/games/profile", label: "Perfil Gamer", icon: User },
   ];
 
   const isActive = (href: string) => {
     if (href === "/games") return pathname === "/games";
+    if (href.startsWith("/reviews"))
+      return pathname === "/reviews" || pathname === "/resenas";
     if (href.startsWith("/leaderboard"))
       return pathname === "/leaderboard" || pathname === "/ranking";
     return pathname.startsWith(href);

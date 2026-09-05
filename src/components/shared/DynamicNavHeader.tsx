@@ -13,6 +13,8 @@ import {
   User,
   ChevronDown,
   Trophy,
+  MessageSquare,
+  Share2,
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
@@ -94,6 +96,14 @@ export default function DynamicNavHeader() {
               <span>Ranking</span>
             </Link>
 
+            <Link
+              href="/reviews"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
+              <span>Reseñas</span>
+            </Link>
+
             <div className="w-px h-5 bg-cine-800 hidden sm:block" />
 
             {session?.user ? (
@@ -134,6 +144,14 @@ export default function DynamicNavHeader() {
                         {session.user.email}
                       </p>
                     </div>
+                    <Link
+                      href={`/u/${session.user.username || session.user.id}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-purple-300 hover:bg-cine-800 hover:text-white"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Mi Perfil Público</span>
+                    </Link>
                     <Link
                       href="/profile"
                       onClick={() => setIsMenuOpen(false)}
