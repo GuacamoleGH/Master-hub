@@ -4,7 +4,16 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { ArrowLeft, Film, Gamepad2, LogIn, LogOut, User, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft,
+  Film,
+  Gamepad2,
+  LogIn,
+  LogOut,
+  User,
+  ChevronDown,
+  Trophy,
+} from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
 
@@ -25,7 +34,10 @@ export default function DynamicNavHeader() {
             <ArrowLeft className="w-4 h-4" />
             <span>Volver al Hub</span>
           </Link>
-          <Link href="/" className="font-extrabold text-white text-base tracking-tight">
+          <Link
+            href="/"
+            className="font-extrabold text-white text-base tracking-tight"
+          >
             Master<span className="text-purple-400">Hub</span>
           </Link>
         </div>
@@ -74,6 +86,14 @@ export default function DynamicNavHeader() {
               <span>Videojuegos</span>
             </Link>
 
+            <Link
+              href="/leaderboard"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ranking</span>
+            </Link>
+
             <div className="w-px h-5 bg-cine-800 hidden sm:block" />
 
             {session?.user ? (
@@ -90,7 +110,9 @@ export default function DynamicNavHeader() {
                     />
                   ) : (
                     <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold flex items-center justify-center">
-                      {(session.user.name || session.user.username || "U")[0].toUpperCase()}
+                      {(session.user.name ||
+                        session.user.username ||
+                        "U")[0].toUpperCase()}
                     </div>
                   )}
                   <span className="text-xs font-semibold text-white max-w-[100px] truncate">
