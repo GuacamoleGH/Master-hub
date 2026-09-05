@@ -77,12 +77,12 @@ export default function Header() {
         </div>
 
         {/* Buscador Central */}
-        <div className="flex-1 max-w-md hidden sm:block">
+        <div className="flex-1 max-w-xs xl:max-w-sm hidden sm:block">
           <MovieSearchInput />
         </div>
 
         {/* Navegación Desktop */}
-        <nav className="hidden lg:flex items-center gap-2">
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -90,21 +90,21 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                   active
                     ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-gold-glow"
                     : "text-cine-300 hover:text-white hover:bg-cine-900"
                 }`}
               >
                 <Icon
-                  className={`w-3.5 h-3.5 ${active ? "fill-amber-400 text-amber-400" : "text-cine-400"}`}
+                  className={`w-3.5 h-3.5 shrink-0 ${active ? "fill-amber-400 text-amber-400" : "text-cine-400"}`}
                 />
-                <span>{link.label}</span>
+                <span className="whitespace-nowrap">{link.label}</span>
               </Link>
             );
           })}
 
-          <div className="w-px h-5 bg-cine-800 mx-1" />
+          <div className="w-px h-5 bg-cine-800 mx-1 shrink-0" />
 
           {/* Selector de Sonido */}
           <SoundToggle />
@@ -175,19 +175,19 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-cine-950 bg-amber-400 hover:bg-amber-300 shadow-gold-glow transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-cine-950 bg-amber-400 hover:bg-amber-300 shadow-gold-glow transition-all whitespace-nowrap shrink-0"
               >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Iniciar Sesión</span>
+                <LogIn className="w-3.5 h-3.5 shrink-0" />
+                <span className="whitespace-nowrap">Iniciar Sesión</span>
               </Link>
               <Link
                 href="/register"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 transition-all whitespace-nowrap shrink-0"
               >
-                <span>Registro</span>
+                <span className="whitespace-nowrap">Registro</span>
               </Link>
             </div>
           )}

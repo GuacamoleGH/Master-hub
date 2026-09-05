@@ -74,12 +74,12 @@ export default function GameHeader() {
         </div>
 
         {/* Buscador Central */}
-        <div className="flex-1 max-w-md hidden sm:block">
+        <div className="flex-1 max-w-xs xl:max-w-sm hidden sm:block">
           <GameSearchInput />
         </div>
 
         {/* Navegación Desktop */}
-        <nav className="hidden lg:flex items-center gap-2">
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.href);
@@ -87,21 +87,21 @@ export default function GameHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 xl:px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                   active
                     ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(139,92,246,0.2)]"
                     : "text-cine-300 hover:text-white hover:bg-cine-900"
                 }`}
               >
                 <Icon
-                  className={`w-3.5 h-3.5 ${active ? "text-purple-400" : "text-cine-400"}`}
+                  className={`w-3.5 h-3.5 shrink-0 ${active ? "text-purple-400" : "text-cine-400"}`}
                 />
-                <span>{link.label}</span>
+                <span className="whitespace-nowrap">{link.label}</span>
               </Link>
             );
           })}
 
-          <div className="w-px h-5 bg-cine-800 mx-1" />
+          <div className="w-px h-5 bg-cine-800 mx-1 shrink-0" />
 
           {/* Selector de Sonido */}
           <SoundToggle />
@@ -172,19 +172,19 @@ export default function GameHeader() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/40 shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/40 shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all whitespace-nowrap shrink-0"
               >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Iniciar Sesión</span>
+                <LogIn className="w-3.5 h-3.5 shrink-0" />
+                <span className="whitespace-nowrap">Iniciar Sesión</span>
               </Link>
               <Link
                 href="/register"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-purple-300 hover:text-white bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-purple-300 hover:text-white bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 transition-all whitespace-nowrap shrink-0"
               >
-                <span>Registro</span>
+                <span className="whitespace-nowrap">Registro</span>
               </Link>
             </div>
           )}
