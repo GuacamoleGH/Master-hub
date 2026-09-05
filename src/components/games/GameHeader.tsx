@@ -34,15 +34,15 @@ export default function GameHeader() {
     { href: "/games", label: "Inicio", icon: Gamepad2 },
     { href: "/games/backlog", label: "Backlog", icon: Bookmark },
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
-    { href: "/reviews?category=gaming", label: "Reseñas", icon: MessageSquare },
+    { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
     { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
     { href: "/games/profile", label: "Perfil Gamer", icon: User },
   ];
 
   const isActive = (href: string) => {
     if (href === "/games") return pathname === "/games";
-    if (href.startsWith("/reviews"))
-      return pathname === "/reviews" || pathname === "/resenas";
+    if (href === "/games/reviews")
+      return pathname === "/games/reviews" || pathname === "/games/resenas";
     if (href.startsWith("/leaderboard"))
       return pathname === "/leaderboard" || pathname === "/ranking";
     return pathname.startsWith(href);

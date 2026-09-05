@@ -182,10 +182,7 @@ export default async function MasterHubPage() {
         </Link>
 
         {/* Banner 2: Reseñas de la Comunidad */}
-        <Link
-          href="/reviews"
-          className="group relative overflow-hidden rounded-3xl border border-pink-500/30 hover:border-pink-400/60 bg-gradient-to-br from-pink-500/10 via-cine-900/90 to-purple-500/10 p-5 sm:p-6 flex flex-col justify-between gap-4 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]"
-        >
+        <div className="group relative overflow-hidden rounded-3xl border border-pink-500/30 hover:border-pink-400/60 bg-gradient-to-br from-pink-500/10 via-cine-900/90 to-purple-500/10 p-5 sm:p-6 flex flex-col justify-between gap-4 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0 group-hover:scale-105 transition-transform shadow-[0_0_15px_rgba(236,72,153,0.3)]">
               <MessageSquare className="w-6 h-6 text-pink-400" />
@@ -194,34 +191,46 @@ export default async function MasterHubPage() {
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-pink-400" />
-                  Muro Comunitario
+                  Muros de Crítica
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                  Nuevo v3.4
+                  Reseñas
                 </span>
               </div>
               <h3 className="text-lg font-black text-white group-hover:text-pink-300 transition-colors mt-1">
                 Reseñas & Hot Takes
               </h3>
               <p className="text-xs text-cine-300 mt-1">
-                Descubre qué opina la gente. Filtra por más recientes, obras
-                maestras (10★) o discrepancias.
+                Explora las críticas de la comunidad divididas por universo:
+                cine/series y videojuegos.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-pink-500/20">
-            <span className="text-[11px] font-mono text-pink-400/80">
+          <div className="flex items-center justify-between pt-2 border-t border-pink-500/20 gap-2">
+            <span className="text-[11px] font-mono text-pink-400/80 truncate">
               {reviewCount > 0
                 ? `${reviewCount} opiniones registradas`
-                : "Cine & Videojuegos"}
+                : "Comunidad Activa"}
             </span>
-            <div className="flex items-center gap-1.5 text-xs font-black text-pink-400 bg-pink-500/10 group-hover:bg-pink-500 group-hover:text-slate-950 px-3 py-1.5 rounded-xl border border-pink-500/30 transition-all shrink-0">
-              <span>Explorar Reseñas</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/reviews"
+                className="flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-500/15 hover:bg-amber-500 hover:text-slate-950 px-3 py-1.5 rounded-xl border border-amber-500/30 transition-all whitespace-nowrap"
+              >
+                <Film className="w-3.5 h-3.5" />
+                <span>Cine</span>
+              </Link>
+              <Link
+                href="/games/reviews"
+                className="flex items-center gap-1.5 text-xs font-bold text-purple-300 bg-purple-600/25 hover:bg-purple-600 hover:text-white px-3 py-1.5 rounded-xl border border-purple-500/40 transition-all whitespace-nowrap shadow-sm"
+              >
+                <Gamepad2 className="w-3.5 h-3.5" />
+                <span>Juegos</span>
+              </Link>
             </div>
           </div>
-        </Link>
+        </div>
       </div>
 
       {/* Grid de Universos Activos */}
