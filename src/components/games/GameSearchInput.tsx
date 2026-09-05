@@ -154,8 +154,12 @@ export default function GameSearchInput({
               {/* Metacritic Badge */}
               {game.metacritic && (
                 <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-mono font-bold shadow-sm">
-                  <span className="text-[10px] uppercase text-purple-400 font-semibold">Meta</span>
-                  <span className="text-white font-black text-sm">{game.metacritic}</span>
+                  <span className="text-[10px] uppercase text-purple-400 font-semibold">
+                    Meta
+                  </span>
+                  <span className="text-white font-black text-sm">
+                    {game.metacritic}
+                  </span>
                 </div>
               )}
             </button>

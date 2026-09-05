@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const idOrTmdb = params.id;
   const session = await getServerSession(authOptions);
@@ -70,6 +70,73 @@ export async function GET(
         }
       }
 
+      // Obtener todas las valoraciones y reseñas de la comunidad para este título
+      const allCommunityUserMovies = await prisma.userMovie.findMany({
+        where: {
+          movieId: dbMovie.id,
+          OR: [
+            { review: { not: null, gt: "" } },
+            { userRating: { not: null } },
+          ],
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true,
+              totalXp: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      const validRatings: number[] = [];
+      const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const communityReviews = [];
+
+      for (const um of allCommunityUserMovies) {
+        if (typeof um.userRating === "number" && um.userRating > 0) {
+          validRatings.push(um.userRating);
+          const starIndex =
+            Math.min(10, Math.max(1, Math.round(um.userRating))) - 1;
+          distribution[starIndex]++;
+        }
+        if (um.review && um.review.trim().length > 0) {
+          const username =
+            um.user.username ||
+            um.user.name?.toLowerCase().replace(/\s+/g, "") ||
+            `user_${um.user.id.slice(-5)}`;
+          communityReviews.push({
+            id: um.id,
+            user: {
+              id: um.user.id,
+              username,
+              name: um.user.name,
+              image: um.user.image,
+              totalXp: um.user.totalXp,
+            },
+            userRating: um.userRating,
+            review: um.review,
+            platform: um.platform,
+            knowledgeScore: um.ballKnowledge,
+            knowledgeType: "sofa" as const,
+            date: (um.watchedDate || um.updatedAt).toISOString(),
+          });
+        }
+      }
+
+      const masterHubScore =
+        validRatings.length > 0
+          ? Number(
+              (
+                validRatings.reduce((a, b) => a + b, 0) / validRatings.length
+              ).toFixed(1),
+            )
+          : null;
+
       const userMovie = (dbMovie as any).userMovies?.[0] || null;
 
       return NextResponse.json({
@@ -90,6 +157,10 @@ export async function GET(
           cast: parsedCast,
           imdbRating: dbMovie.imdbRating,
           streamingPlatforms: parsedPlatforms,
+          masterHubScore,
+          masterHubVotes: validRatings.length,
+          masterHubDistribution: distribution,
+          communityReviews,
           userMovie: userMovie
             ? {
                 id: userMovie.id,
@@ -117,13 +188,13 @@ export async function GET(
 
     return NextResponse.json(
       { error: "Película no encontrada" },
-      { status: 404 }
+      { status: 404 },
     );
   } catch (error) {
     console.error("Error en /api/movies/[id]:", error);
     return NextResponse.json(
       { error: "Error al obtener la película" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
