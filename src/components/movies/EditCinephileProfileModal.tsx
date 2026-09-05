@@ -2,9 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, User, Image, FileText, Loader2, Check, Film, Sparkles } from "lucide-react";
+import {
+  X,
+  User,
+  Image,
+  FileText,
+  Loader2,
+  Check,
+  Film,
+  Sparkles,
+} from "lucide-react";
 import { PRESET_AVATARS } from "@/lib/avatars";
 import { sounds } from "@/lib/sounds";
+import { useSession } from "next-auth/react";
 
 interface EditCinephileProfileModalProps {
   isOpen: boolean;
@@ -23,6 +33,7 @@ export default function EditCinephileProfileModal({
   initialBio,
   initialAvatar,
 }: EditCinephileProfileModalProps) {
+  const { data: session } = useSession();
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
@@ -47,7 +58,7 @@ export default function EditCinephileProfileModal({
     };
   }, [isOpen, initialName, initialBio, initialAvatar]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted || !session?.user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,7 +202,8 @@ export default function EditCinephileProfileModal({
           {/* Biografía */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-amber-400" /> Biografía Cinéfila
+              <FileText className="w-3.5 h-3.5 text-amber-400" /> Biografía
+              Cinéfila
             </label>
             <textarea
               rows={3}
@@ -229,6 +241,6 @@ export default function EditCinephileProfileModal({
         </form>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
