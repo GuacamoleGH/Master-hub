@@ -119,7 +119,7 @@ export default async function MasterHubPage() {
       </div>
 
       {/* Grid de Universos Activos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
         {/* Tarjeta 1: Cinephile Hub */}
         <div className="group relative rounded-3xl overflow-hidden glass-panel border border-amber-500/20 hover:border-amber-500/60 p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-2xl bg-gradient-to-br from-amber-500/10 via-cine-950 to-cine-950">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-all duration-500" />
