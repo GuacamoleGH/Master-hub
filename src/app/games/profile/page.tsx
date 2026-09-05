@@ -324,7 +324,8 @@ export default function GamerProfilePage() {
         {/* Nota Media vs Prensa */}
         <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota Media
+            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota
+            Media
           </div>
           <div className="text-3xl font-black text-white font-mono">
             {stats.averageRating || "—"}
@@ -354,11 +355,13 @@ export default function GamerProfilePage() {
                     Vitrina de Trofeos Gamer
                   </h3>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    {achievementsData.totalUnlocked} / {achievementsData.totalAvailable} Desbloqueados
+                    {achievementsData.totalUnlocked} /{" "}
+                    {achievementsData.totalAvailable} Desbloqueados
                   </span>
                 </div>
                 <p className="text-xs text-cine-400 mt-0.5">
-                  {achievementsData.completionRate}% completado · {achievementsData.totalXpEarned} XP acumulados
+                  {achievementsData.completionRate}% completado ·{" "}
+                  {achievementsData.totalXpEarned} XP acumulados
                 </p>
               </div>
             </div>
@@ -368,7 +371,10 @@ export default function GamerProfilePage() {
               className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer shrink-0"
             >
               <Award className="w-4 h-4" />
-              <span>Ver Vitrina Completa de Logros ({achievementsData.totalAvailable})</span>
+              <span>
+                Ver Vitrina Completa de Logros (
+                {achievementsData.totalAvailable})
+              </span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -432,7 +438,9 @@ export default function GamerProfilePage() {
                 </p>
                 <p className="text-xl font-black text-purple-400 font-mono mt-0.5">
                   {stats.longestGame.hours}{" "}
-                  <span className="text-xs text-cine-400 font-normal">horas jugadas</span>
+                  <span className="text-xs text-cine-400 font-normal">
+                    horas jugadas
+                  </span>
                 </p>
               </div>
             </div>
@@ -465,7 +473,9 @@ export default function GamerProfilePage() {
                 </p>
                 <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
                   ★ {stats.highestRatedGame.rating}{" "}
-                  <span className="text-xs text-cine-400 font-normal">/ 10</span>
+                  <span className="text-xs text-cine-400 font-normal">
+                    / 10
+                  </span>
                 </p>
               </div>
             </div>
@@ -491,19 +501,27 @@ export default function GamerProfilePage() {
               </span>
             </div>
             <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-              <span className="text-cine-400 block text-[10px]">Pendientes</span>
+              <span className="text-cine-400 block text-[10px]">
+                Pendientes
+              </span>
               <span className="text-base font-black text-white font-mono">
                 {stats.statusBreakdown?.backlog ?? stats.totalBacklog}
               </span>
             </div>
             <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-              <span className="text-cine-400 block text-[10px]">Media / Título</span>
+              <span className="text-cine-400 block text-[10px]">
+                Media / Título
+              </span>
               <span className="text-base font-black text-cyan-300 font-mono">
-                {stats.averageCompletionHours ? `${stats.averageCompletionHours}h` : "—"}
+                {stats.averageCompletionHours
+                  ? `${stats.averageCompletionHours}h`
+                  : "—"}
               </span>
             </div>
             <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-              <span className="text-cine-400 block text-[10px]">Platinados</span>
+              <span className="text-cine-400 block text-[10px]">
+                Platinados
+              </span>
               <span className="text-base font-black text-amber-400 font-mono">
                 {stats.statusBreakdown?.platinum ?? stats.totalPlatinum}
               </span>
@@ -513,51 +531,66 @@ export default function GamerProfilePage() {
       </section>
 
       {/* Distribución de Puntuaciones (1 al 10) */}
-      {stats.ratingDistribution && stats.ratingDistribution.some((d) => d.count > 0) && (
-        <section className="glass-panel p-6 rounded-3xl border border-purple-500/20 bg-cine-950 space-y-4">
-          <div className="flex items-center justify-between border-b border-cine-800 pb-3">
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-purple-400" />
-              <h3 className="text-base font-bold text-white">
-                Distribución de Puntuaciones
-              </h3>
+      {stats.ratingDistribution &&
+        stats.ratingDistribution.some((d) => d.count > 0) && (
+          <section className="glass-panel p-6 rounded-3xl border border-purple-500/20 bg-cine-950 space-y-4">
+            <div className="flex items-center justify-between border-b border-cine-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-purple-400" />
+                <h3 className="text-base font-bold text-white">
+                  Distribución de Puntuaciones
+                </h3>
+              </div>
+              <span className="text-xs text-cine-400 font-mono">
+                Escala 1 a 10
+              </span>
             </div>
-            <span className="text-xs text-cine-400 font-mono">
-              Escala 1 a 10
-            </span>
-          </div>
 
-          <div className="w-full h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={stats.ratingDistribution}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#232635" vertical={false} />
-                <XAxis
-                  dataKey="rating"
-                  stroke="#71717A"
-                  fontSize={11}
-                  tickLine={false}
-                  tickFormatter={(v) => `★ ${v}`}
-                />
-                <YAxis stroke="#71717A" fontSize={11} tickLine={false} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#090A10",
-                    borderColor: "#8B5CF6",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                  }}
-                  formatter={(val: any) => [`${val} juego(s)`, "Cantidad"]}
-                  labelFormatter={(lbl) => `Nota ★ ${lbl}`}
-                />
-                <Bar dataKey="count" fill="#8B5CF6" radius={[6, 6, 0, 0]} maxBarSize={30} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-      )}
+            <div className="w-full h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={stats.ratingDistribution}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#232635"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="rating"
+                    stroke="#71717A"
+                    fontSize={11}
+                    tickLine={false}
+                    tickFormatter={(v) => `★ ${v}`}
+                  />
+                  <YAxis
+                    stroke="#71717A"
+                    fontSize={11}
+                    tickLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#090A10",
+                      borderColor: "#8B5CF6",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(val: any) => [`${val} juego(s)`, "Cantidad"]}
+                    labelFormatter={(lbl) => `Nota ★ ${lbl}`}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="#8B5CF6"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={30}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )}
 
       {/* Critic vs You: Gráfica Comparativa con Metacritic */}
       <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-cine-950 space-y-4">

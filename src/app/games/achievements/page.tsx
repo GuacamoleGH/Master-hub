@@ -114,7 +114,9 @@ export default function GamerAchievementsPage() {
                 Vitrina de Trofeos & Medallas Gamer
               </h1>
               <p className="text-xs sm:text-sm text-cine-300 max-w-xl leading-relaxed">
-                Desbloquea hitos únicos registrando tus sesiones, conquistando platinos, acumulando horas de juego y defendiendo tus notas frente al consenso de Metacritic.
+                Desbloquea hitos únicos registrando tus sesiones, conquistando
+                platinos, acumulando horas de juego y defendiendo tus notas
+                frente al consenso de Metacritic.
               </p>
             </div>
 
