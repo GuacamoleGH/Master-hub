@@ -4,34 +4,68 @@
 
 ---
 
-## 🚀 Novedades de la Versión 3.0 (User Management & Social Hub)
+## 📜 Historial de Versiones (Changelog)
 
-- 🔐 **Autenticación & Cuentas de Usuario:**
-  - Sistema de cuentas mediante **NextAuth.js** con registro seguro por credenciales (contraseñas hasheadas con `bcryptjs`).
-  - Inicio de sesión social integrado con **Google OAuth** y **Discord OAuth**.
-  - Modo **Invitado** transparente: navegación y lectura libres del catálogo y reseñas; redirección inteligente a `/login?callbackUrl=...` al intentar editar perfiles o interactuar con el sistema personal.
-- 💬 **Muros Críticos de Reseñas Comunitarias (`/reviews` y `/games/reviews`):**
-  - Espacios dedicados para explorar las opiniones de la comunidad divididas por universo:
-    - Cine & Series (`/reviews` o `/resenas`).
-    - Videojuegos (`/games/reviews` o `/games/resenas`).
-  - Buscador reactivo en vivo por título, usuario crítico o texto.
-  - Criterios de ordenación:
-    - 🕒 **Más recientes**: Últimas opiniones publicadas.
-    - ⭐ **Mayor nota**: Las mejores joyas valoradas.
-    - 🔥 **Hot Takes**: Menor nota y opiniones más controvertidas frente a la crítica oficial.
-  - Tarjetas de reseña con carátula de alta resolución, insignia de Ball/Game Knowledge, spoiler warning y timestamp.
-- 🏆 **Salón de la Fama & Leaderboard Global (`/leaderboard`):**
-  - Podio interactivo con los 3 usuarios más destacados.
+### 🚀 v3.0.0 — User Management & Social Hub *(Versión Actual)*
+- **Autenticación Multi-Proveedor:**
+  - Integración completa con **NextAuth.js** con registro seguro y verificación por credenciales (contraseñas encriptadas con `bcryptjs`).
+  - Inicio de sesión rápido y seguro con **Google OAuth** y **Discord OAuth**.
+  - Sesiones persistentes JWT y vinculación automática de cuentas en Supabase PostgreSQL.
+- **Gestión de Invitados & Control de Acceso:**
+  - Modo invitado libre para explorar y consultar catálogos, detalles de obras y muros de reseñas.
+  - Redirección con retorno inteligente (`/login?callbackUrl=...`) al intentar personalizar perfiles, guardar reseñas o votar.
+- **Muros Críticos de Reseñas Comunitarias:**
+  - Espacio de críticas cinéfilas (`/reviews` o `/resenas`) y críticas gamer (`/games/reviews` o `/games/resenas`).
+  - Buscador reactivo en tiempo real por obra, usuario crítico o texto de la reseña.
+  - Criterios de ordenación: 🕒 *Más recientes*, ⭐ *Mayor nota* (Aclamadas) y 🔥 *Hot Takes* (Mayor discrepancia con la crítica oficial).
+  - Tarjetas de reseña completas con carátula en alta resolución, insignia de Ball/Game Knowledge, spoiler warning y fecha.
+- **Salón de la Fama & Leaderboard Global (`/leaderboard`):**
+  - Podio interactivo con los tres mejores usuarios de la comunidad.
   - Pestañas independientes: **General**, **Cine & Series** y **Videojuegos**.
-  - Sistema de puntuación Master Hub Score calculado en base a volumen de visionados/juegos, nivel y precisión cultural.
-- 👤 **Perfiles Públicos de Usuario (`/u/[username]`):**
-  - Enlaces públicos compartibles con biografía, estadísticas de carrera, desglose de calificaciones y afinidad cultural entre usuarios.
-  - **Top 4 Favoritos:** Muestra destacada de tus 4 películas/series y videojuegos predilectos.
-- 🎨 **Modales de Edición de Perfil & Insignias Temáticas:**
-  - Modales emergentes (`EditCinephileProfileModal` y `EditGamerProfileModal`) con selector de 16 avatares vectoriales prediseñados (Claqueta de Oro, Gafas 3D, Cyber Gamepad, Trofeo Platino, etc.) o URL de imagen externa.
+  - Algoritmo de puntuación **Master Hub Score** basado en volumen de obras registradas, nivel de experiencia y precisión cultural acumulada.
+- **Perfiles Sociales Públicos (`/u/[username]`):**
+  - Páginas públicas compartibles con biografía, estadísticas de carrera, desglose de notas y vitrina de **Top 4 Favoritos**.
+  - **Medidor de Afinidad Cultural:** Calcula el porcentaje de coincidencia de gustos y criterios entre dos usuarios.
+- **Modales de Perfil & Presets de Avatares:**
+  - Modales emergentes para Cine (`EditCinephileProfileModal`) y Videojuegos (`EditGamerProfileModal`).
+  - 16 insignias vectoriales temáticas personalizadas y soporte para URLs de imágenes externas.
   - Botón hover en avatar centrado milimétricamente tanto en modo invitado ("Entrar") como en autenticado ("Cambiar").
-- 🔊 **Audio Háptico Web & Efectos de Sonido:**
-  - Efectos auditivos sutiles en clicks, guardados y aperturas (`lib/sounds.ts`) con selector de sonido (`SoundToggle`) en la barra de navegación.
+- **Audio Háptico Web:**
+  - Sistema de sonido interactivo (`lib/sounds.ts`) con conmutador de silencio (`SoundToggle`) en la cabecera.
+
+### 🎮 v2.1.0 — Multi-Plataforma Granular & UI Refinements
+- **Desglose de Horas Multi-Plataforma:**
+  - Registro de horas y estado específico por plataforma (ej. *80h en Steam*, *20h en Nintendo Switch*).
+  - Paneles analíticos y gráficos de dedicación por consola/tienda.
+- **Catálogo Retro & Moderno:**
+  - Soporte para ecosistemas clásicos: PS1, PS2, PS3, PS4, PS5, Xbox 360, Xbox One, Xbox Series, GameCube, N64, GBA y consolas portátiles.
+- **Ficha Cinéfila Flexible:**
+  - Casilla `[x] Asignar nota` interactiva para registrar visionados sin necesidad de puntuación numérica obligatoria.
+- **Optimizaciones de Rendimiento:**
+  - Índices en base de datos Supabase, lazy loading de carátulas y scripts de mantenimiento de índice Git para Windows (`repair-git.bat`).
+
+### 🛸 v2.0.0 — Gamer Hub & Arquitectura Multi-Universo
+- **Launcher Genérico Modular (`/`):**
+  - Pantalla principal para navegar entre universos con métricas en tiempo real de cada ecosistema.
+- **Lanzamiento de Gamer Hub (`/games`):**
+  - Integración con la API de **RAWG** con trailers, capturas oficiales y carátulas de videojuegos.
+  - Sistema de **Backlog** y juegos **Completados/Platinados**.
+- **Motor Game Knowledge (GK):**
+  - Cálculo matemático de sintonía frente al consenso de Metacritic.
+  - Tabla de **Hot Takes** clasificando títulos en *Overrated* y *Based*.
+- **Sistema de Nivel y XP Gamer:**
+  - Barra de progreso dinámica, cálculo de experiencia y rangos desbloqueables (de *Novato de Silicio* a *Leyenda del Píxel*).
+
+### 🎬 v1.0.0 — Cinephile Hub
+- **Lanzamiento Inicial de Cinephile Hub (`/movies`):**
+  - Conexión con **TMDB API** para catálogo universal de películas y series.
+  - Fichas interactivas con reparto, sinopsis, plataformas de streaming y enlace directo a IMDb.
+  - Inclusión de plataforma especial 🏴‍☠️ *Pirata / Stremio*.
+- **Motor Sofa Knowledge (SK):**
+  - Cálculo de precisión cultural del usuario frente a las notas medias de IMDb.
+- **Gestión de Colecciones:**
+  - Listas de *Vistas* y *Watchlist* con filtrado por género, nota y plataforma.
+  - Gráficos interactivos de distribución de notas, géneros favoritos y cronología de visionados.
 
 ---
 
@@ -96,11 +130,13 @@ prueba/
 ## ✨ Universos y Funcionalidades
 
 ### 1. 🛸 Launcher Genérico (`/`)
+
 - Pantalla de bienvenida modular para acceder a cualquier universo activo (**v3.0 Multi-Universo**).
 - Tarjetas vivas con estadísticas de Cinephile Hub y Gamer Hub.
 - Espacio reservado modular ("Próximamente...") preparado para escalar a futuros universos (Anime, Libros, etc.).
 
 ### 2. 🎮 Gamer Hub (`/games/...`)
+
 - **Integración RAWG API:** Carátulas, screenshots oficiales, trailers y enlaces directos a RAWG.
 - **Registro Multi-Plataforma Granular:** Horas jugadas y estado independiente por plataforma (_Completado en PC_, _Jugando en PS5_, _Platinado en Steam_).
 - **Estadísticas de Plataforma:** Paneles de horas acumuladas y dedicación por ecosistema (Steam, Xbox, PlayStation, Nintendo, Emuladores).
@@ -110,6 +146,7 @@ prueba/
 - **Muro de Reseñas Gamer (`/games/reviews`):** Feed comunitario con ordenación por fecha, nota o controversia.
 
 ### 3. 🎬 Cinephile Hub (`/movies/...` y `/series/...`)
+
 - **Catálogo de Cine y Series TMDB:** Fichas con reparto completo, sinopsis, pósteres y enlaces a **IMDb**.
 - **Plataformas de streaming:** Netflix, Max, Prime Video, Disney+, Apple TV+, Movistar+, Filmin o **🏴‍☠️ Pirata / Stremio**.
 - **Registro Flexible de Obras:** Opción de registrar películas o series con o sin puntuación numérica.
@@ -152,23 +189,24 @@ npm run git:fix
 ## 🌐 Despliegue en Vercel & Variables de Entorno
 
 ### 📍 ¿Dónde están las Variables de Entorno en Vercel?
+
 Para configurar las claves en producción, la ruta en el panel de control de Vercel es:
+
 > **Tu Proyecto en Vercel** ➔ **Settings** (pestaña superior) ➔ **Environment Variables** (menú lateral izquierdo)
 
 ### 📋 Variables requeridas en Vercel:
 
-| Variable | Descripción / Ejemplo | Entorno Requerido |
-| :--- | :--- | :--- |
-| `NEXTAUTH_SECRET` | Clave secreta para firmar sesiones JWT de NextAuth (32+ caracteres) | Production, Preview |
-| `NEXTAUTH_URL` | URL pública de tu dominio en Vercel (`https://tu-proyecto.vercel.app`) | Production, Preview |
-| `DATABASE_URL` | Conexión pooling de Supabase PostgreSQL (`...:6543/postgres?pgbouncer=true`) | Production, Preview |
-| `DIRECT_URL` | Conexión directa de Supabase PostgreSQL (`...:5432/postgres`) | Production, Preview |
-| `TMDB_API_KEY` | Clave API de The Movie Database | Production, Preview |
-| `RAWG_API_KEY` | Clave API de RAWG Video Games | Production, Preview |
-| `GOOGLE_CLIENT_ID` | Client ID de Google Cloud OAuth *(Opcional para login con Google)* | Production, Preview |
-| `GOOGLE_CLIENT_SECRET` | Client Secret de Google Cloud OAuth *(Opcional para login con Google)* | Production, Preview |
-| `DISCORD_CLIENT_ID` | Client ID de Discord Developer Portal *(Opcional para login con Discord)* | Production, Preview |
-| `DISCORD_CLIENT_SECRET` | Client Secret de Discord Developer Portal *(Opcional para login con Discord)* | Production, Preview |
+| Variable                | Descripción / Ejemplo                                                         | Entorno Requerido   |
+| :---------------------- | :---------------------------------------------------------------------------- | :------------------ |
+| `NEXTAUTH_SECRET`       | Clave secreta para firmar sesiones JWT de NextAuth (32+ caracteres)           | Production, Preview |
+| `NEXTAUTH_URL`          | URL pública de tu dominio en Vercel (`https://tu-proyecto.vercel.app`)        | Production, Preview |
+| `DATABASE_URL`          | Conexión pooling de Supabase PostgreSQL (`...:6543/postgres?pgbouncer=true`)  | Production, Preview |
+| `DIRECT_URL`            | Conexión directa de Supabase PostgreSQL (`...:5432/postgres`)                 | Production, Preview |
+| `TMDB_API_KEY`          | Clave API de The Movie Database                                               | Production, Preview |
+| `RAWG_API_KEY`          | Clave API de RAWG Video Games                                                 | Production, Preview |
+| `GOOGLE_CLIENT_ID`      | Client ID de Google Cloud OAuth _(Opcional para login con Google)_            | Production, Preview |
+| `GOOGLE_CLIENT_SECRET`  | Client Secret de Google Cloud OAuth _(Opcional para login con Google)_        | Production, Preview |
+| `DISCORD_CLIENT_ID`     | Client ID de Discord Developer Portal _(Opcional para login con Discord)_     | Production, Preview |
+| `DISCORD_CLIENT_SECRET` | Client Secret de Discord Developer Portal _(Opcional para login con Discord)_ | Production, Preview |
 
-*Nota: Tras añadir o modificar variables en Vercel, recuerda hacer **Redeploy** del último despliegue para que surtan efecto.*
-
+_Nota: Tras añadir o modificar variables en Vercel, recuerda hacer **Redeploy** del último despliegue para que surtan efecto._
