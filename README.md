@@ -6,7 +6,31 @@
 
 ## 📜 Historial de Versiones (Changelog)
 
-### 🚀 v3.0.0 — User Management & Social Hub _(Versión Actual)_
+### 🏆 v4.0.0 — Gamification, Trophy Room, SFX 2.0 & Social Wrapped _(Versión Actual)_
+
+- **Sala de Trofeos & Medallas Desbloqueables (`AchievementsShowcase`):**
+  - Motor de evaluación dinámica (`lib/achievements.ts`) con 20 insignias distribuidas en 4 categorías:
+    - 🍿 **Cine & Series**: _Primer Fotograma_, _Sesión Continua_, _Filmoteca Viviente_, _Rey de los Mares_ (opción Pirata 🏴‍☠️), _Atracón de Temporadas_, \_Ojo de Halcón u (diferencia exacta 0.0 frente a IMDb).
+    - 🎮 **Videojuegos**: _Press Start_, _Victoria Magistral_, _Finisher Legendario_, _Cazador de Platinos_, _Veterano del Vicio_, _No-Life Honorario_ (100+ horas), _Metacritic Sniper_ (diferencia 0.0 frente a Metacritic).
+    - 🌶️ **Comunidad & Crítica**: _Voz en el Desierto_, _Crítico Acreditado_, _Pirómano de Opiniones_ (Hot Take con > 2.5 de diferencia), _Obra Maestra Universal_ (nota perfecta 10/10).
+    - 🧠 **Maestría Multi-Universo**: _Cátedra del Sofá_ (> 80% Sofa Knowledge), _Sabio del Gamepad_ (> 80% Game Knowledge), _Señor Multi-Universo_ (hazaña combinada).
+  - Niveles de rareza visuales (_Bronce_, _Plata_, _Oro_, _Diamante_) con resplandor cromático, puntos XP ganados y barra de progreso general de colección.
+  - Modal interactivo de inspección con audio y seguimiento numérico de requisitos restantes.
+  - Presente en Perfil Cinéfilo (`/profile`), Perfil Gamer (`/games/profile`) y Perfiles Públicos (`/u/[username]`).
+- **MasterHub Wrapped — Tarjeta Social Compartible (`SocialWrappedModal`):**
+  - Generador visual de tarjetas en alta resolución 9:16 (1080x1920) renderizado directamente con **HTML5 Canvas**, optimizado para Instagram Stories, Twitter/X y WhatsApp Status.
+  - Incluye avatar, handle `@username`, métricas clave duales (horas gamer, películas vistas, % Sofa y Game Knowledge) y la vitrina con las 3 mejores medallas del usuario.
+  - Descarga instantánea en archivo PNG de alta calidad y soporte para la **Web Share API** nativa en dispositivos móviles.
+- **Motor de Audio Arcade SFX 2.0 (`lib/sounds.ts`):**
+  - Nuevos efectos sintetizados mediante **Web Audio API** nativa (sin assets externos, sin latencia):
+    - `playAchievement()`: Arpegio triunfal brillante de trofeo desbloqueado.
+    - `playPirate()`: Tintineo náutico de doblones de oro al marcar la plataforma Pirata 🏴‍☠️.
+    - `playShutter()`: Clic de obturador mecánico de cámara analógica para MasterHub Wrapped.
+    - `playLevelUp()`: Acorde épico ascendente de subida de nivel.
+    - `playTrophyHover()`: Micro-campana armónica al interactuar con las medallas.
+  - Botón de audio interactivo (`SoundToggle`) incorporado en la cabecera principal del Launcher.
+
+### 🚀 v3.0.0 — User Management & Social Hub
 
 - **Autenticación Multi-Proveedor:**
   - Integración completa con **NextAuth.js** con registro seguro y verificación por credenciales (contraseñas encriptadas con `bcryptjs`).

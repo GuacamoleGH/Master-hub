@@ -21,6 +21,9 @@ import {
 } from "lucide-react";
 import TopFourCard from "@/components/profile/TopFourCard";
 import AffinityCard from "@/components/profile/AffinityCard";
+import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
+import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import { UserAchievement } from "@/lib/achievements";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -58,6 +61,13 @@ interface PublicProfileData {
     recentGames: any[];
   };
   affinity: any;
+  achievements?: {
+    achievements: UserAchievement[];
+    totalUnlocked: number;
+    totalAvailable: number;
+    totalXpEarned: number;
+    completionRate: number;
+  };
 }
 
 export default function PublicProfilePage() {
@@ -70,6 +80,7 @@ export default function PublicProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"cinema" | "gaming">("cinema");
   const [copied, setCopied] = useState(false);
+  const [isWrappedOpen, setIsWrappedOpen] = useState(false);
 
   useEffect(() => {
     if (!username) return;
@@ -237,7 +248,32 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Botones de acción */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                sounds.shutter();
+                setIsWrappedOpen(true);
+              }}
+              className={`px-4 py-2 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                activeTab === "cinema"
+                  ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 shadow-gold-glow"
+                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+              }`}
+            >
+              {activeTab === "cinema" ? (
+                <>
+                  <Film className="w-3.5 h-3.5" />
+                  <span>Cinephile Wrapped</span>
+                </>
+              ) : (
+                <>
+                  <Gamepad2 className="w-3.5 h-3.5" />
+                  <span>Gamer Wrapped</span>
+                </>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={handleShare}
@@ -288,12 +324,27 @@ export default function PublicProfilePage() {
         />
       </div>
 
+      {/* Vitrina de Trofeos & Medallas */}
+      {data.achievements && (
+        <section className="pt-2">
+          <AchievementsShowcase
+            achievements={data.achievements.achievements}
+            totalUnlocked={data.achievements.totalUnlocked}
+            totalAvailable={data.achievements.totalAvailable}
+            completionRate={data.achievements.completionRate}
+            totalXpEarned={data.achievements.totalXpEarned}
+            userName={user.name || user.username || "Usuario"}
+            universe={activeTab === "cinema" ? "CINE" : "GAMING"}
+          />
+        </section>
+      )}
+
       {/* 4. Selector de Pestañas (Cinefilia vs Gaming) */}
       <div className="flex items-center gap-2 border-b border-cine-800 pb-3">
         <button
           type="button"
           onClick={() => {
-            sounds.playNav();
+            sounds.whoosh();
             setActiveTab("cinema");
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -309,7 +360,7 @@ export default function PublicProfilePage() {
         <button
           type="button"
           onClick={() => {
-            sounds.playNav();
+            sounds.whoosh();
             setActiveTab("gaming");
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -516,6 +567,27 @@ export default function PublicProfilePage() {
           </div>
         </div>
       )}
+
+      {/* Modal de Social Wrapped */}
+      <SocialWrappedModal
+        isOpen={isWrappedOpen}
+        onClose={() => setIsWrappedOpen(false)}
+        universe={activeTab === "cinema" ? "CINE" : "GAMING"}
+        user={{
+          displayName: user.name || user.username || "Usuario",
+          username: user.username,
+          avatarUrl: user.image,
+        }}
+        stats={{
+          totalMovies: cinema.totalWatched,
+          totalSeries: 0,
+          totalHours: gaming.totalHours,
+          totalCompletedGames: gaming.totalCompleted,
+          ballKnowledge: cinema.globalBallKnowledge,
+          gameKnowledge: gaming.globalGameKnowledge,
+        }}
+        achievements={data.achievements?.achievements || []}
+      />
     </div>
   );
 }

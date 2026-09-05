@@ -127,22 +127,6 @@ export default function GameReviewModal({
             hours: idx === 0 ? initialHours || 0 : 0,
             status: initialStatus,
           }));
-        } else if (game.platforms && game.platforms.length > 0) {
-          loadedList = [
-            {
-              platform: game.platforms[0],
-              hours: initialHours || 0,
-              status: initialStatus,
-            },
-          ];
-        } else {
-          loadedList = [
-            {
-              platform: "PC (Steam)",
-              hours: initialHours || 0,
-              status: initialStatus,
-            },
-          ];
         }
       }
 
@@ -270,7 +254,11 @@ export default function GameReviewModal({
       }
 
       if (res.ok) {
-        sounds.playSuccess();
+        if (status === "PLATINUM") {
+          sounds.achievement();
+        } else {
+          sounds.playSuccess();
+        }
         toast.success(
           "¡Juego registrado!",
           status === "COMPLETED" || status === "PLATINUM"

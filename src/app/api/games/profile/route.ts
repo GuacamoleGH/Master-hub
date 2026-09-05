@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateGamerLevelAndRank,
+  calculateGameXp,
   classifyHotTake,
 } from "@/lib/gameKnowledge";
 import { GamerStats, HotTake } from "@/types/game";
@@ -200,12 +201,77 @@ export async function GET() {
 
     hotTakes.sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference));
 
-    const totalXp = user?.totalXp || 0;
-    const levelInfo = calculateGamerLevelAndRank(totalXp);
+    // Hallmarks y Récords Personales
+    const gamesWithHours = userGames
+      .filter((g) => (g.hoursPlayed || 0) > 0)
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+    const longestGame =
+      gamesWithHours.length > 0
+        ? {
+            title: gamesWithHours[0].game.title,
+            cover: gamesWithHours[0].game.backgroundImage,
+            hours: gamesWithHours[0].hoursPlayed || 0,
+          }
+        : null;
+
+    const ratedGames = userGames
+      .filter((g) => typeof g.userRating === "number")
+      .sort((a, b) => (b.userRating || 0) - (a.userRating || 0));
+    const highestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[0].game.title,
+            cover: ratedGames[0].game.backgroundImage,
+            rating: ratedGames[0].userRating || 0,
+          }
+        : null;
+    const lowestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[ratedGames.length - 1].game.title,
+            cover: ratedGames[ratedGames.length - 1].game.backgroundImage,
+            rating: ratedGames[ratedGames.length - 1].userRating || 0,
+          }
+        : null;
+
+    const completedWithHours = userGames.filter(
+      (ug) =>
+        (ug.status === "COMPLETED" || ug.status === "PLATINUM") &&
+        (ug.hoursPlayed || 0) > 0,
+    );
+    const averageCompletionHours =
+      completedWithHours.length > 0
+        ? Math.round(
+            completedWithHours.reduce(
+              (acc, g) => acc + (g.hoursPlayed || 0),
+              0,
+            ) / completedWithHours.length,
+          )
+        : null;
+
+    const statusBreakdown = {
+      completed: totalCompleted,
+      playing: totalPlaying,
+      backlog: totalBacklog,
+      platinum: totalPlatinum,
+      abandoned: userGames.filter((ug) => ug.status === "ABANDONED").length,
+    };
+
+    let gamerXp = 0;
+    for (const ug of userGames) {
+      const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
+      gamerXp += calculateGameXp(
+        ug.status,
+        hasReview,
+        ug.hoursPlayed,
+        ug.gameKnowledge,
+      );
+    }
+    const levelInfo = calculateGamerLevelAndRank(gamerXp);
 
     const totalPlatformAggregatedHours = Object.values(platformHoursMap).reduce(
       (a, b) => a + b,
-      0
+      0,
     );
     const hoursByPlatform = Object.entries(platformHoursMap)
       .map(([platform, hours]) => ({
@@ -224,7 +290,7 @@ export async function GET() {
       .sort((a, b) => b.hours - a.hours);
 
     const ratingDistributionList = Object.entries(ratingDistribution).map(
-      ([rating, count]) => ({ rating: Number(rating), count })
+      ([rating, count]) => ({ rating: Number(rating), count }),
     );
 
     const stats: GamerStats = {
@@ -244,7 +310,7 @@ export async function GET() {
           : null,
       globalGameKnowledge:
         gkCount > 0 ? Number((totalGkSum / gkCount).toFixed(1)) : null,
-      totalXp,
+      totalXp: gamerXp,
       level: levelInfo.level,
       rankTitle: levelInfo.rankTitle,
       rankIcon: levelInfo.rankIcon,
@@ -260,6 +326,11 @@ export async function GET() {
       hoursByPlatform,
       hoursByGenre,
       ratingDistribution: ratingDistributionList,
+      longestGame,
+      highestRatedGame,
+      lowestRatedGame,
+      averageCompletionHours,
+      statusBreakdown,
     };
 
     return NextResponse.json({
@@ -275,7 +346,7 @@ export async function GET() {
     console.error("Error en /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al calcular estadísticas gamer" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -312,7 +383,7 @@ export async function PATCH(request: NextRequest) {
     console.error("Error en PATCH /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al actualizar perfil gamer" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

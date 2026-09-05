@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
+import SoundToggle from "./SoundToggle";
 
 export default function DynamicNavHeader() {
   const pathname = usePathname();
@@ -56,8 +57,8 @@ export default function DynamicNavHeader() {
   if (pathname === "/") {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 via-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center">
               <span className="text-sm font-black text-white">MH</span>
             </div>
@@ -71,10 +72,10 @@ export default function DynamicNavHeader() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <nav className="hidden md:flex items-center justify-center gap-1.5 xl:gap-2 flex-1">
             <Link
               href="/movies"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Film className="w-3.5 h-3.5 text-amber-400" />
               <span>Cine & Series</span>
@@ -82,7 +83,7 @@ export default function DynamicNavHeader() {
 
             <Link
               href="/games"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
               <span>Videojuegos</span>
@@ -90,7 +91,7 @@ export default function DynamicNavHeader() {
 
             <Link
               href="/leaderboard"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span>Ranking</span>
@@ -98,13 +99,15 @@ export default function DynamicNavHeader() {
 
             <Link
               href="/reviews"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
               <span>Reseñas</span>
             </Link>
+          </nav>
 
-            <div className="w-px h-5 bg-cine-800 hidden sm:block" />
+          <div className="flex items-center gap-3 shrink-0">
+            <SoundToggle />
 
             {session?.user ? (
               <div className="relative">

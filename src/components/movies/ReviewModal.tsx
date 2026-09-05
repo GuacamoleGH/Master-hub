@@ -297,7 +297,14 @@ export default function ReviewModal({
                   <button
                     key={plat}
                     type="button"
-                    onClick={() => setPlatform(plat)}
+                    onClick={() => {
+                      if (isPirate) {
+                        sounds.pirate();
+                      } else {
+                        sounds.click();
+                      }
+                      setPlatform(plat);
+                    }}
                     className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all text-center truncate ${
                       isSelected
                         ? isPirate
