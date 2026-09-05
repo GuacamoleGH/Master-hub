@@ -1,8 +1,21 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import Link from "next/link";
-import { CheckCircle2, AlertCircle, Sparkles, X, LogIn, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  X,
+  LogIn,
+  ArrowRight,
+} from "lucide-react";
 import { sounds } from "@/lib/sounds";
 
 interface Toast {
@@ -109,10 +122,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {guestModal.isOpen && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
           {/* Backdrop clickable */}
-          <div
-            className="absolute inset-0"
-            onClick={closeGuestModal}
-          />
+          <div className="absolute inset-0" onClick={closeGuestModal} />
 
           {/* Tarjeta Centrada */}
           <div className="relative z-10 w-full max-w-md bg-cine-900/95 border-2 border-purple-500/60 rounded-3xl p-6 sm:p-8 shadow-[0_0_60px_rgba(168,85,247,0.35)] animate-slideUp overflow-hidden">
@@ -149,15 +159,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               {/* Mensaje descriptivo */}
               <p className="text-xs sm:text-sm text-cine-300 leading-relaxed mb-6">
                 Crea una cuenta gratuita o accede con{" "}
-                <span className="text-white font-semibold">Google o Discord</span> para{" "}
-                <span className="text-purple-300 font-semibold">{guestModal.actionName}</span> y mantener tus puntuaciones y estadísticas de Sofa / Game Knowledge guardadas en tu cuenta.
+                <span className="text-white font-semibold">
+                  Google o Discord
+                </span>{" "}
+                para{" "}
+                <span className="text-purple-300 font-semibold">
+                  {guestModal.actionName}
+                </span>{" "}
+                y mantener tus puntuaciones y estadísticas de Sofa / Game
+                Knowledge guardadas en tu cuenta.
               </p>
 
               {/* Botones de acción */}
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <Link
                   href="/login"
-                  onClick={() => setGuestModal((prev) => ({ ...prev, isOpen: false }))}
+                  onClick={() =>
+                    setGuestModal((prev) => ({ ...prev, isOpen: false }))
+                  }
                   className="w-full sm:flex-1 py-3 px-5 bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] group"
                 >
                   <LogIn className="w-4 h-4" />

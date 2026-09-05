@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronDown,
   Sparkles,
+  Share2,
 } from "lucide-react";
 import GameSearchInput from "./GameSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -140,6 +141,14 @@ export default function GameHeader() {
                       {session.user.email}
                     </p>
                   </div>
+                  <Link
+                    href={`/u/${session.user.username || session.user.id}`}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-purple-300 hover:bg-cine-800 hover:text-white"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Mi Perfil Público</span>
+                  </Link>
                   <Link
                     href="/games/profile"
                     onClick={() => setIsUserMenuOpen(false)}
