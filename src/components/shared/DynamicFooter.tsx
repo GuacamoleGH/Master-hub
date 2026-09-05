@@ -20,8 +20,16 @@ export default function DynamicFooter() {
           <p className="text-cine-500">
             Datos impulsados por{" "}
             <strong className="text-purple-300">RAWG</strong> &{" "}
-            <strong className="text-cyan-300">Metacritic</strong>. Diseñado para
-            jugadores exigentes.
+            <strong className="text-cyan-300">Metacritic</strong>. Hecho por{" "}
+            <a
+              href="https://github.com/GuacamoleGH"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-300 hover:text-white font-semibold transition-colors"
+            >
+              Guacamole
+            </a>
+            .
           </p>
         </div>
       </footer>
@@ -40,8 +48,16 @@ export default function DynamicFooter() {
             <span className="text-purple-400">Gamer Hub</span>
           </div>
           <p className="text-cine-500">
-            Ecosistema de entretenimiento personal. Arquitectura escalable y
-            modular.
+            Ecosistema de entretenimiento personal. Hecho por{" "}
+            <a
+              href="https://github.com/GuacamoleGH"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cine-300 hover:text-white font-semibold transition-colors"
+            >
+              Guacamole
+            </a>
+            .
           </p>
         </div>
       </footer>
@@ -57,7 +73,16 @@ export default function DynamicFooter() {
           <span>Sofa Knowledge Engine 🛋️</span>
         </div>
         <p className="text-cine-500">
-          Datos impulsados por TMDB & OMDb. Diseñado para cinéfilos exigentes.
+          Datos impulsados por TMDB & OMDb. Hecho por{" "}
+          <a
+            href="https://github.com/GuacamoleGH"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-300 hover:text-white font-semibold transition-colors"
+          >
+            Guacamole
+          </a>
+          .
         </p>
       </div>
     </footer>
