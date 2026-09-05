@@ -18,7 +18,7 @@ export default function GlobalSoundListener() {
 
       // Buscar si el clic fue en un elemento interactivo
       const interactive = target.closest<HTMLElement>(
-        "button, a, [role='button'], [role='tab'], input[type='checkbox'], input[type='radio'], select, summary, .interactive-card"
+        "button, a, [role='button'], [role='tab'], input[type='checkbox'], input[type='radio'], select, summary, .interactive-card",
       );
 
       if (!interactive) return;
@@ -60,7 +60,9 @@ export default function GlobalSoundListener() {
 
     document.addEventListener("click", handleGlobalClick, { capture: true });
     return () => {
-      document.removeEventListener("click", handleGlobalClick, { capture: true });
+      document.removeEventListener("click", handleGlobalClick, {
+        capture: true,
+      });
     };
   }, []);
 
