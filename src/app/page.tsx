@@ -145,7 +145,7 @@ export default async function MasterHubPage() {
             </div>
 
             {/* Descripción */}
-            <p className="text-sm text-cine-300 mt-4 leading-relaxed min-h-[4.25rem] flex items-center">
+            <p className="text-sm text-cine-300 mt-4 leading-relaxed min-h-[4.5rem]">
               Tu Letterboxd cinematográfico. Registra películas, escribe
               reseñas, sigue plataformas de streaming (con opción 🏴‍☠️ Pirata) y
               calcula tu precisión frente a IMDb con el índice{" "}
@@ -225,9 +225,9 @@ export default async function MasterHubPage() {
             </div>
 
             {/* Descripción */}
-            <p className="text-sm text-cine-300 mt-4 leading-relaxed min-h-[4.25rem] flex items-center">
-              Tu Letterboxd de videojuegos. Registra horas jugadas, gestiona
-              tu backlog, descubre trailers y capturas, y compara tu criterio
+            <p className="text-sm text-cine-300 mt-4 leading-relaxed min-h-[4.5rem]">
+              Tu Letterboxd de videojuegos. Registra horas jugadas, gestiona tu
+              backlog, descubre trailers y capturas, y compara tu criterio
               frente a Metacritic con{" "}
               <strong className="text-cine-200">Game Knowledge</strong> y tus{" "}
               <strong className="text-cine-200">Hot Takes</strong>.
