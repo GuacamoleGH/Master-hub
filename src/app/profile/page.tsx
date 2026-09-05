@@ -156,9 +156,9 @@ export default function ProfilePage() {
       {/* 1. Cabecera del Perfil */}
       <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-cine-800 bg-gradient-to-r from-cine-900 via-cine-950 to-cine-900 shadow-2xl relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5 sm:gap-6">
             {/* Avatar con botón de cambio */}
-            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center">
+            <div className="relative group/avatar w-24 h-24 sm:w-32 sm:h-32 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center">
               {profileData.avatarUrl ? (
                 <img
                   src={profileData.avatarUrl}
@@ -166,7 +166,7 @@ export default function ProfilePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User className="w-10 h-10 text-cine-500" />
+                <User className="w-12 h-12 text-cine-500" />
               )}
               <button
                 type="button"
@@ -178,14 +178,14 @@ export default function ProfilePage() {
               >
                 {session?.user ? (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
-                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <Sparkles className="w-6 h-6 text-amber-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Cambiar
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
-                    <LogIn className="w-5 h-5 text-amber-400" />
+                    <LogIn className="w-6 h-6 text-amber-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Entrar
                     </span>
@@ -195,15 +195,26 @@ export default function ProfilePage() {
             </div>
 
             {/* Datos Personales */}
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="space-y-2">
+              {stats?.rankTitle && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
+                    Perfil Cinéfilo
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    {stats.rankTitle}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-3.5">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                   {profileData.displayName}
                 </h1>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2.5 sm:gap-3">
                   <button
                     onClick={handleOpenEdit}
-                    className="w-full justify-center px-3 py-1 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                    className="w-full justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                     title={
                       session?.user
                         ? "Editar perfil cinéfilo"
@@ -228,7 +239,7 @@ export default function ProfilePage() {
                       sounds.shutter();
                       setIsWrappedOpen(true);
                     }}
-                    className="w-full justify-center px-3.5 py-1 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
+                    className="w-full justify-center px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
                     title="Generar tarjeta de resumen para redes sociales"
                   >
                     <Camera className="w-3.5 h-3.5" />
@@ -241,17 +252,17 @@ export default function ProfilePage() {
                 {profileData.bio || "Explorador y crítico del séptimo arte."}
               </p>
 
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-cine-400">
+              <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-cine-400">
                 <span className="font-semibold text-white">
-                  {stats.totalWatched}
+                  {stats?.totalWatched ?? 0}
                 </span>{" "}
                 películas vistas ·{" "}
                 <span className="font-semibold text-white">
-                  {stats.totalReviews}
+                  {stats?.totalReviews ?? 0}
                 </span>{" "}
                 reseñas escritas ·{" "}
                 <span className="font-semibold text-white">
-                  {stats.totalWatchlist}
+                  {stats?.totalWatchlist ?? 0}
                 </span>{" "}
                 en Watchlist
               </div>
