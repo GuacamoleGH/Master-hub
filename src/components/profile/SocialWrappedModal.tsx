@@ -75,9 +75,9 @@ export default function SocialWrappedModal({
     .filter((a) => {
       if (!a.isUnlocked) return false;
       if (isGaming) {
-        return a.universe === "GAMING" || a.universe === "BOTH";
+        return a.universe === "GAMING";
       }
-      return a.universe === "CINE" || a.universe === "BOTH";
+      return a.universe === "CINE";
     })
     .slice(0, 3);
 
@@ -150,9 +150,7 @@ export default function SocialWrappedModal({
     ctx.font = "bold 32px monospace";
     ctx.textAlign = "left";
     ctx.fillText(
-      isGaming
-        ? "MASTERHUB • GAMER WRAPPED"
-        : "MASTERHUB • CINEPHILE WRAPPED",
+      isGaming ? "MASTERHUB • GAMER WRAPPED" : "MASTERHUB • CINEPHILE WRAPPED",
       100,
       140,
     );
@@ -250,9 +248,8 @@ export default function SocialWrappedModal({
       ctx.font = "black 54px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const initial = (
-        user.displayName || (isGaming ? "G" : "C")
-      )[0].toUpperCase();
+      const initial = (user.displayName ||
+        (isGaming ? "G" : "C"))[0].toUpperCase();
       ctx.fillText(initial, avatarX + avatarSize / 2, avatarY + avatarSize / 2);
     }
 

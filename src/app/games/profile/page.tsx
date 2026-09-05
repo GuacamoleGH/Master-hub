@@ -212,43 +212,45 @@ export default function GamerProfilePage() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {profile.displayName}
                 </h1>
-                <button
-                  onClick={handleOpenEdit}
-                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                  title={
-                    session?.user
-                      ? "Editar perfil gamer"
-                      : "Inicia sesión para editar tu perfil"
-                  }
-                >
-                  {session?.user ? (
-                    <>
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Editar Perfil</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="w-3.5 h-3.5" />
-                      <span>Iniciar Sesión</span>
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col gap-1.5">
+                  <button
+                    onClick={handleOpenEdit}
+                    className="w-full justify-center px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                    title={
+                      session?.user
+                        ? "Editar perfil gamer"
+                        : "Inicia sesión para editar tu perfil"
+                    }
+                  >
+                    {session?.user ? (
+                      <>
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Editar Perfil</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span>Iniciar Sesión</span>
+                      </>
+                    )}
+                  </button>
 
-                <button
-                  onClick={() => {
-                    sounds.shutter();
-                    setIsWrappedOpen(true);
-                  }}
-                  className="px-3.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
-                  title="Generar tarjeta de resumen para redes sociales"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>MasterHub Wrapped</span>
-                </button>
+                  <button
+                    onClick={() => {
+                      sounds.shutter();
+                      setIsWrappedOpen(true);
+                    }}
+                    className="w-full justify-center px-3.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
+                    title="Generar tarjeta de resumen para redes sociales"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>MasterHub Wrapped</span>
+                  </button>
+                </div>
               </div>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg">

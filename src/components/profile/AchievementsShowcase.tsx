@@ -162,10 +162,10 @@ export default function AchievementsShowcase({
   const scopedAchievements = achievements.filter((ach) => {
     if (activeUniverseTab === "ALL") return true;
     if (activeUniverseTab === "CINE") {
-      return ach.universe === "CINE" || ach.universe === "BOTH";
+      return ach.universe === "CINE";
     }
     if (activeUniverseTab === "GAMING") {
-      return ach.universe === "GAMING" || ach.universe === "BOTH";
+      return ach.universe === "GAMING";
     }
     return true;
   });
@@ -265,8 +265,8 @@ export default function AchievementsShowcase({
           isGaming
             ? "bg-gradient-to-br from-[#0c0d1e]/95 via-cine-950/90 to-[#0e1026]/80 border-purple-800/40"
             : isCine
-            ? "bg-gradient-to-br from-[#1a1205]/95 via-cine-950/90 to-[#140e04]/80 border-amber-800/40"
-            : "bg-gradient-to-br from-cine-900/90 via-cine-950/80 to-cine-900/60 border-cine-800/80"
+              ? "bg-gradient-to-br from-[#1a1205]/95 via-cine-950/90 to-[#140e04]/80 border-amber-800/40"
+              : "bg-gradient-to-br from-cine-900/90 via-cine-950/80 to-cine-900/60 border-cine-800/80"
         }`}
       >
         <div
@@ -274,8 +274,8 @@ export default function AchievementsShowcase({
             isGaming
               ? "bg-purple-600/15"
               : isCine
-              ? "bg-amber-500/15"
-              : "bg-amber-500/10"
+                ? "bg-amber-500/15"
+                : "bg-amber-500/10"
           }`}
         />
         <div
@@ -283,8 +283,8 @@ export default function AchievementsShowcase({
             isGaming
               ? "bg-cyan-500/10"
               : isCine
-              ? "bg-yellow-500/10"
-              : "bg-purple-500/10"
+                ? "bg-yellow-500/10"
+                : "bg-purple-500/10"
           }`}
         />
 
@@ -295,8 +295,8 @@ export default function AchievementsShowcase({
                 isGaming
                   ? "bg-purple-600/20 border-purple-500/40 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
                   : isCine
-                  ? "bg-amber-500/20 border-amber-500/40 text-amber-400 shadow-gold-glow"
-                  : "bg-gradient-to-tr from-amber-500/20 via-yellow-500/30 to-amber-400/20 border-amber-500/40 text-amber-400 shadow-gold-glow"
+                    ? "bg-amber-500/20 border-amber-500/40 text-amber-400 shadow-gold-glow"
+                    : "bg-gradient-to-tr from-amber-500/20 via-yellow-500/30 to-amber-400/20 border-amber-500/40 text-amber-400 shadow-gold-glow"
               }`}
             >
               {isGaming ? (
@@ -313,27 +313,16 @@ export default function AchievementsShowcase({
                   {isGaming
                     ? "Vitrina de Trofeos Gamer"
                     : isCine
-                    ? "Vitrina de Trofeos Cinéfilos"
-                    : "Sala de Trofeos & Medallas"}
+                      ? "Vitrina de Trofeos Cinéfilos"
+                      : "Sala de Trofeos & Medallas"}
                 </h3>
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold border ${
-                    isGaming
-                      ? "bg-purple-950/60 text-purple-300 border-purple-500/40"
-                      : isCine
-                      ? "bg-amber-950/60 text-amber-300 border-amber-500/40"
-                      : "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                  }`}
-                >
-                  {isGaming ? "Gamer v4.0" : isCine ? "Cine v4.0" : "v4.0"}
-                </span>
               </div>
               <p className="text-xs sm:text-sm text-cine-400 mt-1">
                 {isGaming
                   ? "Desbloquea medallas completando videojuegos, sumando horas y logrando platinos."
                   : isCine
-                  ? "Desbloquea medallas registrando películas, series y afinando tu Sofa Knowledge."
-                  : "Logros desbloqueables por tu trayectoria en Cine, Series y Videojuegos."}
+                    ? "Desbloquea medallas registrando películas, series y afinando tu Sofa Knowledge."
+                    : "Logros desbloqueables por tu trayectoria en Cine, Series y Videojuegos."}
               </p>
             </div>
           </div>
@@ -390,8 +379,8 @@ export default function AchievementsShowcase({
               {isGaming
                 ? "Progreso de logros Gamer"
                 : isCine
-                ? "Progreso de logros Cinéfilos"
-                : "Completitud general de la colección"}
+                  ? "Progreso de logros Cinéfilos"
+                  : "Completitud general de la colección"}
             </span>
             <span className="font-mono font-bold text-white">
               {displayRate}% completado
@@ -403,8 +392,8 @@ export default function AchievementsShowcase({
                 isGaming
                   ? "bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 shadow-[0_0_12px_rgba(168,85,247,0.5)]"
                   : isCine
-                  ? "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 shadow-gold-glow"
-                  : "bg-gradient-to-r from-amber-500 via-purple-500 to-cyan-400"
+                    ? "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 shadow-gold-glow"
+                    : "bg-gradient-to-r from-amber-500 via-purple-500 to-cyan-400"
               }`}
               style={{ width: `${Math.max(displayRate, 3)}%` }}
             />
@@ -591,9 +580,7 @@ export default function AchievementsShowcase({
                 <div className="w-full h-2 bg-cine-950 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
-                      activeModal.isUnlocked
-                        ? "bg-emerald-400"
-                        : "bg-amber-500"
+                      activeModal.isUnlocked ? "bg-emerald-400" : "bg-amber-500"
                     }`}
                     style={{ width: `${activeModal.progress}%` }}
                   />
@@ -601,8 +588,8 @@ export default function AchievementsShowcase({
                 <div className="mt-3 text-[11px] text-cine-400">
                   {activeModal.isUnlocked ? (
                     <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <ShieldCheck className="w-4 h-4 inline" /> Logro conseguido
-                      y añadido a tu vitrina.
+                      <ShieldCheck className="w-4 h-4 inline" /> Logro
+                      conseguido y añadido a tu vitrina.
                     </span>
                   ) : (
                     <span>
