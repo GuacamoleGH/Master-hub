@@ -8,8 +8,9 @@ import {
   ShieldAlert,
   Loader2,
   X,
-  CheckCircle2,
   Lock,
+  Gamepad2,
+  Film,
 } from "lucide-react";
 import { useToast } from "@/components/shared/ToastContext";
 import { sounds } from "@/lib/sounds";
@@ -53,6 +54,8 @@ export function WipeoutDangerZone({
     setErrorMessage(null);
   };
 
+  const isGaming = universe === "GAMING";
+
   const handleWipeout = async () => {
     if (!canExecute) return;
 
@@ -66,6 +69,7 @@ export function WipeoutDangerZone({
         body: JSON.stringify({
           confirmationWord: typedWord.trim(),
           deleteAccount,
+          universe,
         }),
       });
 
@@ -79,10 +83,8 @@ export function WipeoutDangerZone({
 
       toast({
         type: "success",
-        title: "Wipeout ejecutado",
-        description: deleteAccount
-          ? "Tu cuenta y todos tus datos fueron eliminados de la base de datos."
-          : "Se han eliminado tus películas, series, videojuegos y se ha restablecido tu XP.",
+        title: isGaming ? "Wipeout Gamer completado" : "Wipeout Cinéfilo completado",
+        description: data.message || "Tus registros han sido purgados correctamente de la base de datos.",
       });
 
       handleClose();
@@ -124,15 +126,27 @@ export function WipeoutDangerZone({
                   Zona de Peligro
                 </h3>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/30">
-                  Wipeout de Datos
+                  {isGaming ? "Wipeout Gamer" : "Wipeout Cinéfilo"}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-cine-400 max-w-2xl leading-relaxed">
-                Purgar de forma permanente todos los registros de tu cuenta en la base de datos
-                (películas vistas, series, biblioteca gamer, reseñas, notas y puntos XP).{" "}
-                <span className="text-cine-300 font-semibold">
-                  Esta acción solo afecta a tus datos de usuario y es completamente irreversible.
-                </span>
+                {isGaming ? (
+                  <>
+                    Purgar de forma permanente todos los registros de videojuegos de tu cuenta
+                    (horas jugadas, backlog, completados, platinos, notas y críticas gamer).{" "}
+                    <span className="text-cine-300 font-semibold">
+                      Tus películas y series de CinephileHub permanecerán intactas.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Purgar de forma permanente todas las películas y series registradas de tu cuenta
+                    (visionados, watchlist, notas y críticas de cine).{" "}
+                    <span className="text-cine-300 font-semibold">
+                      Tus videojuegos, horas y logros de GamerHub permanecerán intactos.
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -148,12 +162,16 @@ export function WipeoutDangerZone({
               }`}
               title={
                 session?.user
-                  ? "Abrir asistente de wipeout seguro"
+                  ? isGaming
+                    ? "Abrir asistente de wipeout de videojuegos"
+                    : "Abrir asistente de wipeout de cine y series"
                   : "Inicia sesión para gestionar los datos de tu cuenta"
               }
             >
               <Trash2 className="w-4 h-4" />
-              <span>Wipeout de mis datos</span>
+              <span>
+                {isGaming ? "Wipeout de videojuegos" : "Wipeout de cine & series"}
+              </span>
             </button>
             {!session?.user && (
               <p className="text-[10px] text-cine-500 text-right mt-1">
@@ -176,7 +194,9 @@ export function WipeoutDangerZone({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-white tracking-tight">
-                    Confirmar Wipeout de Datos
+                    {isGaming
+                      ? "Confirmar Wipeout de Videojuegos"
+                      : "Confirmar Wipeout de Cine & Series"}
                   </h3>
                   <p className="text-xs text-red-400/90 font-mono">
                     Acción destructiva permanente
@@ -193,7 +213,7 @@ export function WipeoutDangerZone({
               </button>
             </div>
 
-            {/* Capa 1: Desglose de lo que se destruirá */}
+            {/* Capa 1: Desglose específico de lo que se destruirá */}
             <div className="bg-red-950/30 border border-red-500/20 rounded-2xl p-4 text-xs space-y-2 text-cine-300">
               <p className="font-bold text-red-300 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
@@ -203,21 +223,50 @@ export function WipeoutDangerZone({
                 </span>
                 ):
               </p>
-              <ul className="list-disc pl-5 space-y-1 text-cine-400">
-                <li>
-                  <strong className="text-cine-200">Catálogo de Cine & Series:</strong> Todas
-                  las películas y episodios vistos, lista de pendientes, calificaciones y críticas
-                  personales.
-                </li>
-                <li>
-                  <strong className="text-cine-200">Biblioteca de Videojuegos:</strong> Horas
-                  jugadas acumuladas, backlog, títulos completados, platinos y notas.
-                </li>
-                <li>
-                  <strong className="text-cine-200">Progresión y Gamificación:</strong> Tu total
-                  de XP se reseteará a 0 y volverás al rango de nivel 1.
-                </li>
-              </ul>
+
+              {isGaming ? (
+                <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
+                  <li>
+                    <strong className="text-red-300">
+                      Biblioteca de Videojuegos:
+                    </strong>{" "}
+                    Horas registradas, títulos en progreso, backlog, completados, platinos y críticas personales.
+                  </li>
+                  <li className="text-emerald-400/90 font-medium">
+                    <strong className="text-emerald-300">
+                      CinephileHub Intacto:
+                    </strong>{" "}
+                    Todas tus películas y series vistas se conservarán exactamente como están.
+                  </li>
+                  <li>
+                    <strong className="text-cine-200">
+                      Ajuste de Experiencia:
+                    </strong>{" "}
+                    Tu XP total se recalculará manteniendo solo los puntos obtenidos en cine y series.
+                  </li>
+                </ul>
+              ) : (
+                <ul className="list-disc pl-5 space-y-1.5 text-cine-400">
+                  <li>
+                    <strong className="text-red-300">
+                      Catálogo de Cine & Series:
+                    </strong>{" "}
+                    Todas las películas y temporadas vistas, lista de pendientes, notas y críticas personales.
+                  </li>
+                  <li className="text-emerald-400/90 font-medium">
+                    <strong className="text-emerald-300">
+                      GamerHub Intacto:
+                    </strong>{" "}
+                    Toda tu biblioteca de videojuegos, horas y platinos se conservarán exactamente como están.
+                  </li>
+                  <li>
+                    <strong className="text-cine-200">
+                      Ajuste de Experiencia:
+                    </strong>{" "}
+                    Tu XP total se recalculará manteniendo solo los puntos obtenidos en videojuegos.
+                  </li>
+                </ul>
+              )}
             </div>
 
             {/* Capa 2: Checkbox de consentimiento consciente */}
@@ -233,15 +282,18 @@ export function WipeoutDangerZone({
                 className="mt-0.5 rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800"
               />
               <span className="text-xs text-cine-300 leading-snug">
-                He leído las advertencias y comprendo que esta eliminación es{" "}
-                <strong className="text-white">inmediata, definitiva e irreversible</strong>. No hay copias de seguridad para restaurar mis listas.
+                He leído las advertencias y comprendo que esta eliminación de datos de{" "}
+                <strong className="text-white">
+                  {isGaming ? "videojuegos" : "cine y series"}
+                </strong>{" "}
+                es <strong className="text-white">definitiva e irreversible</strong>.
               </span>
             </label>
 
             {/* Capa 3: Escribir obligatoriamente la palabra ELIMINAR */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-cine-300 block">
-                Escribe la palabra <span className="font-mono font-bold text-red-400">ELIMINAR</span> en mayúsculas para desbloquear la purga:
+                Escribe la palabra <span className="font-mono font-bold text-red-400">ELIMINAR</span> en mayúsculas para confirmar:
               </label>
               <input
                 type="text"
@@ -259,7 +311,7 @@ export function WipeoutDangerZone({
               )}
             </div>
 
-            {/* Opción adicional: Eliminar también la cuenta de usuario */}
+            {/* Opción adicional: Eliminar también la cuenta completa */}
             <label className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900/30 border border-cine-800/80 hover:border-cine-700 transition-colors cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -306,12 +358,16 @@ export function WipeoutDangerZone({
                 {isWiping ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Purgando base de datos...</span>
+                    <span>Purgando registros...</span>
                   </>
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />
-                    <span>Ejecutar Wipeout Definitivo</span>
+                    <span>
+                      {isGaming
+                        ? "Purgar Catálogo de Videojuegos"
+                        : "Purgar Catálogo de Cine & Series"}
+                    </span>
                   </>
                 )}
               </button>

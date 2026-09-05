@@ -2,6 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { calculateMovieXp } from "@/lib/ballKnowledge";
+import { calculateGameXp } from "@/lib/gameKnowledge";
+
+async function calculateRemainingTotalXp(userId: string) {
+  const [userMovies, userSeries, userGames] = await Promise.all([
+    prisma.userMovie.findMany({ where: { userId } }),
+    prisma.userSeries.findMany({ where: { userId } }),
+    prisma.userGame.findMany({ where: { userId } }),
+  ]);
+
+  let totalXp = 0;
+  for (const um of userMovies) {
+    const isWatched = um.status === "WATCHED";
+    const hasReview = Boolean(um.review && um.review.trim().length > 0);
+    totalXp += calculateMovieXp(isWatched, hasReview, um.ballKnowledge);
+  }
+  for (const us of userSeries) {
+    const isWatched = us.status === "WATCHED";
+    const hasReview = Boolean(us.review && us.review.trim().length > 0);
+    totalXp += calculateMovieXp(isWatched, hasReview, us.ballKnowledge);
+  }
+  for (const ug of userGames) {
+    const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
+    totalXp += calculateGameXp(
+      ug.status,
+      hasReview,
+      ug.hoursPlayed,
+      ug.gameKnowledge
+    );
+  }
+  return totalXp;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,10 +48,13 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
     const body = await request.json();
-    const { confirmationWord, deleteAccount } = body;
+    const { confirmationWord, deleteAccount, universe } = body;
 
     // Capa de seguridad obligatoria: escribir la palabra exacta ELIMINAR
-    if (typeof confirmationWord !== "string" || confirmationWord.trim() !== "ELIMINAR") {
+    if (
+      typeof confirmationWord !== "string" ||
+      confirmationWord.trim() !== "ELIMINAR"
+    ) {
       return NextResponse.json(
         {
           error:
@@ -41,47 +76,93 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ejecutar borrado estricto y aislado SOLO para este userId
-    const [deletedMovies, deletedSeries, deletedGames] = await prisma.$transaction([
-      prisma.userMovie.deleteMany({
-        where: { userId },
-      }),
-      prisma.userSeries.deleteMany({
-        where: { userId },
-      }),
-      prisma.userGame.deleteMany({
-        where: { userId },
-      }),
-    ]);
-
     let accountDeleted = false;
+    let deletedCount = {
+      movies: 0,
+      series: 0,
+      games: 0,
+    };
+    let responseMessage = "";
 
     if (deleteAccount === true) {
-      // Eliminar también la cuenta de usuario (cascada a sesiones y cuentas OAuth/Credentials)
+      // Eliminar la cuenta completa en cascada
       await prisma.user.delete({
         where: { id: userId },
       });
       accountDeleted = true;
-    } else {
-      // Mantener la cuenta pero reiniciar totalmente sus estadísticas y XP
+      responseMessage =
+        "Tu cuenta y todos tus datos han sido purgados permanentemente de la base de datos.";
+    } else if (universe === "GAMING") {
+      // Purgar EXCLUSIVAMENTE los registros de videojuegos
+      const deletedGames = await prisma.userGame.deleteMany({
+        where: { userId },
+      });
+      deletedCount.games = deletedGames.count;
+
+      // Recalcular XP restante basado únicamente en películas y series
+      const remainingXp = await calculateRemainingTotalXp(userId);
       await prisma.user.update({
         where: { id: userId },
-        data: {
-          totalXp: 0,
-        },
+        data: { totalXp: remainingXp },
       });
+
+      responseMessage =
+        "Se han eliminado todos tus videojuegos, horas y notas de GamerHub. Tus películas y series se conservan intactas.";
+    } else if (universe === "CINE") {
+      // Purgar EXCLUSIVAMENTE películas y series
+      const [deletedMovies, deletedSeries] = await prisma.$transaction([
+        prisma.userMovie.deleteMany({
+          where: { userId },
+        }),
+        prisma.userSeries.deleteMany({
+          where: { userId },
+        }),
+      ]);
+      deletedCount.movies = deletedMovies.count;
+      deletedCount.series = deletedSeries.count;
+
+      // Recalcular XP restante basado únicamente en videojuegos
+      const remainingXp = await calculateRemainingTotalXp(userId);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { totalXp: remainingXp },
+      });
+
+      responseMessage =
+        "Se han eliminado todas tus películas, series y críticas de CinephileHub. Tus videojuegos se conservan intactos.";
+    } else {
+      // Purgar ambos universos
+      const [deletedMovies, deletedSeries, deletedGames] =
+        await prisma.$transaction([
+          prisma.userMovie.deleteMany({
+            where: { userId },
+          }),
+          prisma.userSeries.deleteMany({
+            where: { userId },
+          }),
+          prisma.userGame.deleteMany({
+            where: { userId },
+          }),
+        ]);
+      deletedCount = {
+        movies: deletedMovies.count,
+        series: deletedSeries.count,
+        games: deletedGames.count,
+      };
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { totalXp: 0 },
+      });
+
+      responseMessage =
+        "Se ha realizado el wipeout de toda tu biblioteca y se ha restablecido tu XP a cero.";
     }
 
     return NextResponse.json({
       success: true,
-      message: accountDeleted
-        ? "Tu cuenta y todos tus datos han sido purgados permanentemente de la base de datos."
-        : "Se ha realizado el wipeout de tu biblioteca (películas, series y juegos) y se ha restablecido tu XP a cero.",
-      deletedCount: {
-        movies: deletedMovies.count,
-        series: deletedSeries.count,
-        games: deletedGames.count,
-      },
+      message: responseMessage,
+      deletedCount,
       accountDeleted,
     });
   } catch (error: any) {
