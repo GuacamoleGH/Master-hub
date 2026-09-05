@@ -25,6 +25,9 @@ import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
 import RatingDistributionChart from "@/components/charts/RatingDistributionChart";
 import GenreChart from "@/components/charts/GenreChart";
 import WatchesTimelineChart from "@/components/charts/WatchesTimelineChart";
+import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<{
@@ -38,6 +41,8 @@ export default function ProfilePage() {
   });
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const toast = useToast();
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Edición de perfil
@@ -73,6 +78,27 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const handleSelectPresetAvatar = async (dataUrl: string) => {
+    setEditAvatar(dataUrl);
+    setProfileData((prev) => ({ ...prev, avatarUrl: dataUrl }));
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: dataUrl }),
+      });
+      if (res.ok) {
+        toast.success(
+          "¡Avatar actualizado!",
+          "Se ha guardado tu nueva insignia temática.",
+        );
+        fetchProfile();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -579,8 +605,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
-
-      
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   Edit3,
   Trash2,
   RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -30,6 +31,7 @@ import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import { GamerStats } from "@/types/game";
+import { sounds } from "@/lib/sounds";
 
 interface ProfileResponse {
   profile: {
@@ -127,17 +129,29 @@ export default function GamerProfilePage() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
-                alt={profile.displayName}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0"
-              />
-            ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-purple-900/60 border-2 border-purple-400/50 flex items-center justify-center text-purple-300 flex-shrink-0">
+            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
+              {profile.avatarUrl ? (
+                <img
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <Gamepad2 className="w-10 h-10" />
-              </div>
-            )}
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setIsEditOpen(true);
+                }}
+                className="absolute inset-0 bg-black/70 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-purple-300 text-[10px] font-bold gap-1 cursor-pointer"
+                title="Elegir insignia temática"
+              >
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span>Cambiar</span>
+              </button>
+            </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
@@ -154,8 +168,11 @@ export default function GamerProfilePage() {
                   {profile.displayName}
                 </h1>
                 <button
-                  onClick={() => setIsEditOpen(true)}
-                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                  onClick={() => {
+                    sounds.playClick();
+                    setIsEditOpen(true);
+                  }}
+                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                 >
                   <Edit3 className="w-3.5 h-3.5" /> Editar Perfil
                 </button>
@@ -399,8 +416,6 @@ export default function GamerProfilePage() {
           )}
         </section>
       </div>
-
-      
 
       {/* Modal para Editar Perfil Gamer */}
       <EditGamerProfileModal

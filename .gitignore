@@ -38,4 +38,7 @@ next-env.d.ts
 *.db-journal
 dev.db
 
+# scratch scripts
+scratch/
+
 .vscode/

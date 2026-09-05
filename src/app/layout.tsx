@@ -3,6 +3,7 @@ import "./globals.css";
 import DynamicNavHeader from "@/components/DynamicNavHeader";
 import DynamicFooter from "@/components/DynamicFooter";
 import AuthProvider from "@/components/providers/AuthProvider";
+import { ToastProvider } from "@/components/shared/ToastContext";
 
 export const metadata: Metadata = {
   title: "Cinephile & Gamer Hub",
@@ -24,11 +25,13 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body className="bg-cine-950 text-cine-100 antialiased min-h-screen flex flex-col selection:bg-purple-600 selection:text-white">
         <AuthProvider>
-          <DynamicNavHeader />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
-          <DynamicFooter />
+          <ToastProvider>
+            <DynamicNavHeader />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {children}
+            </main>
+            <DynamicFooter />
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

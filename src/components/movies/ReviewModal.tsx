@@ -12,6 +12,8 @@ import {
   Tv,
 } from "lucide-react";
 import MoviePoster from "./MoviePoster";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -73,6 +75,7 @@ export default function ReviewModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     setMounted(true);
@@ -135,10 +138,23 @@ export default function ReviewModal({
         }),
       });
 
+      if (res.status === 401) {
+        toast.guestPrompt("guardar esta película en tu historial");
+        setErrorMsg("Inicia sesión para guardar tus valoraciones.");
+        return;
+      }
+
       if (!res.ok) {
         throw new Error("No se pudo guardar la reseña");
       }
 
+      sounds.playSuccess();
+      toast.success(
+        "¡Película registrada!",
+        hasRating
+          ? `Valorada con ${rating.toFixed(1)} ⭐ (+10 XP)`
+          : "Añadida a vistas (+10 XP)",
+      );
       onSaved();
       onClose();
     } catch (err: any) {
@@ -244,7 +260,11 @@ export default function ReviewModal({
                   max="10"
                   step="0.1"
                   value={rating}
-                  onChange={(e) => setRating(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setRating(val);
+                    sounds.playStar(Math.round(val));
+                  }}
                   className="w-full h-2 bg-cine-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
                 />
                 <div className="flex justify-between text-[11px] text-cine-500 font-mono">
