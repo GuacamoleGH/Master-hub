@@ -297,6 +297,7 @@ export default function ProfilePage() {
             completionRate={achievementsData.completionRate}
             totalXpEarned={achievementsData.totalXpEarned}
             userName={profileData.displayName}
+            universe="CINE"
           />
         </section>
       )}
@@ -611,6 +612,7 @@ export default function ProfilePage() {
       <SocialWrappedModal
         isOpen={isWrappedOpen}
         onClose={() => setIsWrappedOpen(false)}
+        universe="CINE"
         user={{
           displayName: profileData.displayName,
           username: session?.user?.username,

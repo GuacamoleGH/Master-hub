@@ -232,10 +232,10 @@ class SoundEngine {
       const now = ctx.currentTime;
       // Secuencia armónica ascendente estilo PlayStation / Steam
       const notes = [
-        { f: 440.0, t: 0.0, d: 0.1 },   // A4
+        { f: 440.0, t: 0.0, d: 0.1 }, // A4
         { f: 554.37, t: 0.08, d: 0.1 }, // C#5
         { f: 659.25, t: 0.16, d: 0.12 }, // E5
-        { f: 880.0, t: 0.24, d: 0.35 },  // A5
+        { f: 880.0, t: 0.24, d: 0.35 }, // A5
         { f: 1108.73, t: 0.32, d: 0.5 }, // C#6 (acorde final sostenido)
       ];
 
@@ -397,6 +397,171 @@ class SoundEngine {
     } catch {}
   }
 
+  // Apertura suave y armónica de modal
+  public playModalOpen(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+      notes.forEach((freq, idx) => {
+        const start = now + idx * 0.035;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.045, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.19);
+      });
+    } catch {}
+  }
+
+  // Cierre sutil y descendente de modal
+  public playModalClose(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(260, now + 0.09);
+
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.1);
+    } catch {}
+  }
+
+  // Moneda arcade retro (estilo Mario / 8-bit coin)
+  public playCoin(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(987.77, now); // B5
+      osc.frequency.setValueAtTime(1318.51, now + 0.07); // E6
+
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.setValueAtTime(0.06, now + 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.33);
+    } catch {}
+  }
+
+  // Whoosh / Swipe para cambio de pestañas
+  public playWhoosh(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(540, now + 0.04);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.11);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.05, now + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.13);
+    } catch {}
+  }
+
+  // Favorito / Destello brillante
+  public playFavorite(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const notes = [783.99, 1174.66, 1567.98]; // G5, D6, G6
+      notes.forEach((f, i) => {
+        const start = now + i * 0.04;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, start);
+
+        gain.gain.setValueAtTime(0.05, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.15);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.16);
+      });
+    } catch {}
+  }
+
+  // Clic mecánico tipo blip para filtros de logros
+  public playFilterBlip(): void {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(587.33, now); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.03); // A5
+
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch {}
+  }
+
   // Aliases ergonómicos
   public click(): void {
     this.playClick();
@@ -440,6 +605,30 @@ class SoundEngine {
 
   public trophyHover(): void {
     this.playTrophyHover();
+  }
+
+  public modalOpen(): void {
+    this.playModalOpen();
+  }
+
+  public modalClose(): void {
+    this.playModalClose();
+  }
+
+  public coin(): void {
+    this.playCoin();
+  }
+
+  public whoosh(): void {
+    this.playWhoosh();
+  }
+
+  public favorite(): void {
+    this.playFavorite();
+  }
+
+  public filterBlip(): void {
+    this.playFilterBlip();
   }
 }
 

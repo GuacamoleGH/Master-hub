@@ -255,10 +255,23 @@ export default function PublicProfilePage() {
                 sounds.shutter();
                 setIsWrappedOpen(true);
               }}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all"
+              className={`px-4 py-2 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
+                activeTab === "cinema"
+                  ? "bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 shadow-gold-glow"
+                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>MasterHub Wrapped</span>
+              {activeTab === "cinema" ? (
+                <>
+                  <Film className="w-3.5 h-3.5" />
+                  <span>Cinephile Wrapped</span>
+                </>
+              ) : (
+                <>
+                  <Gamepad2 className="w-3.5 h-3.5" />
+                  <span>Gamer Wrapped</span>
+                </>
+              )}
             </button>
 
             <button
@@ -321,6 +334,7 @@ export default function PublicProfilePage() {
             completionRate={data.achievements.completionRate}
             totalXpEarned={data.achievements.totalXpEarned}
             userName={user.name || user.username || "Usuario"}
+            universe={activeTab === "cinema" ? "CINE" : "GAMING"}
           />
         </section>
       )}
@@ -330,7 +344,7 @@ export default function PublicProfilePage() {
         <button
           type="button"
           onClick={() => {
-            sounds.playNav();
+            sounds.whoosh();
             setActiveTab("cinema");
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -346,7 +360,7 @@ export default function PublicProfilePage() {
         <button
           type="button"
           onClick={() => {
-            sounds.playNav();
+            sounds.whoosh();
             setActiveTab("gaming");
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -558,6 +572,7 @@ export default function PublicProfilePage() {
       <SocialWrappedModal
         isOpen={isWrappedOpen}
         onClose={() => setIsWrappedOpen(false)}
+        universe={activeTab === "cinema" ? "CINE" : "GAMING"}
         user={{
           displayName: user.name || user.username || "Usuario",
           username: user.username,
