@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSession, signOut } from "next-auth/react";
 import {
   AlertTriangle,
@@ -27,12 +28,28 @@ export function WipeoutDangerZone({
   const { data: session } = useSession();
   const { toast } = useToast();
 
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [confirmedCheck, setConfirmedCheck] = useState(false);
   const [typedWord, setTypedWord] = useState("");
   const [deleteAccount, setDeleteAccount] = useState(false);
   const [isWiping, setIsWiping] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const canExecute =
     confirmedCheck && typedWord.trim() === "ELIMINAR" && !isWiping;
@@ -120,7 +137,7 @@ export function WipeoutDangerZone({
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
+          <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
               <ShieldAlert className="w-6 h-6" />
             </div>
@@ -194,39 +211,42 @@ export function WipeoutDangerZone({
       </section>
 
       {/* Modal de Múltiples Capas de Seguridad */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg bg-cine-950 border border-red-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(239,68,68,0.25)] space-y-5 animate-scale-up">
-            {/* Cabecera del modal */}
-            <div className="flex items-start justify-between gap-4 pb-2 border-b border-cine-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400">
-                  <AlertTriangle className="w-5 h-5" />
+      {isOpen &&
+        mounted &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className="relative w-full max-w-lg bg-cine-950 border border-red-500/40 rounded-3xl p-6 sm:p-7 shadow-[0_0_50px_rgba(239,68,68,0.25)] space-y-5 animate-scale-up">
+              {/* Cabecera del modal */}
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-cine-800">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base sm:text-lg font-black text-white tracking-tight leading-snug">
+                      {deleteAccount
+                        ? "Purgar Todos los Datos y Cuenta"
+                        : isGaming
+                          ? "Confirmar Wipeout de Videojuegos"
+                          : "Confirmar Wipeout de Cine & Series"}
+                    </h3>
+                    <p className="text-xs text-red-400/90 font-mono leading-tight mt-0.5">
+                      {deleteAccount
+                        ? "Eliminación total de cuenta • Cierre de sesión inmediato"
+                        : "Acción destructiva permanente"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-black text-white tracking-tight">
-                    {deleteAccount
-                      ? "Confirmar Eliminación Total de Cuenta & Datos"
-                      : isGaming
-                        ? "Confirmar Wipeout de Videojuegos"
-                        : "Confirmar Wipeout de Cine & Series"}
-                  </h3>
-                  <p className="text-xs text-red-400/90 font-mono">
-                    {deleteAccount
-                      ? "Eliminación completa de usuario • Cierre de sesión inmediato"
-                      : "Acción destructiva permanente"}
-                  </p>
-                </div>
-              </div>
 
-              <button
-                onClick={handleClose}
-                disabled={isWiping}
-                className="p-1.5 rounded-lg text-cine-400 hover:text-white hover:bg-cine-800 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isWiping}
+                  className="p-1.5 rounded-lg text-cine-400 hover:text-white hover:bg-cine-800 transition-colors shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
             {/* Capa 1: Desglose específico de lo que se destruirá */}
             <div className="bg-red-950/30 border border-red-500/20 rounded-2xl p-4 text-xs space-y-2.5 text-cine-300">
@@ -247,19 +267,22 @@ export function WipeoutDangerZone({
                     <strong className="text-red-300">
                       Catálogo de Cine & Series:
                     </strong>{" "}
-                    Películas y series vistas, pendientes, notas y críticas en CinephileHub.
+                    Películas y series vistas, pendientes, notas y críticas en
+                    CinephileHub.
                   </li>
                   <li>
                     <strong className="text-red-300">
                       Biblioteca de Videojuegos:
                     </strong>{" "}
-                    Horas registradas, títulos, backlog, completados, platinos y críticas en GamerHub.
+                    Horas registradas, títulos, backlog, completados, platinos y
+                    críticas en GamerHub.
                   </li>
                   <li className="text-rose-400 font-medium">
                     <strong className="text-rose-300">
                       Cuenta de Usuario & Sesión:
                     </strong>{" "}
-                    Tu cuenta se eliminará por completo de la base de datos y se cerrará tu sesión de inmediato.
+                    Tu cuenta se eliminará por completo de la base de datos y se
+                    cerrará tu sesión de inmediato.
                   </li>
                 </ul>
               ) : isGaming ? (
@@ -380,7 +403,8 @@ export function WipeoutDangerZone({
                 className="rounded border-cine-700 text-red-600 focus:ring-red-500 h-4 w-4 bg-cine-800 shrink-0 cursor-pointer"
               />
               <span className="text-xs text-cine-400 leading-normal">
-                Eliminar también mi cuenta de usuario y cerrar sesión automáticamente
+                Eliminar también mi cuenta de usuario y cerrar sesión
+                automáticamente
               </span>
             </label>
 
@@ -431,7 +455,8 @@ export function WipeoutDangerZone({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
