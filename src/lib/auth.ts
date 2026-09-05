@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
 
         const isValid = await bcrypt.compare(
           credentials.password,
-          user.passwordHash
+          user.passwordHash,
         );
 
         if (!isValid) {
@@ -83,14 +83,18 @@ export const authOptions: NextAuthOptions = {
           if (dbUser?.username) {
             uname = dbUser.username;
           } else {
-            let base = (user.name || (user.email ? user.email.split("@")[0] : "gamer"))
+            let base = (
+              user.name || (user.email ? user.email.split("@")[0] : "gamer")
+            )
               .toLowerCase()
               .replace(/[^a-z0-9_]/g, "")
               .slice(0, 15);
             if (!base) base = "gamer";
             uname = base;
             let counter = 1;
-            while (await prisma.user.findUnique({ where: { username: uname } })) {
+            while (
+              await prisma.user.findUnique({ where: { username: uname } })
+            ) {
               uname = `${base}${Math.floor(100 + Math.random() * 900)}`;
               counter++;
               if (counter > 6) {
