@@ -39,6 +39,7 @@ import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { UserAchievement } from "@/lib/achievements";
 import { GamerStats } from "@/types/game";
 import { useSession } from "next-auth/react";
@@ -231,7 +232,7 @@ export default function GamerProfilePage() {
             </div>
 
             {/* Columna de Botones de Acción */}
-            <div className="flex flex-row sm:flex-col gap-2.5 sm:gap-2.5 shrink-0 self-start sm:self-center">
+            <div className="flex flex-row sm:flex-col gap-3 sm:gap-3.5 shrink-0 self-start sm:self-center sm:ml-auto">
               <button
                 onClick={handleOpenEdit}
                 className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
@@ -751,6 +752,9 @@ export default function GamerProfilePage() {
           )}
         </section>
       </div>
+
+      {/* Zona de Peligro / Wipeout de Datos */}
+      <WipeoutDangerZone onDataWiped={fetchProfile} universe="GAMING" />
 
       {/* Modal para Editar Perfil Gamer */}
       <EditGamerProfileModal

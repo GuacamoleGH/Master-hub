@@ -30,6 +30,7 @@ import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
 import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
 import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { UserAchievement } from "@/lib/achievements";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -233,7 +234,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Columna de Botones de Acción */}
-            <div className="flex flex-row sm:flex-col gap-2.5 sm:gap-2.5 shrink-0 self-start sm:self-center">
+            <div className="flex flex-row sm:flex-col gap-3 sm:gap-3.5 shrink-0 self-start sm:self-center sm:ml-auto">
               <button
                 onClick={handleOpenEdit}
                 className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
@@ -669,6 +670,9 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* Zona de Peligro / Wipeout de Datos */}
+      <WipeoutDangerZone onDataWiped={fetchProfile} universe="CINE" />
 
       {/* Modal Moderno de Edición de Perfil Cinéfilo */}
       <EditCinephileProfileModal
