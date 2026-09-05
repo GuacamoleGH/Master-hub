@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { calculateLevelAndRank } from "@/lib/ballKnowledge";
 import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
+import { evaluateUserAchievements } from "@/lib/achievements";
 
 export async function GET(
   request: NextRequest,
@@ -262,6 +263,31 @@ export async function GET(
       }
     }
 
+    // 4. Evaluar vitrina de logros
+    const userSeries = await prisma.userSeries.findMany({
+      where: { userId },
+      select: {
+        status: true,
+        userRating: true,
+        difference: true,
+        platform: true,
+        review: true,
+        ballKnowledge: true,
+        createdAt: true,
+      },
+    });
+
+    const achievementsData = evaluateUserAchievements({
+      movies: userMovies,
+      series: userSeries,
+      games: userGames,
+      stats: {
+        avgBallKnowledge: globalBallKnowledge,
+        avgGameKnowledge: globalGameKnowledge,
+        totalHours,
+      },
+    });
+
     return NextResponse.json({
       user: targetUser,
       isOwner: visitorId === userId,
@@ -289,6 +315,7 @@ export async function GET(
         recentGames: userGames.slice(0, 12),
       },
       affinity,
+      achievements: achievementsData,
     });
   } catch (error) {
     console.error("Error en GET /api/u/[username]:", error);

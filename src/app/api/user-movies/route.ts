@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMovieDetail } from "@/lib/tmdb";
 import { calculateBallKnowledge, calculateMovieXp } from "@/lib/ballKnowledge";
+import { calculateGameXp } from "@/lib/gameKnowledge";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 async function refreshUserXp(userId: string) {
-  const allUserMovies = await prisma.userMovie.findMany({ where: { userId } });
-  const allUserSeries = await prisma.userSeries.findMany({ where: { userId } });
+  const [allUserMovies, allUserSeries, allUserGames] = await Promise.all([
+    prisma.userMovie.findMany({ where: { userId } }),
+    prisma.userSeries.findMany({ where: { userId } }),
+    prisma.userGame.findMany({ where: { userId } }),
+  ]);
   let totalXp = 0;
   for (const um of allUserMovies) {
     const isWatched = um.status === "WATCHED";
@@ -18,6 +22,15 @@ async function refreshUserXp(userId: string) {
     const isWatched = us.status === "WATCHED";
     const hasReview = Boolean(us.review && us.review.trim().length > 0);
     totalXp += calculateMovieXp(isWatched, hasReview, us.ballKnowledge);
+  }
+  for (const ug of allUserGames) {
+    const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
+    totalXp += calculateGameXp(
+      ug.status,
+      hasReview,
+      ug.hoursPlayed,
+      ug.gameKnowledge,
+    );
   }
 
   await prisma.user.update({
@@ -114,7 +127,7 @@ export async function GET(request: NextRequest) {
 
     if (genre && genre !== "all") {
       results = results.filter((item) =>
-        item.movie.genres.some((g) => g.toLowerCase() === genre.toLowerCase())
+        item.movie.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
       );
     }
 
@@ -127,7 +140,7 @@ export async function GET(request: NextRequest) {
         if (
           item.movie.streamingPlatforms &&
           item.movie.streamingPlatforms.some((p) =>
-            p.toLowerCase().includes(cleanPlat)
+            p.toLowerCase().includes(cleanPlat),
           )
         ) {
           return true;
@@ -138,11 +151,11 @@ export async function GET(request: NextRequest) {
 
     if (sort === "imdbRatingDesc") {
       results.sort(
-        (a, b) => (b.movie.imdbRating || 0) - (a.movie.imdbRating || 0)
+        (a, b) => (b.movie.imdbRating || 0) - (a.movie.imdbRating || 0),
       );
     } else if (sort === "imdbRatingAsc") {
       results.sort(
-        (a, b) => (a.movie.imdbRating || 0) - (b.movie.imdbRating || 0)
+        (a, b) => (a.movie.imdbRating || 0) - (b.movie.imdbRating || 0),
       );
     } else if (sort === "title") {
       results.sort((a, b) => a.movie.title.localeCompare(b.movie.title));
@@ -155,7 +168,7 @@ export async function GET(request: NextRequest) {
     console.error("Error en GET /api/user-movies:", error);
     return NextResponse.json(
       { error: "Error al listar películas" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -165,7 +178,7 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: "Debes iniciar sesión para guardar películas en tu lista." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -173,19 +186,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const {
-      tmdbId,
-      status,
-      userRating,
-      review,
-      platform,
-      watchedDate,
-    } = body;
+    const { tmdbId, status, userRating, review, platform, watchedDate } = body;
 
     if (!tmdbId || !status) {
       return NextResponse.json(
         { error: "Faltan parámetros requeridos (tmdbId, status)" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -198,7 +204,7 @@ export async function POST(request: NextRequest) {
       if (!detail) {
         return NextResponse.json(
           { error: "No se pudo obtener información de la película desde TMDB" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -219,7 +225,7 @@ export async function POST(request: NextRequest) {
           cast: JSON.stringify(detail.cast),
           imdbRating: detail.imdbRating,
           streamingPlatforms: JSON.stringify(
-            detail.streamingPlatforms || ["Pirata / Stremio"]
+            detail.streamingPlatforms || ["Pirata / Stremio"],
           ),
         },
       });
@@ -241,8 +247,8 @@ export async function POST(request: NextRequest) {
     const dateToSave = watchedDate
       ? new Date(watchedDate)
       : status === "WATCHED"
-      ? new Date()
-      : null;
+        ? new Date()
+        : null;
 
     const userMovie = await prisma.userMovie.upsert({
       where: {
@@ -280,7 +286,7 @@ export async function POST(request: NextRequest) {
     console.error("Error en POST /api/user-movies:", error);
     return NextResponse.json(
       { error: "Error al registrar la película" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -290,7 +296,7 @@ export async function DELETE(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: "Debes iniciar sesión para modificar tu lista." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -311,7 +317,7 @@ export async function DELETE(request: NextRequest) {
     } else {
       return NextResponse.json(
         { error: "Falta parámetro id o movieId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -321,7 +327,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Error en DELETE /api/user-movies:", error);
     return NextResponse.json(
       { error: "Error al eliminar registro" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   LogIn,
   Gamepad2,
@@ -16,6 +17,13 @@ import {
   Trash2,
   RefreshCw,
   Sparkles,
+  Award,
+  ArrowRight,
+  Play,
+  CheckCircle2,
+  Flame,
+  Camera,
+  Medal,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -30,6 +38,9 @@ import GamerLevelBar from "@/components/games/GamerLevelBar";
 import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
+import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
+import { UserAchievement } from "@/lib/achievements";
 import { GamerStats } from "@/types/game";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -55,6 +66,16 @@ export default function GamerProfilePage() {
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  // Logros y Wrapped
+  const [achievementsData, setAchievementsData] = useState<{
+    achievements: UserAchievement[];
+    totalUnlocked: number;
+    totalAvailable: number;
+    completionRate: number;
+    totalXpEarned: number;
+  } | null>(null);
+  const [isWrappedOpen, setIsWrappedOpen] = useState(false);
+
   const handleOpenEdit = () => {
     sounds.playClick();
     if (!session?.user) {
@@ -67,10 +88,19 @@ export default function GamerProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/games/profile");
-      if (res.ok) {
-        const data = await res.json();
+      const [resProfile, resAch] = await Promise.all([
+        fetch("/api/games/profile"),
+        fetch("/api/profile/achievements?universe=GAMING"),
+      ]);
+
+      if (resProfile.ok) {
+        const data = await resProfile.json();
         setProfileData(data);
+      }
+
+      if (resAch.ok) {
+        const dataAch = await resAch.json();
+        setAchievementsData(dataAch);
       }
     } catch (err) {
       console.error("Error al cargar perfil gamer:", err);
@@ -141,9 +171,10 @@ export default function GamerProfilePage() {
       <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.4)] flex-shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
+            {/* Avatar */}
+            <div className="relative group/avatar w-24 h-24 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-400 shadow-[0_0_20px_rgba(139,92,246,0.4)] shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
@@ -151,7 +182,7 @@ export default function GamerProfilePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Gamepad2 className="w-10 h-10" />
+                <Gamepad2 className="w-12 h-12" />
               )}
               <button
                 type="button"
@@ -163,14 +194,14 @@ export default function GamerProfilePage() {
               >
                 {session?.user ? (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
-                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <Sparkles className="w-6 h-6 text-purple-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Cambiar
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-purple-300">
-                    <LogIn className="w-5 h-5 text-purple-400" />
+                    <LogIn className="w-6 h-6 text-purple-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Entrar
                     </span>
@@ -179,51 +210,67 @@ export default function GamerProfilePage() {
               </button>
             </div>
 
-            <div className="space-y-1.5">
+            {/* Bloque de Textos Tipográfico */}
+            <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono uppercase tracking-widest text-purple-400 font-bold">
                   Perfil de Jugador
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
                   {stats.rankTitle}
                 </span>
               </div>
 
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  {profile.displayName}
-                </h1>
-                <button
-                  onClick={handleOpenEdit}
-                  className="px-3 py-1 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                  title={
-                    session?.user
-                      ? "Editar perfil gamer"
-                      : "Inicia sesión para editar tu perfil"
-                  }
-                >
-                  {session?.user ? (
-                    <>
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>Editar Perfil</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="w-3.5 h-3.5" />
-                      <span>Iniciar Sesión</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                {profile.displayName}
+              </h1>
 
-              <p className="text-xs sm:text-sm text-cine-300 max-w-lg">
+              <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed pt-0.5">
                 {profile.bio ||
                   "Jugador y analista del catálogo universal de videojuegos."}
               </p>
             </div>
+
+            {/* Columna de Botones de Acción */}
+            <div className="flex flex-row sm:flex-col gap-3 sm:gap-3.5 shrink-0 self-start sm:self-center sm:ml-auto">
+              <button
+                onClick={handleOpenEdit}
+                className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-purple-600/30 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title={
+                  session?.user
+                    ? "Editar perfil gamer"
+                    : "Inicia sesión para editar tu perfil"
+                }
+              >
+                {session?.user ? (
+                  <>
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Editar Perfil</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Iniciar Sesión</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  sounds.shutter();
+                  setIsWrappedOpen(true);
+                }}
+                className="justify-center px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
+                title="Generar tarjeta de resumen para redes sociales"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>MasterHub Wrapped</span>
+              </button>
+            </div>
           </div>
 
-          <div className="w-full md:w-auto md:min-w-[340px]">
+          {/* Barra de Nivel Gamer */}
+          <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
             <GamerLevelBar totalXp={stats.totalXp} />
           </div>
         </div>
@@ -294,6 +341,257 @@ export default function GamerProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* Vitrina de Trofeos Gamer - Banner Resumen Destacado */}
+      {achievementsData && (
+        <section className="glass-panel p-6 rounded-3xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-cine-900 to-cine-950 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                <Trophy className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-white">
+                    Vitrina de Trofeos Gamer
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    {achievementsData.totalUnlocked} /{" "}
+                    {achievementsData.totalAvailable} Desbloqueados
+                  </span>
+                </div>
+                <p className="text-xs text-cine-400 mt-0.5">
+                  {achievementsData.completionRate}% completado ·{" "}
+                  {achievementsData.totalXpEarned} XP acumulados
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/games/achievements"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer shrink-0"
+            >
+              <Award className="w-4 h-4" />
+              <span>
+                Ver Vitrina Completa de Logros (
+                {achievementsData.totalAvailable})
+              </span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Muestra de Trofeos Destacados */}
+          <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {achievementsData.achievements.slice(0, 6).map((ach) => (
+              <Link
+                key={ach.id}
+                href="/games/achievements"
+                className={`p-3 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 hover:scale-[1.02] cursor-pointer ${
+                  ach.isUnlocked
+                    ? "bg-purple-950/30 border-purple-500/40 text-purple-200 shadow-[0_0_10px_rgba(139,92,246,0.15)]"
+                    : "bg-cine-900/40 border-cine-800 text-cine-500 opacity-60"
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${
+                    ach.isUnlocked
+                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/50"
+                      : "bg-cine-800 text-cine-600"
+                  }`}
+                >
+                  {ach.isUnlocked ? "🏆" : "🔒"}
+                </div>
+                <div className="min-w-0 w-full">
+                  <p className="text-xs font-bold text-white truncate">
+                    {ach.title}
+                  </p>
+                  <p className="text-[10px] text-cine-400 font-mono mt-0.5">
+                    +{ach.xp} XP
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Récords Personales y Desglose de Biblioteca */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* Récord: Mayor Vicio */}
+        <div className="glass-panel p-5 rounded-3xl border border-purple-500/20 bg-cine-950 flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-3">
+            <Clock className="w-4 h-4 text-purple-400" />
+            <span>Mayor Vicio Personal</span>
+          </div>
+
+          {stats.longestGame ? (
+            <div className="flex items-center gap-3.5">
+              {stats.longestGame.cover && (
+                <img
+                  src={stats.longestGame.cover}
+                  alt={stats.longestGame.title}
+                  className="w-14 h-14 rounded-xl object-cover border border-purple-500/30 shadow-md shrink-0"
+                />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white truncate">
+                  {stats.longestGame.title}
+                </p>
+                <p className="text-xl font-black text-purple-400 font-mono mt-0.5">
+                  {stats.longestGame.hours}{" "}
+                  <span className="text-xs text-cine-400 font-normal">
+                    horas jugadas
+                  </span>
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-cine-500 italic py-3">
+              Registra horas en tus títulos para descubrir tu récord.
+            </p>
+          )}
+        </div>
+
+        {/* Récord: Obra Maestra */}
+        <div className="glass-panel p-5 rounded-3xl border border-amber-500/20 bg-cine-950 flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <span>Obra Maestra Personal</span>
+          </div>
+
+          {stats.highestRatedGame ? (
+            <div className="flex items-center gap-3.5">
+              {stats.highestRatedGame.cover && (
+                <img
+                  src={stats.highestRatedGame.cover}
+                  alt={stats.highestRatedGame.title}
+                  className="w-14 h-14 rounded-xl object-cover border border-amber-500/30 shadow-md shrink-0"
+                />
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white truncate">
+                  {stats.highestRatedGame.title}
+                </p>
+                <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
+                  ★ {stats.highestRatedGame.rating}{" "}
+                  <span className="text-xs text-cine-400 font-normal">
+                    / 10
+                  </span>
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-cine-500 italic py-3">
+              Puntúa tus títulos favoritos para ver tu obra maestra.
+            </p>
+          )}
+        </div>
+
+        {/* Estado del Catálogo */}
+        <div className="glass-panel p-5 rounded-3xl border border-cyan-500/20 bg-cine-950 flex flex-col justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-400 mb-3">
+            <Layers className="w-4 h-4 text-cyan-400" />
+            <span>Ritmo y Biblioteca</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+              <span className="text-cine-400 block text-[10px]">Jugando</span>
+              <span className="text-base font-black text-white font-mono">
+                {stats.statusBreakdown?.playing ?? stats.totalPlaying}
+              </span>
+            </div>
+            <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+              <span className="text-cine-400 block text-[10px]">
+                Pendientes
+              </span>
+              <span className="text-base font-black text-white font-mono">
+                {stats.statusBreakdown?.backlog ?? stats.totalBacklog}
+              </span>
+            </div>
+            <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+              <span className="text-cine-400 block text-[10px]">
+                Media / Título
+              </span>
+              <span className="text-base font-black text-cyan-300 font-mono">
+                {stats.averageCompletionHours
+                  ? `${stats.averageCompletionHours}h`
+                  : "—"}
+              </span>
+            </div>
+            <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+              <span className="text-cine-400 block text-[10px]">
+                Platinados
+              </span>
+              <span className="text-base font-black text-amber-400 font-mono">
+                {stats.statusBreakdown?.platinum ?? stats.totalPlatinum}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Distribución de Puntuaciones (1 al 10) */}
+      {stats.ratingDistribution &&
+        stats.ratingDistribution.some((d) => d.count > 0) && (
+          <section className="glass-panel p-6 rounded-3xl border border-purple-500/20 bg-cine-950 space-y-4">
+            <div className="flex items-center justify-between border-b border-cine-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-purple-400" />
+                <h3 className="text-base font-bold text-white">
+                  Distribución de Puntuaciones
+                </h3>
+              </div>
+              <span className="text-xs text-cine-400 font-mono">
+                Escala 1 a 10
+              </span>
+            </div>
+
+            <div className="w-full h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={stats.ratingDistribution}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#232635"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="rating"
+                    stroke="#71717A"
+                    fontSize={11}
+                    tickLine={false}
+                    tickFormatter={(v) => `★ ${v}`}
+                  />
+                  <YAxis
+                    stroke="#71717A"
+                    fontSize={11}
+                    tickLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#090A10",
+                      borderColor: "#8B5CF6",
+                      borderRadius: "12px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(val: any) => [`${val} juego(s)`, "Cantidad"]}
+                    labelFormatter={(lbl) => `Nota ★ ${lbl}`}
+                  />
+                  <Bar
+                    dataKey="count"
+                    fill="#8B5CF6"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={30}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )}
 
       {/* Critic vs You: Gráfica Comparativa con Metacritic */}
       <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/30 bg-cine-950 space-y-4">
@@ -455,6 +753,9 @@ export default function GamerProfilePage() {
         </section>
       </div>
 
+      {/* Zona de Peligro / Wipeout de Datos */}
+      <WipeoutDangerZone onDataWiped={fetchProfile} universe="GAMING" />
+
       {/* Modal para Editar Perfil Gamer */}
       <EditGamerProfileModal
         isOpen={isEditOpen}
@@ -465,6 +766,28 @@ export default function GamerProfilePage() {
         initialName={profile.displayName}
         initialBio={profile.bio}
         initialAvatar={profile.avatarUrl}
+      />
+
+      {/* Modal de Social Wrapped */}
+      <SocialWrappedModal
+        isOpen={isWrappedOpen}
+        onClose={() => setIsWrappedOpen(false)}
+        universe="GAMING"
+        user={{
+          displayName: profile.displayName,
+          username: session?.user?.username,
+          avatarUrl: profile.avatarUrl,
+        }}
+        stats={{
+          totalMovies: 0,
+          totalSeries: 0,
+          totalHours: stats.totalHours,
+          totalCompletedGames: stats.totalCompleted,
+          totalPlatinum: stats.totalPlatinum,
+          ballKnowledge: null,
+          gameKnowledge: stats.globalGameKnowledge,
+        }}
+        achievements={achievementsData?.achievements || []}
       />
     </div>
   );
