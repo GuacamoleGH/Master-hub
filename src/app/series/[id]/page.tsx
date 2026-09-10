@@ -221,30 +221,30 @@ export default function SeriesDetailPage() {
             </div>
 
             {/* 2. Bloque Central: Título, Metadatos, Géneros y Streaming */}
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               <div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] drop-shadow-md">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
                   {series.name}
                 </h1>
                 {series.originalName && series.originalName !== series.name && (
-                  <p className="text-base sm:text-lg text-cine-400 italic mt-1 font-medium">
+                  <p className="text-sm sm:text-base text-cine-400 italic mt-0.5 font-medium">
                     Título original: {series.originalName}
                   </p>
                 )}
               </div>
 
               {/* Metadatos rápidos: Años, Temporadas, Episodios, IMDb */}
-              <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 text-sm sm:text-base font-medium">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs sm:text-sm font-medium">
                 {yearRange && (
                   <div className="flex items-center gap-1.5 text-cine-200">
-                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cine-400" />
+                    <Calendar className="w-4 h-4 text-cine-400" />
                     <span>{yearRange}</span>
                   </div>
                 )}
 
                 {series.numberOfSeasons && (
                   <div className="flex items-center gap-1.5 text-cine-200">
-                    <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-cine-400" />
+                    <Layers className="w-4 h-4 text-cine-400" />
                     <span>
                       {series.numberOfSeasons}{" "}
                       {series.numberOfSeasons === 1
@@ -261,10 +261,10 @@ export default function SeriesDetailPage() {
                     href={imdbUrl || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3.5 py-1.5 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer text-sm sm:text-base shadow-sm"
+                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer text-xs sm:text-sm shadow-sm"
                     title="Ver ficha oficial en IMDb"
                   >
-                    <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400" />
+                    <Star className="w-4 h-4 fill-amber-400" />
                     <span>IMDb {series.imdbRating.toFixed(1)} / 10</span>
                     <ExternalLink className="w-3.5 h-3.5 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
                   </a>
@@ -273,11 +273,11 @@ export default function SeriesDetailPage() {
 
               {/* Pills de Géneros */}
               {series.genres && series.genres.length > 0 && (
-                <div className="flex flex-wrap gap-2.5 sm:gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
                   {series.genres.map((genre) => (
                     <span
                       key={genre}
-                      className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-cine-800/80 border border-cine-700/80 text-cine-200 shadow-sm"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cine-800/80 border border-cine-700/80 text-cine-200 shadow-sm"
                     >
                       {genre}
                     </span>
@@ -288,12 +288,12 @@ export default function SeriesDetailPage() {
               {/* Plataformas de Streaming Disponibles */}
               {series.streamingPlatforms &&
                 series.streamingPlatforms.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-xs sm:text-sm font-semibold text-cine-300 flex items-center gap-1.5">
-                      <Tv className="w-4 h-4 text-cine-400" /> Dónde ver en
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                      <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
                       streaming:
                     </span>
-                    <div className="flex flex-wrap gap-2 sm:gap-2.5">
+                    <div className="flex flex-wrap gap-2">
                       {series.streamingPlatforms.map((plat) => (
                         <StreamingBadge key={plat} platform={plat} size="sm" />
                       ))}
