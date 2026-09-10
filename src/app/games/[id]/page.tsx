@@ -201,7 +201,7 @@ export default function GameDetailPage() {
         {/* Contenido del Hero */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-5 sm:gap-6 items-stretch">
           {/* Portada Principal */}
-          <div className="relative w-64 sm:w-80 md:w-[360px] lg:w-[380px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[480px]">
+          <div className="relative w-64 sm:w-80 md:w-[340px] lg:w-[360px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[480px]">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
@@ -365,9 +365,10 @@ export default function GameDetailPage() {
                   className="px-4 sm:px-4.5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95 flex-shrink-0"
                   title="Abrir ficha oficial en RAWG"
                 >
-                  <span className="font-mono font-bold text-xs tracking-tight">
+                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-200 leading-none tracking-tight">
                     RAWG
                   </span>
+                  <span className="font-semibold text-sm">Ver en RAWG</span>
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}

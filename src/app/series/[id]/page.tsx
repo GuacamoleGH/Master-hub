@@ -195,7 +195,7 @@ export default function SeriesDetailPage() {
         {/* Contenido de la cabecera */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-5 sm:gap-6 items-stretch">
           {/* Póster Grande */}
-          <div className="relative w-64 sm:w-80 md:w-[360px] lg:w-[380px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900 aspect-[2/3] md:aspect-auto md:min-h-[480px]">
+          <div className="relative w-64 sm:w-80 md:w-[340px] lg:w-[360px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900 aspect-[2/3] md:aspect-auto md:min-h-[480px]">
             <MoviePoster
               src={series.posterPath}
               alt={series.name}
@@ -359,9 +359,7 @@ export default function SeriesDetailPage() {
                   <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
                     IMDb
                   </span>
-                  <span className="font-semibold text-sm">
-                    Ver en IMDb
-                  </span>
+                  <span className="font-semibold text-sm">Ver en IMDb</span>
                   <ExternalLink className="w-3.5 h-3.5 text-black/70 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </a>
               )}
