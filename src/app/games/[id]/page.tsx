@@ -201,7 +201,7 @@ export default function GameDetailPage() {
         {/* Contenido del Hero */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-stretch">
           {/* Portada Principal */}
-          <div className="relative w-56 sm:w-64 md:w-[280px] lg:w-[285px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[400px]">
+          <div className="relative w-56 sm:w-72 md:w-[330px] lg:w-[335px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[430px]">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
@@ -210,7 +210,7 @@ export default function GameDetailPage() {
           </div>
 
           {/* Datos y Ficha */}
-          <div className="flex-1 flex flex-col justify-between min-h-[400px] gap-6">
+          <div className="flex-1 flex flex-col justify-between min-h-[430px] gap-6">
             {/* 1. Categoría y Metacritic Arriba */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold w-fit">
