@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Loader2, Film, Tv, Star, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { sortSearchResultsByRelevance } from "@/lib/searchRanking";
 
 interface SearchItem {
   id: number;
@@ -12,6 +13,8 @@ interface SearchItem {
   year?: number;
   posterPath: string | null;
   voteAverage: number;
+  popularity?: number;
+  voteCount?: number;
   mediaType: "movie" | "tv";
 }
 
@@ -57,6 +60,8 @@ function SearchContent() {
           year: item.year,
           posterPath: item.posterPath,
           voteAverage: item.voteAverage,
+          popularity: item.popularity,
+          voteCount: item.voteCount,
           mediaType: "movie" as const,
         }),
       );
@@ -69,12 +74,14 @@ function SearchContent() {
           year: item.firstAirYear,
           posterPath: item.posterPath,
           voteAverage: item.voteAverage,
+          popularity: item.popularity,
+          voteCount: item.voteCount,
           mediaType: "tv" as const,
         }),
       );
 
-      setMovieResults(movies);
-      setSeriesResults(series);
+      setMovieResults(sortSearchResultsByRelevance(movies, q));
+      setSeriesResults(sortSearchResultsByRelevance(series, q));
     } catch (err) {
       console.error(err);
     } finally {
@@ -89,14 +96,11 @@ function SearchContent() {
     }
   };
 
-  // Combinar resultados
-  const cleanQ = query.trim().toLowerCase();
-  const allResults = [...movieResults, ...seriesResults].sort((a, b) => {
-    const aExact = a.title.toLowerCase() === cleanQ ? 1 : 0;
-    const bExact = b.title.toLowerCase() === cleanQ ? 1 : 0;
-    if (aExact !== bExact) return bExact - aExact;
-    return (b.voteAverage || 0) - (a.voteAverage || 0);
-  });
+  // Combinar resultados ordenados por relevancia
+  const allResults = sortSearchResultsByRelevance(
+    [...movieResults, ...seriesResults],
+    query,
+  );
 
   const displayedResults =
     filterTab === "movie"

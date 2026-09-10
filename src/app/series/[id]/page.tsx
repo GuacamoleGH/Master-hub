@@ -299,12 +299,12 @@ export default function SeriesDetailPage() {
                 disabled={isUpdatingWatchlist}
                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
                   isWatchlist
-                    ? "bg-amber-500 text-cine-950 font-bold shadow-gold-glow"
+                    ? "bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold shadow-[0_0_20px_rgba(14,165,233,0.35)]"
                     : "glass-card border border-cine-700 text-cine-200 hover:text-white hover:bg-cine-800"
                 }`}
               >
                 <Bookmark
-                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-amber-400"}`}
+                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-sky-400"}`}
                 />
                 {isWatchlist ? "En tu Watchlist" : "+ Añadir a Watchlist"}
               </button>

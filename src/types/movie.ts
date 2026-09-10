@@ -14,6 +14,8 @@ export interface MovieSearchResult {
   backdropPath: string | null;
   overview: string;
   voteAverage: number;
+  popularity?: number;
+  voteCount?: number;
 }
 
 export interface MovieDetail {

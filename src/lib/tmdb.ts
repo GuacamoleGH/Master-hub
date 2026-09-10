@@ -83,7 +83,7 @@ export async function searchMovies(
     if (res.ok) {
       const data = await res.json();
       if (data.results && Array.isArray(data.results)) {
-        return data.results.slice(0, 15).map((item: any) => ({
+        return data.results.slice(0, 20).map((item: any) => ({
           id: item.id,
           title: item.title,
           originalTitle: item.original_title,
@@ -98,6 +98,8 @@ export async function searchMovies(
             : null,
           overview: item.overview || "",
           voteAverage: Number((item.vote_average || 0).toFixed(1)),
+          popularity: Number(item.popularity || 0),
+          voteCount: Number(item.vote_count || 0),
         }));
       }
     }
@@ -257,7 +259,7 @@ export async function searchSeries(
     if (res.ok) {
       const data = await res.json();
       if (data.results && Array.isArray(data.results)) {
-        return data.results.slice(0, 15).map((item: any) => ({
+        return data.results.slice(0, 20).map((item: any) => ({
           id: item.id,
           name: item.name,
           originalName: item.original_name,
@@ -272,6 +274,8 @@ export async function searchSeries(
             : null,
           overview: item.overview || "",
           voteAverage: Number((item.vote_average || 0).toFixed(1)),
+          popularity: Number(item.popularity || 0),
+          voteCount: Number(item.vote_count || 0),
         }));
       }
     }

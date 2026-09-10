@@ -188,7 +188,7 @@ export default function SeriesCard({
               disabled={isUpdating}
               className={`p-2 rounded-xl backdrop-blur-md border shadow transition-all ${
                 isWatchlist
-                  ? "bg-amber-500 text-cine-950 border-amber-400"
+                  ? "bg-sky-500 text-cine-950 border-sky-400 font-bold shadow-[0_0_12px_rgba(14,165,233,0.4)]"
                   : "bg-cine-900/90 text-cine-300 hover:text-white border-cine-700 hover:bg-cine-800"
               }`}
               title={
