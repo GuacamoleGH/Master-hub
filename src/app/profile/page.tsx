@@ -286,7 +286,10 @@ export default function ProfilePage() {
           </div>
           <div className="text-3xl font-black text-white font-mono">
             {stats.totalWatchlist}
-            <span className="text-xs font-normal text-cine-400"> pendientes</span>
+            <span className="text-xs font-normal text-cine-400">
+              {" "}
+              pendientes
+            </span>
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
             Por ver en streaming / cine
@@ -311,14 +314,16 @@ export default function ProfilePage() {
         {/* Tu Nota Media */}
         <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Tu Nota Media
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Tu Nota
+            Media
           </div>
           <div className="text-3xl font-black text-white font-mono">
             {stats.averageRating || "—"}
             <span className="text-xs font-normal text-cine-400"> / 10</span>
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
-            Género top: <strong className="text-amber-400">{stats.topGenre || "—"}</strong>
+            Género top:{" "}
+            <strong className="text-amber-400">{stats.topGenre || "—"}</strong>
           </div>
         </div>
       </section>

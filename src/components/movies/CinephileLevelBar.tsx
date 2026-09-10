@@ -113,7 +113,10 @@ export default function CinephileLevelBar({
             />{" "}
             Experiencia Total
           </div>
-          <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight">
+          <div
+            suppressHydrationWarning
+            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight"
+          >
             {(totalXp || 0).toLocaleString()}{" "}
             <span
               className={`text-xs font-bold ${
