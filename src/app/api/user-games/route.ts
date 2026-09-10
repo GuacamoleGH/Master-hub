@@ -239,11 +239,14 @@ export async function POST(request: NextRequest) {
     }
 
     const isFinished = status === "COMPLETED" || status === "PLATINUM";
-    const dateToSave = completedDate
-      ? new Date(completedDate)
-      : isFinished
-        ? new Date()
-        : null;
+    const dateToSave =
+      completedDate === null
+        ? null
+        : completedDate
+          ? new Date(completedDate)
+          : isFinished
+            ? new Date()
+            : null;
 
     let finalHoursPlayed = typeof hoursPlayed === "number" ? hoursPlayed : null;
     let serializedPlatformDetails: string | null = null;

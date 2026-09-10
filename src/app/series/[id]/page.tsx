@@ -16,6 +16,7 @@ import {
   Layers,
   Film,
   ExternalLink,
+  History,
 } from "lucide-react";
 import { SeriesDetail } from "@/types/series";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
@@ -23,6 +24,8 @@ import ReviewModal from "@/components/ReviewModal";
 import MoviePoster from "@/components/MoviePoster";
 import StreamingBadge from "@/components/StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function SeriesDetailPage() {
   const params = useParams();
@@ -33,6 +36,8 @@ export default function SeriesDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isUpdatingWatchlist, setIsUpdatingWatchlist] = useState(false);
+  const [isUpdatingSeenLongAgo, setIsUpdatingSeenLongAgo] = useState(false);
+  const toast = useToast();
 
   const fetchSeries = async () => {
     try {
@@ -106,6 +111,41 @@ export default function SeriesDetailPage() {
       console.error(err);
     } finally {
       setIsUpdatingWatchlist(false);
+    }
+  };
+
+  const handleMarkSeenLongAgo = async () => {
+    setIsUpdatingSeenLongAgo(true);
+    try {
+      const res = await fetch("/api/user-series", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tmdbId: series.tmdbId,
+          status: "WATCHED",
+          userRating: null,
+          watchedDate: null,
+          review: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar series en tu historial");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Serie registrada!",
+          "Marcada como vista hace tiempo 📼 (+10 XP)",
+        );
+        await fetchSeries();
+      }
+    } catch (err) {
+      console.error("Error al registrar serie como vista hace tiempo:", err);
+    } finally {
+      setIsUpdatingSeenLongAgo(false);
     }
   };
 
@@ -283,6 +323,23 @@ export default function SeriesDetailPage() {
                   : "Marcar serie como vista"}
               </button>
 
+              {!isWatched ? (
+                <button
+                  onClick={handleMarkSeenLongAgo}
+                  disabled={isUpdatingSeenLongAgo}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-950/40 active:scale-95 shadow"
+                  title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
+                >
+                  <History className="w-4 h-4 text-purple-400" />
+                  <span>Vista hace tiempo</span>
+                </button>
+              ) : series.userSeries?.watchedDate === null ? (
+                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-purple-500/15 border border-purple-500/30 text-purple-300 flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Vista en el pasado</span>
+                </div>
+              ) : null}
+
               {imdbUrl && (
                 <a
                   href={imdbUrl}
@@ -333,7 +390,11 @@ export default function SeriesDetailPage() {
                 <span className="text-3xl font-extrabold text-purple-400 font-mono">
                   {series.userSeries.userRating?.toFixed(1) ?? "—"}
                 </span>
-                <span className="text-sm text-cine-500">/ 10</span>
+                <span className="text-sm text-cine-500">
+                  {series.userSeries.userRating !== null && series.userSeries.userRating !== undefined
+                    ? "/ 10"
+                    : "(Sin puntuar)"}
+                </span>
                 {series.imdbRating && (
                   <span className="text-xs text-cine-400 ml-2">
                     (IMDb:{" "}
@@ -403,8 +464,13 @@ export default function SeriesDetailPage() {
                 Fecha de Registro
               </span>
               <div className="text-sm font-semibold text-cine-200">
-                {formatSpanishDate(series.userSeries.watchedDate) ||
-                  "No especificada"}
+                {series.userSeries.watchedDate ? (
+                  formatSpanishDate(series.userSeries.watchedDate)
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-purple-300 font-mono text-xs">
+                    <span>📼</span> Vista en el pasado (sin fecha fija)
+                  </span>
+                )}
               </div>
             </div>
           </div>

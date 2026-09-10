@@ -11,6 +11,7 @@ import {
   Award,
   Check,
   Plus,
+  History,
 } from "lucide-react";
 import { ALL_PLATFORMS, PlatformOption } from "@/lib/platforms";
 import { PlatformProgress } from "@/types/game";
@@ -275,6 +276,51 @@ export default function GameReviewModal({
     }
   };
 
+  const handleQuickPlayedLongAgo = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/user-games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rawgId: game.rawgId,
+          status: "COMPLETED",
+          userRating: null,
+          hoursPlayed: null,
+          platform:
+            platformProgressList.length > 0
+              ? platformProgressList.map((p) => p.platform).join(", ")
+              : null,
+          platformDetails:
+            platformProgressList.length > 0
+              ? JSON.stringify(platformProgressList)
+              : null,
+          review: null,
+          completedDate: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar videojuegos en tu catálogo");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Juego guardado!",
+          "Marcado como completado en su día 🕹️ (+15 XP)",
+        );
+        onSaved();
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error al guardar juego:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!isOpen || !mounted) return null;
 
   return createPortal(
@@ -310,6 +356,31 @@ export default function GameReviewModal({
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
+          {/* Acción rápida: Jugado en su día */}
+          <div className="p-3.5 bg-purple-950/40 border border-purple-500/30 rounded-2xl flex items-center justify-between gap-3 shadow-inner">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-purple-900/50 border border-purple-500/40 flex items-center justify-center text-cyan-300 shrink-0">
+                <History className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-white truncate">
+                  ¿Lo jugaste en su día?
+                </div>
+                <div className="text-[11px] text-purple-300/80 truncate">
+                  Guardar como completado sin nota ni horas
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleQuickPlayedLongAgo}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white transition-all shrink-0 shadow-sm flex items-center gap-1 active:scale-95"
+            >
+              <span>⚡ Guardar rápido</span>
+            </button>
+          </div>
+
           {/* Selector de Estado */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-cine-300 block">

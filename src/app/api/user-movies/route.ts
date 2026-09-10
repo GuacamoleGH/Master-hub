@@ -244,11 +244,14 @@ export async function POST(request: NextRequest) {
       difference = bkResult.difference;
     }
 
-    const dateToSave = watchedDate
-      ? new Date(watchedDate)
-      : status === "WATCHED"
-        ? new Date()
-        : null;
+    const dateToSave =
+      watchedDate === null
+        ? null
+        : watchedDate
+          ? new Date(watchedDate)
+          : status === "WATCHED"
+            ? new Date()
+            : null;
 
     const userMovie = await prisma.userMovie.upsert({
       where: {

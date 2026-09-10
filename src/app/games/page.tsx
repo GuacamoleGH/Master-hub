@@ -82,7 +82,7 @@ export default async function GamerHomePage() {
     ? await prisma.userGame.findMany({
         where: { userId, status: { in: ["COMPLETED", "PLATINUM"] } },
         include: { game: true },
-        orderBy: { completedDate: "desc" },
+        orderBy: [{ completedDate: "desc" }, { createdAt: "desc" }],
         take: 6,
       })
     : [];

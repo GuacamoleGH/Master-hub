@@ -208,6 +208,13 @@ export default function MovieCard({
                 <Star className="w-3 h-3 fill-cine-950 text-cine-950" />
                 <span>{userMovie.userRating.toFixed(1)}</span>
               </div>
+            ) : isWatched ? (
+              <div
+                className="flex items-center gap-1 bg-cine-950/80 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-lg text-[10px] font-bold shadow backdrop-blur-md"
+                title="Película en tu historial (sin nota)"
+              >
+                <span>📼 Visto</span>
+              </div>
             ) : currentPlatform ? (
               <StreamingBadge platform={currentPlatform} size="xs" />
             ) : (
