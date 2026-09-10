@@ -204,7 +204,7 @@ export default function MovieDetailPage() {
         {/* Contenido Principal de Cabecera */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-stretch">
           {/* Póster Oficial */}
-          <div className="relative w-48 sm:w-52 md:w-56 flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto">
+          <div className="relative w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto md:min-h-[360px]">
             <MoviePoster
               src={movie.posterPath}
               alt={movie.title}
@@ -214,89 +214,100 @@ export default function MovieDetailPage() {
           </div>
 
           {/* Información y Títulos */}
-          <div className="flex-1 flex flex-col justify-center space-y-4 sm:space-y-4.5">
+          <div className="flex-1 flex flex-col justify-between min-h-[360px] gap-6">
+            {/* 1. Categoría Arriba */}
             <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                {movie.title}
-              </h1>
-              {movie.originalTitle && movie.originalTitle !== movie.title && (
-                <p className="text-base text-cine-400 italic mt-0.5">
-                  Título original: {movie.originalTitle}
-                </p>
-              )}
-            </div>
-
-            {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Master Hub */}
-            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-              {movie.year && (
-                <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Calendar className="w-4 h-4 text-cine-500" />
-                  <span>{movie.year}</span>
-                </div>
-              )}
-
-              {movie.runtime && (
-                <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Clock className="w-4 h-4 text-cine-500" />
-                  <span>{formatRuntime(movie.runtime)}</span>
-                </div>
-              )}
-
-              {movie.imdbRating && (
-                <a
-                  href={imdbUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer"
-                  title="Ver ficha oficial en IMDb"
-                >
-                  <Star className="w-4 h-4 fill-amber-400" />
-                  <span>IMDb {movie.imdbRating.toFixed(1)} / 10</span>
-                  <ExternalLink className="w-3 h-3 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
-                </a>
-              )}
-
-              {/* Master Hub Score Oficial */}
-              <MasterHubScoreBadge
-                score={movie.masterHubScore || null}
-                totalVotes={movie.masterHubVotes || 0}
-                distribution={movie.masterHubDistribution}
-                themeColor="amber"
-              />
-            </div>
-
-            {/* Pills de Géneros */}
-            {movie.genres && movie.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-cine-800/80 border border-cine-700 text-cine-200"
-                  >
-                    {genre}
-                  </span>
-                ))}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold w-fit">
+                <Film className="w-3.5 h-3.5" />
+                <span>Película</span>
               </div>
-            )}
+            </div>
 
-            {/* Plataformas de Streaming Disponibles */}
-            {movie.streamingPlatforms &&
-              movie.streamingPlatforms.length > 0 && (
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-cine-400 flex items-center gap-1.5">
-                    <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
-                    streaming:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {movie.streamingPlatforms.map((plat) => (
-                      <StreamingBadge key={plat} platform={plat} size="sm" />
-                    ))}
+            {/* 2. Bloque Central: Títulos, Metadatos, Géneros y Streaming */}
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                  {movie.title}
+                </h1>
+                {movie.originalTitle && movie.originalTitle !== movie.title && (
+                  <p className="text-base text-cine-400 italic mt-0.5">
+                    Título original: {movie.originalTitle}
+                  </p>
+                )}
+              </div>
+
+              {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Master Hub */}
+              <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+                {movie.year && (
+                  <div className="flex items-center gap-1 text-cine-300 font-medium">
+                    <Calendar className="w-4 h-4 text-cine-500" />
+                    <span>{movie.year}</span>
                   </div>
+                )}
+
+                {movie.runtime && (
+                  <div className="flex items-center gap-1 text-cine-300 font-medium">
+                    <Clock className="w-4 h-4 text-cine-500" />
+                    <span>{formatRuntime(movie.runtime)}</span>
+                  </div>
+                )}
+
+                {movie.imdbRating && (
+                  <a
+                    href={imdbUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer"
+                    title="Ver ficha oficial en IMDb"
+                  >
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <span>IMDb {movie.imdbRating.toFixed(1)} / 10</span>
+                    <ExternalLink className="w-3 h-3 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
+                  </a>
+                )}
+
+                {/* Master Hub Score Oficial */}
+                <MasterHubScoreBadge
+                  score={movie.masterHubScore || null}
+                  totalVotes={movie.masterHubVotes || 0}
+                  distribution={movie.masterHubDistribution}
+                  themeColor="amber"
+                />
+              </div>
+
+              {/* Pills de Géneros */}
+              {movie.genres && movie.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {movie.genres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="px-3 py-1 rounded-lg text-xs font-semibold bg-cine-800/80 border border-cine-700 text-cine-200"
+                    >
+                      {genre}
+                    </span>
+                  ))}
                 </div>
               )}
 
-            {/* Botones de acción principales */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {/* Plataformas de Streaming Disponibles */}
+              {movie.streamingPlatforms &&
+                movie.streamingPlatforms.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-cine-400 flex items-center gap-1.5">
+                      <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
+                      streaming:
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {movie.streamingPlatforms.map((plat) => (
+                        <StreamingBadge key={plat} platform={plat} size="sm" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+
+            {/* 3. Botones de acción principales Abajo */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdatingWatchlist}
