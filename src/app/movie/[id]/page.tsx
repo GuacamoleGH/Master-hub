@@ -202,13 +202,13 @@ export default function MovieDetailPage() {
         )}
 
         {/* Contenido Principal de Cabecera */}
-        <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
           {/* Póster Oficial */}
-          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 shadow-2xl rounded-2xl overflow-hidden border border-white/10 glass-card">
+          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 md:self-stretch shadow-2xl rounded-2xl overflow-hidden border border-white/10 glass-card flex flex-col">
             <MoviePoster
               src={movie.posterPath}
               alt={movie.title}
-              className="w-full h-auto object-cover"
+              className="w-full h-full flex-1 object-cover min-h-[280px] sm:min-h-[340px]"
             />
           </div>
 
@@ -225,7 +225,7 @@ export default function MovieDetailPage() {
               )}
             </div>
 
-            {/* Metadatos rápidos: Año, Duración, Géneros, IMDb */}
+            {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Master Hub */}
             <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
               {movie.year && (
                 <div className="flex items-center gap-1 text-cine-300 font-medium">
@@ -254,15 +254,15 @@ export default function MovieDetailPage() {
                   <ExternalLink className="w-3 h-3 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
                 </a>
               )}
-            </div>
 
-            {/* Master Hub Score Oficial */}
-            <MasterHubScoreBadge
-              score={movie.masterHubScore || null}
-              totalVotes={movie.masterHubVotes || 0}
-              distribution={movie.masterHubDistribution}
-              themeColor="amber"
-            />
+              {/* Master Hub Score Oficial */}
+              <MasterHubScoreBadge
+                score={movie.masterHubScore || null}
+                totalVotes={movie.masterHubVotes || 0}
+                distribution={movie.masterHubDistribution}
+                themeColor="amber"
+              />
+            </div>
 
             {/* Pills de Géneros */}
             {movie.genres && movie.genres.length > 0 && (
