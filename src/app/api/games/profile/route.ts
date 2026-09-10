@@ -18,9 +18,11 @@ export async function GET() {
         profile: {
           id: "guest",
           displayName: "Invitado",
+          username: null,
           avatarUrl: null,
           bio: "Inicia sesión para guardar tu progreso de videojuegos y subir de nivel.",
         },
+        topGames: [],
         stats: {
           totalHours: 0,
           totalCompleted: 0,
@@ -333,13 +335,34 @@ export async function GET() {
       statusBreakdown,
     };
 
+    const topGames = [...userGames]
+      .filter((g) => g.status !== "DROPPED")
+      .sort((a, b) => {
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
+        return (b.userRating || 0) - (a.userRating || 0);
+      })
+      .slice(0, 5)
+      .map((g) => ({
+        id: g.id,
+        title: g.game.title,
+        image: g.game.backgroundImage,
+        year: g.game.released ? g.game.released.split("-")[0] : null,
+        rating: g.userRating,
+        isFavorite: Boolean(g.isFavorite),
+        link: `/games/${g.game.rawgId}`,
+        mediaType: "game" as const,
+      }));
+
     return NextResponse.json({
       profile: {
         id: user?.id || "gamer-default",
         displayName: user?.name || user?.username || "Gamer",
+        username: user?.username || null,
         avatarUrl: user?.image || null,
         bio: user?.bio || null,
       },
+      topGames,
       stats,
     });
   } catch (error) {

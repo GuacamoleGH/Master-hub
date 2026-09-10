@@ -19,7 +19,7 @@ import {
   AlertCircle,
   ExternalLink,
 } from "lucide-react";
-import TopFourCard from "@/components/profile/TopFourCard";
+import TopFiveCard from "@/components/profile/TopFiveCard";
 import AffinityCard from "@/components/profile/AffinityCard";
 import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
@@ -45,8 +45,10 @@ interface PublicProfileData {
     level: number;
     rankTitle: string;
     rankIcon: string;
-    topMovies: any[];
+    topCine?: any[];
+    topMovies?: any[];
     recentMovies: any[];
+    recentSeries?: any[];
   };
   gaming: {
     totalCompleted: number;
@@ -160,25 +162,27 @@ export default function PublicProfilePage() {
 
   const { user, isOwner, cinema, gaming, affinity } = data;
 
-  // Formatear Top 4 para los componentes
-  const topFourMovies = cinema.topMovies.map((m) => ({
+  // Formatear Top 5 Cinéfilo y Top 5 Gaming
+  const topFiveCine = (cinema.topCine || cinema.topMovies || []).map((m: any) => ({
     id: m.id,
-    title: m.movie.title,
-    image: m.movie.posterPath,
-    year: m.movie.year,
-    rating: m.userRating,
+    title: m.title || m.movie?.title || m.series?.name,
+    image: m.image ?? m.movie?.posterPath ?? m.series?.posterPath,
+    year: m.year ?? m.movie?.year ?? m.series?.firstAirYear,
+    rating: m.rating ?? m.userRating,
     isFavorite: m.isFavorite,
-    link: `/movie/${m.movie.tmdbId}`,
+    link: m.link || (m.movie ? `/movie/${m.movie.tmdbId}` : m.series ? `/series/${m.series.tmdbId}` : "#"),
+    mediaType: m.mediaType || (m.series ? "series" : "movie"),
   }));
 
-  const topFourGames = gaming.topGames.map((g) => ({
+  const topFiveGames = (gaming.topGames || []).map((g: any) => ({
     id: g.id,
-    title: g.game.title,
-    image: g.game.backgroundImage,
-    year: g.game.released ? g.game.released.split("-")[0] : null,
-    rating: g.userRating,
+    title: g.title || g.game?.title,
+    image: g.image ?? g.game?.backgroundImage,
+    year: g.year ?? (g.game?.released ? g.game.released.split("-")[0] : null),
+    rating: g.rating ?? g.userRating,
     isFavorite: g.isFavorite,
-    link: `/games/${g.game.rawgId}`,
+    link: g.link || (g.game ? `/games/${g.game.rawgId}` : "#"),
+    mediaType: "game" as const,
   }));
 
   const memberYear = user.createdAt
@@ -310,20 +314,6 @@ export default function PublicProfilePage() {
         targetUsername={user.username || "usuario"}
       />
 
-      {/* 3. Vitrina de TOP 4 (Cine y Juegos) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TopFourCard
-          type="cinema"
-          title="Top 4 Cinéfilo"
-          items={topFourMovies}
-        />
-        <TopFourCard
-          type="gaming"
-          title="Top 4 Videojuegos"
-          items={topFourGames}
-        />
-      </div>
-
       {/* Vitrina de Trofeos & Medallas */}
       {data.achievements && (
         <section className="pt-2">
@@ -417,6 +407,13 @@ export default function PublicProfilePage() {
             </div>
           </div>
 
+          {/* Top 5 Cinéfilo */}
+          <TopFiveCard
+            type="cinema"
+            title="Top 5 Cinéfilo"
+            items={topFiveCine}
+          />
+
           {/* Lista de películas recientes con reseñas */}
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -508,6 +505,13 @@ export default function PublicProfilePage() {
               </span>
             </div>
           </div>
+
+          {/* Top 5 Videojuegos */}
+          <TopFiveCard
+            type="gaming"
+            title="Top 5 Videojuegos"
+            items={topFiveGames}
+          />
 
           {/* Lista de videojuegos recientes */}
           <div className="space-y-3">

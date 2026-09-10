@@ -15,6 +15,7 @@ import {
   Trophy,
   MessageSquare,
   Share2,
+  Users,
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
@@ -29,7 +30,7 @@ export default function DynamicNavHeader() {
   if (pathname === "/login" || pathname === "/register") {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center gap-2 text-xs font-semibold text-cine-400 hover:text-white transition-colors bg-cine-900/80 px-3 py-1.5 rounded-xl border border-cine-800"
@@ -57,7 +58,7 @@ export default function DynamicNavHeader() {
   if (pathname === "/") {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <Link
             href="/"
             className="flex items-center gap-2.5 group shrink-0 z-10"
@@ -90,6 +91,14 @@ export default function DynamicNavHeader() {
             >
               <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
               <span>Videojuegos</span>
+            </Link>
+
+            <Link
+              href="/friends"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Users className="w-3.5 h-3.5 text-sky-400" />
+              <span>Amigos</span>
             </Link>
 
             <Link

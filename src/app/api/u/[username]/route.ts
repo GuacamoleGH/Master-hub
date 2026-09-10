@@ -43,26 +43,59 @@ export async function GET(
 
     const userId = targetUser.id;
 
-    // 1. Obtener películas del usuario
-    const userMovies = await prisma.userMovie.findMany({
-      where: { userId },
-      include: {
-        movie: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // 1. Obtener películas y series del usuario
+    const [userMovies, userSeries] = await Promise.all([
+      prisma.userMovie.findMany({
+        where: { userId },
+        include: {
+          movie: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.userSeries.findMany({
+        where: { userId },
+        include: {
+          series: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
     const watchedMovies = userMovies.filter((m) => m.status === "WATCHED");
     const watchlistMovies = userMovies.filter((m) => m.status === "WATCHLIST");
+    const watchedSeries = userSeries.filter((s) => s.status === "WATCHED");
+    const watchlistSeries = userSeries.filter((s) => s.status === "WATCHLIST");
 
-    // Top 4 Cine (favoritas explícitas o mejor valoradas)
-    const topMovies = [...watchedMovies]
+    // Top 5 Cinéfilo (películas y series combinadas)
+    const movieItems = watchedMovies.map((um) => ({
+      id: `movie-${um.id}`,
+      title: um.movie.title,
+      image: um.movie.posterPath,
+      year: um.movie.year,
+      rating: um.userRating,
+      isFavorite: Boolean(um.isFavorite),
+      link: `/movie/${um.movie.tmdbId}`,
+      mediaType: "movie" as const,
+    }));
+
+    const seriesItems = watchedSeries.map((us) => ({
+      id: `series-${us.id}`,
+      title: us.series.name,
+      image: us.series.posterPath,
+      year: us.series.firstAirYear,
+      rating: us.userRating,
+      isFavorite: false,
+      link: `/series/${us.series.tmdbId}`,
+      mediaType: "series" as const,
+    }));
+
+    const topCine = [...movieItems, ...seriesItems]
       .sort((a, b) => {
         if (a.isFavorite && !b.isFavorite) return -1;
         if (!a.isFavorite && b.isFavorite) return 1;
-        return (b.userRating || 0) - (a.userRating || 0);
+        return (b.rating || 0) - (a.rating || 0);
       })
-      .slice(0, 4);
+      .slice(0, 5);
 
     // Métricas de cine
     const movieRatings = watchedMovies
@@ -101,7 +134,7 @@ export async function GET(
     );
     const backlogGames = userGames.filter((g) => g.status === "BACKLOG");
 
-    // Top 4 Videojuegos
+    // Top 5 Videojuegos
     const topGames = [...userGames]
       .filter((g) => g.status !== "DROPPED")
       .sort((a, b) => {
@@ -109,7 +142,17 @@ export async function GET(
         if (!a.isFavorite && b.isFavorite) return 1;
         return (b.userRating || 0) - (a.userRating || 0);
       })
-      .slice(0, 4);
+      .slice(0, 5)
+      .map((g) => ({
+        id: g.id,
+        title: g.game.title,
+        image: g.game.backgroundImage,
+        year: g.game.released ? g.game.released.split("-")[0] : null,
+        rating: g.userRating,
+        isFavorite: Boolean(g.isFavorite),
+        link: `/games/${g.game.rawgId}`,
+        mediaType: "game" as const,
+      }));
 
     // Métricas de gaming
     const totalHours = userGames.reduce(
@@ -264,19 +307,6 @@ export async function GET(
     }
 
     // 4. Evaluar vitrina de logros
-    const userSeries = await prisma.userSeries.findMany({
-      where: { userId },
-      select: {
-        status: true,
-        userRating: true,
-        difference: true,
-        platform: true,
-        review: true,
-        ballKnowledge: true,
-        createdAt: true,
-      },
-    });
-
     const achievementsData = evaluateUserAchievements({
       movies: userMovies,
       series: userSeries,
@@ -292,15 +322,19 @@ export async function GET(
       user: targetUser,
       isOwner: visitorId === userId,
       cinema: {
-        totalWatched: watchedMovies.length,
-        totalWatchlist: watchlistMovies.length,
+        totalWatched: watchedMovies.length + watchedSeries.length,
+        totalWatchlist: watchlistMovies.length + watchlistSeries.length,
+        totalMovies: watchedMovies.length,
+        totalSeries: watchedSeries.length,
         averageRating: avgMovieRating,
         globalBallKnowledge,
         level: movieLevelInfo.level,
         rankTitle: movieLevelInfo.rankTitle,
         rankIcon: movieLevelInfo.rankIcon,
-        topMovies,
+        topCine,
+        topMovies: topCine,
         recentMovies: watchedMovies.slice(0, 12),
+        recentSeries: watchedSeries.slice(0, 12),
       },
       gaming: {
         totalCompleted: completedGames.length,

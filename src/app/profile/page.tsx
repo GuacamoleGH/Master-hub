@@ -19,6 +19,7 @@ import {
   Brain,
   Award,
   ArrowRight,
+  Share2,
 } from "lucide-react";
 import { ProfileStats } from "@/types/movie";
 import CinephileLevelBar from "@/components/CinephileLevelBar";
@@ -30,6 +31,7 @@ import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
 import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
 import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { UserAchievement } from "@/lib/achievements";
 import { useSession } from "next-auth/react";
@@ -44,15 +46,19 @@ export default function ProfilePage() {
 
   const [profileData, setProfileData] = useState<{
     displayName: string;
+    username?: string | null;
     avatarUrl: string | null;
     bio: string | null;
   }>({
     displayName: "Invitado",
+    username: null,
     avatarUrl: null,
     bio: "",
   });
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [topCine, setTopCine] = useState<TopFiveItem[]>([]);
+  const [copied, setCopied] = useState(false);
   const toast = useToast();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,6 +89,32 @@ export default function ProfilePage() {
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  const handleShare = async () => {
+    try {
+      const targetUser =
+        profileData.username ||
+        session?.user?.username ||
+        session?.user?.name;
+      if (!targetUser) {
+        toast.error("Inicia sesión para compartir tu perfil.");
+        return;
+      }
+      const shareUrl = `${window.location.origin}/u/${encodeURIComponent(targetUser)}`;
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+      sounds.playSuccess();
+      setCopied(true);
+      toast.success(
+        "¡Enlace de perfil copiado!",
+        "Compártelo con tus amigos para que visiten tu vitrina cinéfila.",
+      );
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast.error("No se pudo copiar el enlace automáticamente.");
+    }
+  };
+
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
@@ -95,6 +127,7 @@ export default function ProfilePage() {
         const data = await resProfile.json();
         setProfileData(data.profile);
         setStats(data.stats);
+        setTopCine(data.topCine || []);
       }
 
       if (resAch.ok) {
@@ -243,6 +276,24 @@ export default function ProfilePage() {
               </button>
 
               <button
+                onClick={handleShare}
+                className="justify-center px-3.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white border border-amber-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title="Copiar enlace a tu perfil público para compartir con amigos"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-300">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Compartir Perfil</span>
+                  </>
+                )}
+              </button>
+
+              <button
                 onClick={() => {
                   sounds.shutter();
                   setIsWrappedOpen(true);
@@ -326,6 +377,15 @@ export default function ProfilePage() {
             <strong className="text-amber-400">{stats.topGenre || "—"}</strong>
           </div>
         </div>
+      </section>
+
+      {/* Vitrina de Top 5 Cinéfilo (Películas & Series) */}
+      <section>
+        <TopFiveCard
+          type="cinema"
+          title="Top 5 Cinéfilo"
+          items={topCine}
+        />
       </section>
 
       {/* 2. Vitrina de Trofeos Cinéfilos - Banner Resumen Destacado */}
