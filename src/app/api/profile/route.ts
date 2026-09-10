@@ -17,8 +17,11 @@ export async function GET() {
           bio: "Inicia sesión para guardar tu historial y subir de nivel.",
         },
         topCine: [],
+        watchedCatalog: [],
         stats: {
           totalWatched: 0,
+          totalMovies: 0,
+          totalSeries: 0,
           totalWatchlist: 0,
           totalReviews: 0,
           averageRating: null,
@@ -279,6 +282,46 @@ export async function GET() {
       })
       .slice(0, 5);
 
+    const watchedCatalog = [
+      ...watchedList.map((um) => ({
+        id: `movie-${um.id}`,
+        title: um.movie.title,
+        posterPath: um.movie.posterPath,
+        year: um.movie.year,
+        userRating: um.userRating,
+        imdbRating: um.movie.imdbRating,
+        ballKnowledge: um.ballKnowledge,
+        review: um.review,
+        watchedDate: um.watchedDate,
+        isFavorite: Boolean(um.isFavorite),
+        mediaType: "movie" as const,
+        link: `/movie/${um.movie.tmdbId}`,
+      })),
+      ...allUserSeries
+        .filter((us) => us.status === "WATCHED")
+        .map((us) => ({
+          id: `series-${us.id}`,
+          title: us.series.name,
+          posterPath: us.series.posterPath,
+          year: us.series.firstAirYear,
+          userRating: us.userRating,
+          imdbRating: us.series.imdbRating,
+          ballKnowledge: us.ballKnowledge,
+          review: us.review,
+          watchedDate: us.watchedDate,
+          isFavorite: false,
+          mediaType: "series" as const,
+          link: `/series/${us.series.tmdbId}`,
+        })),
+    ].sort((a, b) => {
+      if (a.watchedDate && b.watchedDate) {
+        return new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime();
+      }
+      return (b.userRating || 0) - (a.userRating || 0);
+    });
+
+    const watchedSeriesList = allUserSeries.filter((us) => us.status === "WATCHED");
+
     return NextResponse.json({
       profile: {
         displayName: user?.name || user?.username || "Cinéfilo",
@@ -287,8 +330,11 @@ export async function GET() {
         bio: user?.bio || null,
       },
       topCine,
+      watchedCatalog,
       stats: {
-        totalWatched: watchedList.length,
+        totalWatched: watchedList.length + watchedSeriesList.length,
+        totalMovies: watchedList.length,
+        totalSeries: watchedSeriesList.length,
         totalWatchlist: watchlistCount,
         totalReviews: reviewedCount,
         averageRating,

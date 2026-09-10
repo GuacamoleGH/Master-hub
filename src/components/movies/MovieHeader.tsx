@@ -48,7 +48,11 @@ export default function Header() {
     if (href === "/series")
       return pathname === "/series" || pathname.startsWith("/series/");
     if (href === "/friends")
-      return pathname === "/friends" || pathname.startsWith("/friends/") || pathname === "/amigos";
+      return (
+        pathname === "/friends" ||
+        pathname.startsWith("/friends/") ||
+        pathname === "/amigos"
+      );
     if (href === "/leaderboard")
       return pathname === "/leaderboard" || pathname === "/ranking";
     if (href === "/reviews")

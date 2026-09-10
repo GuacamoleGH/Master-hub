@@ -32,6 +32,9 @@ import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileM
 import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
 import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
+import WatchedCatalogSection, {
+  WatchedCatalogItem,
+} from "@/components/profile/WatchedCatalogSection";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { UserAchievement } from "@/lib/achievements";
 import { useSession } from "next-auth/react";
@@ -58,6 +61,7 @@ export default function ProfilePage() {
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
   const [topCine, setTopCine] = useState<TopFiveItem[]>([]);
+  const [watchedCatalog, setWatchedCatalog] = useState<WatchedCatalogItem[]>([]);
   const [copied, setCopied] = useState(false);
   const toast = useToast();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
@@ -92,9 +96,7 @@ export default function ProfilePage() {
   const handleShare = async () => {
     try {
       const targetUser =
-        profileData.username ||
-        session?.user?.username ||
-        session?.user?.name;
+        profileData.username || session?.user?.username || session?.user?.name;
       if (!targetUser) {
         toast.error("Inicia sesión para compartir tu perfil.");
         return;
@@ -128,6 +130,7 @@ export default function ProfilePage() {
         setProfileData(data.profile);
         setStats(data.stats);
         setTopCine(data.topCine || []);
+        setWatchedCatalog(data.watchedCatalog || []);
       }
 
       if (resAch.ok) {
@@ -381,12 +384,11 @@ export default function ProfilePage() {
 
       {/* Vitrina de Top 5 Cinéfilo (Películas & Series) */}
       <section>
-        <TopFiveCard
-          type="cinema"
-          title="Top 5 Cinéfilo"
-          items={topCine}
-        />
+        <TopFiveCard type="cinema" title="Top 5 Cinéfilo" items={topCine} />
       </section>
+
+      {/* Catálogo Completo de Películas y Series Vistas */}
+      <WatchedCatalogSection type="cinema" items={watchedCatalog} />
 
       {/* 2. Vitrina de Trofeos Cinéfilos - Banner Resumen Destacado */}
       {achievementsData && (
@@ -649,13 +651,15 @@ export default function ProfilePage() {
           avatarUrl: profileData.avatarUrl,
         }}
         stats={{
-          totalMovies: stats.totalWatched,
-          totalSeries: 0,
+          totalMovies: (stats as any).totalMovies ?? stats.totalWatched,
+          totalSeries: (stats as any).totalSeries ?? 0,
           totalHours: 0,
           totalCompletedGames: 0,
+          averageRating: stats.averageRating,
           ballKnowledge: stats.globalBallKnowledge,
           gameKnowledge: null,
         }}
+        topItems={topCine.slice(0, 3)}
         achievements={achievementsData?.achievements || []}
       />
     </div>

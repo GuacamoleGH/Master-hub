@@ -45,7 +45,11 @@ export default function GameHeader() {
   const isActive = (href: string) => {
     if (href === "/games") return pathname === "/games";
     if (href === "/friends")
-      return pathname === "/friends" || pathname.startsWith("/friends/") || pathname === "/amigos";
+      return (
+        pathname === "/friends" ||
+        pathname.startsWith("/friends/") ||
+        pathname === "/amigos"
+      );
     if (href === "/games/reviews")
       return pathname === "/games/reviews" || pathname === "/games/resenas";
     if (href.startsWith("/leaderboard"))
