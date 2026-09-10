@@ -307,11 +307,11 @@ export default function MovieDetailPage() {
             </div>
 
             {/* 3. Botones de acción principales Abajo */}
-            <div className="flex flex-wrap md:flex-nowrap items-center gap-3 sm:gap-3.5 pt-2">
+            <div className="w-full flex flex-wrap md:flex-nowrap items-center gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdatingWatchlist}
-                className={`px-4.5 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
+                className={`flex-1 min-w-[160px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isWatchlist
                     ? "bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold shadow-[0_0_20px_rgba(14,165,233,0.35)]"
                     : "glass-card border border-cine-700 text-cine-200 hover:text-white hover:bg-cine-800"
@@ -325,7 +325,7 @@ export default function MovieDetailPage() {
 
               <button
                 onClick={() => setIsReviewModalOpen(true)}
-                className={`px-4.5 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
+                className={`flex-1 min-w-[155px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold shadow-gold-glow"
@@ -339,14 +339,14 @@ export default function MovieDetailPage() {
                 <button
                   onClick={handleMarkSeenLongAgo}
                   disabled={isUpdatingSeenLongAgo}
-                  className="px-4 sm:px-4.5 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-1.5 sm:gap-2 glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow flex-shrink-0"
+                  className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow"
                   title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
                 >
                   <History className="w-4 h-4 text-amber-400" />
                   <span>Visto hace tiempo</span>
                 </button>
               ) : movie.userMovie?.watchedDate === null ? (
-                <div className="px-4 py-3 rounded-xl text-sm font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl text-sm font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center justify-center gap-1.5 whitespace-nowrap">
                   <History className="w-3.5 h-3.5 text-amber-400" />
                   <span>Visto en el pasado</span>
                 </div>
@@ -357,7 +357,7 @@ export default function MovieDetailPage() {
                   href={imdbUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 sm:px-4.5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 sm:gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group flex-shrink-0"
+                  className="flex-1 min-w-[140px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group"
                   title="Abrir ficha oficial en IMDb"
                 >
                   <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
