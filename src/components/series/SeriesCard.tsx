@@ -142,7 +142,8 @@ export default function SeriesCard({
           {/* Calificación, Ball Knowledge o Badge Visto si está vista */}
           {isWatched && (
             <div className="absolute bottom-2.5 left-2.5">
-              {userSeries?.userRating !== undefined && userSeries.userRating !== null ? (
+              {userSeries?.userRating !== undefined &&
+              userSeries.userRating !== null ? (
                 <div
                   className="flex items-center gap-1 bg-purple-600/90 text-white px-2 py-0.5 rounded-lg text-xs font-bold shadow cursor-help"
                   title={`Tu valoración: ${userSeries.userRating.toFixed(1)} / 10`}
@@ -150,7 +151,8 @@ export default function SeriesCard({
                   <Star className="w-3 h-3 fill-white text-white" />
                   <span>{userSeries.userRating.toFixed(1)}</span>
                 </div>
-              ) : userSeries?.ballKnowledge !== undefined && userSeries.ballKnowledge !== null ? (
+              ) : userSeries?.ballKnowledge !== undefined &&
+                userSeries.ballKnowledge !== null ? (
                 <BallKnowledgeBadge
                   score={userSeries.ballKnowledge}
                   difference={userSeries.difference}
