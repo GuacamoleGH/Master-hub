@@ -42,3 +42,8 @@ dev.db
 scratch/
 
 .vscode/
+
+# secrets & keys
+APIs.md
+apis.md
+
