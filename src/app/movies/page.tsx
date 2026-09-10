@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { calculateLevelAndRank } from "@/lib/ballKnowledge";
+import { calculateLevelAndRank, calculateMovieXp } from "@/lib/ballKnowledge";
 import MovieCard from "@/components/MovieCard";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
 import ExploreMoviesSection from "@/components/movies/ExploreMoviesSection";
@@ -24,29 +24,44 @@ export default async function MoviesHomePage() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
-  // 1. Obtener perfil del usuario o invitado
-  let profile = {
-    id: "guest",
-    displayName: "Invitado",
-    avatarUrl: null as string | null,
-    bio: "Inicia sesión para guardar tus valoraciones y calcular tu Sofa Knowledge.",
-    totalXp: 0,
-    updatedAt: new Date(),
-  };
+  // 1. Obtener usuario y registros para calcular Cinema XP aislado
+  const [user, allWatchedMovies, allWatchedSeries] = userId
+    ? await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.userMovie.findMany({
+          where: { userId, status: "WATCHED" },
+          select: { review: true, ballKnowledge: true },
+        }),
+        prisma.userSeries.findMany({
+          where: { userId, status: "WATCHED" },
+          select: { review: true, ballKnowledge: true },
+        }),
+      ])
+    : [null, [], []];
 
-  if (userId) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (user) {
-      profile = {
-        id: user.id,
-        displayName: user.name || user.username || "Cinéfilo",
-        avatarUrl: user.image,
-        bio: user.bio || "Explorador cinematográfico",
-        totalXp: user.totalXp,
-        updatedAt: user.updatedAt,
-      };
-    }
+  let cinemaXp = 0;
+  for (const um of allWatchedMovies) {
+    const hasReview = Boolean(um.review && um.review.trim().length > 0);
+    cinemaXp += calculateMovieXp(true, hasReview, um.ballKnowledge);
   }
+  for (const us of allWatchedSeries) {
+    const hasReview = Boolean(us.review && us.review.trim().length > 0);
+    cinemaXp += calculateMovieXp(true, hasReview, us.ballKnowledge);
+  }
+
+  const profile = {
+    id: user?.id || "guest",
+    displayName:
+      user?.name || user?.username || (userId ? "Cinéfilo" : "Invitado"),
+    avatarUrl: user?.image || null,
+    bio:
+      user?.bio ||
+      (userId
+        ? "Explorador cinematográfico"
+        : "Inicia sesión para guardar tus valoraciones y calcular tu Sofa Knowledge."),
+    totalXp: cinemaXp,
+    updatedAt: user?.updatedAt || new Date(),
+  };
 
   const levelInfo = calculateLevelAndRank(profile.totalXp);
 

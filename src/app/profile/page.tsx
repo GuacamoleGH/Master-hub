@@ -234,7 +234,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Columna de Botones de Acción */}
-            <div className="flex flex-row sm:flex-col gap-3 sm:gap-3.5 shrink-0 self-start sm:self-center sm:ml-auto">
+            <div className="flex flex-row sm:flex-col gap-3 sm:gap-3.5 shrink-0 self-start sm:self-center sm:ml-auto sm:mr-12 lg:mr-20">
               <button
                 onClick={handleOpenEdit}
                 className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"

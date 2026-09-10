@@ -85,7 +85,7 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Centro: Navegación Principal Perfectamente Centrada con Espacios Equidistantes */}
+        {/* Centro: Navegación Principal Equidistante y Equilibrada */}
         <nav className="hidden lg:flex items-center justify-center gap-1 xl:gap-2 flex-1 px-4">
           {navLinks.map((link) => {
             const Icon = link.icon;
