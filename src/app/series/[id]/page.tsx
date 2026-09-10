@@ -193,13 +193,13 @@ export default function SeriesDetailPage() {
         )}
 
         {/* Contenido de la cabecera */}
-        <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
           {/* Póster Grande */}
-          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[2/3] rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900">
+          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 md:self-stretch rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900 flex flex-col">
             <MoviePoster
               src={series.posterPath}
               alt={series.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full flex-1 object-cover min-h-[280px] sm:min-h-[340px]"
             />
           </div>
 

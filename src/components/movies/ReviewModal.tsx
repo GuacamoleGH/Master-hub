@@ -147,7 +147,14 @@ export default function ReviewModal({
         setPlatform(movie.streamingPlatforms[0]);
       }
     }
-  }, [initialRating, initialReview, initialDate, initialPlatform, isOpen, movie.imdbRating]);
+  }, [
+    initialRating,
+    initialReview,
+    initialDate,
+    initialPlatform,
+    isOpen,
+    movie.imdbRating,
+  ]);
 
   if (!isOpen || !mounted) return null;
 

@@ -199,13 +199,13 @@ export default function GameDetailPage() {
         )}
 
         {/* Contenido del Hero */}
-        <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
           {/* Portada Principal */}
-          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900">
+          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 md:self-stretch rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 flex flex-col">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full flex-1 object-cover min-h-[280px] sm:min-h-[340px]"
             />
           </div>
 
@@ -246,7 +246,7 @@ export default function GameDetailPage() {
             </div>
 
             {/* Metadatos Rápidos */}
-            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-cine-300">
+            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-cine-300">
               {game.released && (
                 <div className="flex items-center gap-1.5 font-medium">
                   <Calendar className="w-4 h-4 text-cine-500" />
@@ -260,6 +260,14 @@ export default function GameDetailPage() {
                   <span>{game.userGame.hoursPlayed}h jugadas</span>
                 </div>
               )}
+
+              {/* Master Hub Score Oficial */}
+              <MasterHubScoreBadge
+                score={game.masterHubScore || null}
+                totalVotes={game.masterHubVotes || 0}
+                distribution={game.masterHubDistribution}
+                themeColor="purple"
+              />
             </div>
 
             {/* Plataformas */}
@@ -294,14 +302,6 @@ export default function GameDetailPage() {
                 ))}
               </div>
             )}
-
-            {/* Master Hub Score Oficial */}
-            <MasterHubScoreBadge
-              score={game.masterHubScore || null}
-              totalVotes={game.masterHubVotes || 0}
-              distribution={game.masterHubDistribution}
-              themeColor="purple"
-            />
 
             {/* Botones de Acción */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
