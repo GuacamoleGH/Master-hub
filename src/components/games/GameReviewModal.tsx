@@ -74,14 +74,12 @@ export default function GameReviewModal({
     if (typeof game.metacritic === "number" && game.metacritic > 0) {
       return Number((game.metacritic / 10).toFixed(1));
     }
-    return 8.5;
+    return 8.0;
   };
 
   const [status, setStatus] = useState(initialStatus);
   const [rating, setRating] = useState<number>(getInitialGameRating);
-  const [hasRating, setHasRating] = useState<boolean>(
-    initialRating !== null && initialRating !== undefined,
-  );
+  const [hasRating, setHasRating] = useState<boolean>(true);
   const [hours, setHours] = useState<string>(
     initialHours ? String(initialHours) : "",
   );
@@ -116,13 +114,13 @@ export default function GameReviewModal({
       const fallbackGameRating =
         typeof game.metacritic === "number" && game.metacritic > 0
           ? Number((game.metacritic / 10).toFixed(1))
-          : 8.5;
+          : 8.0;
       setRating(
         initialRating !== null && initialRating !== undefined
           ? initialRating
           : fallbackGameRating,
       );
-      setHasRating(initialRating !== null && initialRating !== undefined);
+      setHasRating(true);
 
       // Cargar desglose de plataformas
       let loadedList: PlatformProgress[] = [];

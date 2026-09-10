@@ -199,109 +199,111 @@ export default function GameDetailPage() {
         )}
 
         {/* Contenido del Hero */}
-        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-stretch">
           {/* Portada Principal */}
-          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 md:self-stretch rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 flex flex-col">
+          <div className="relative w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[360px]">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
-              className="w-full h-full flex-1 object-cover min-h-[280px] sm:min-h-[340px]"
+              className="w-full h-full object-cover md:absolute md:inset-0"
             />
           </div>
 
           {/* Datos y Ficha */}
-          <div className="flex-1 space-y-5">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                {game.metacritic && (
-                  <a
-                    href={rawgUrl || undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black bg-purple-600 hover:bg-purple-500 text-white border border-purple-400 shadow inline-flex items-center gap-1 transition-colors group cursor-pointer"
-                    title="Ver ficha en RAWG"
-                  >
-                    <span>Metacritic {game.metacritic}</span>
-                    <ExternalLink className="w-2.5 h-2.5 opacity-70 group-hover:opacity-100" />
-                  </a>
-                )}
-                {criticScore && (
-                  <span className="text-xs text-cine-400 font-mono">
-                    (Crítica:{" "}
-                    <strong className="text-cyan-300">{criticScore}/10</strong>)
-                  </span>
+          <div className="flex-1 flex flex-col justify-between min-h-[360px] gap-6">
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  {game.metacritic && (
+                    <a
+                      href={rawgUrl || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black bg-purple-600 hover:bg-purple-500 text-white border border-purple-400 shadow inline-flex items-center gap-1 transition-colors group cursor-pointer"
+                      title="Ver ficha en RAWG"
+                    >
+                      <span>Metacritic {game.metacritic}</span>
+                      <ExternalLink className="w-2.5 h-2.5 opacity-70 group-hover:opacity-100" />
+                    </a>
+                  )}
+                  {criticScore && (
+                    <span className="text-xs text-cine-400 font-mono">
+                      (Crítica:{" "}
+                      <strong className="text-cyan-300">{criticScore}/10</strong>)
+                    </span>
+                  )}
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+                  {game.title}
+                </h1>
+
+                {game.developers && game.developers.length > 0 && (
+                  <p className="text-sm text-purple-300 mt-1 flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-purple-400" />
+                    {game.developers.join(", ")}
+                  </p>
                 )}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                {game.title}
-              </h1>
+              {/* Metadatos Rápidos */}
+              <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-cine-300">
+                {game.released && (
+                  <div className="flex items-center gap-1.5 font-medium">
+                    <Calendar className="w-4 h-4 text-cine-500" />
+                    <span>{game.released}</span>
+                  </div>
+                )}
 
-              {game.developers && game.developers.length > 0 && (
-                <p className="text-sm text-purple-300 mt-1 flex items-center gap-1.5">
-                  <Building className="w-3.5 h-3.5 text-purple-400" />
-                  {game.developers.join(", ")}
-                </p>
-              )}
-            </div>
+                {game.userGame?.hoursPlayed && (
+                  <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold bg-cyan-950/40 px-2.5 py-1 rounded-xl border border-cyan-500/30">
+                    <Clock className="w-4 h-4 text-cyan-400" />
+                    <span>{game.userGame.hoursPlayed}h jugadas</span>
+                  </div>
+                )}
 
-            {/* Metadatos Rápidos */}
-            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-cine-300">
-              {game.released && (
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Calendar className="w-4 h-4 text-cine-500" />
-                  <span>{game.released}</span>
+                {/* Master Hub Score Oficial */}
+                <MasterHubScoreBadge
+                  score={game.masterHubScore || null}
+                  totalVotes={game.masterHubVotes || 0}
+                  distribution={game.masterHubDistribution}
+                  themeColor="purple"
+                />
+              </div>
+
+              {/* Plataformas */}
+              {game.platforms && game.platforms.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-xs font-semibold text-cine-400 block">
+                    Plataformas disponibles:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {game.platforms.map((plat) => (
+                      <span
+                        key={plat}
+                        className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-cine-900 border border-cine-700/80 text-cine-300"
+                      >
+                        {plat}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {game.userGame?.hoursPlayed && (
-                <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold bg-cyan-950/40 px-2.5 py-1 rounded-xl border border-cyan-500/30">
-                  <Clock className="w-4 h-4 text-cyan-400" />
-                  <span>{game.userGame.hoursPlayed}h jugadas</span>
-                </div>
-              )}
-
-              {/* Master Hub Score Oficial */}
-              <MasterHubScoreBadge
-                score={game.masterHubScore || null}
-                totalVotes={game.masterHubVotes || 0}
-                distribution={game.masterHubDistribution}
-                themeColor="purple"
-              />
-            </div>
-
-            {/* Plataformas */}
-            {game.platforms && game.platforms.length > 0 && (
-              <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-cine-400 block">
-                  Plataformas disponibles:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {game.platforms.map((plat) => (
+              {/* Géneros */}
+              {game.genres && game.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {game.genres.map((genre) => (
                     <span
-                      key={plat}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-cine-900 border border-cine-700/80 text-cine-300"
+                      key={genre}
+                      className="px-3 py-1 rounded-lg text-xs font-semibold bg-purple-950/40 border border-purple-500/30 text-purple-300"
                     >
-                      {plat}
+                      {genre}
                     </span>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Géneros */}
-            {game.genres && game.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {game.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-purple-950/40 border border-purple-500/30 text-purple-300"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Botones de Acción */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -324,7 +326,7 @@ export default function GameDetailPage() {
                 onClick={() => setIsReviewOpen(true)}
                 className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
                   isFinished
-                    ? "bg-purple-600 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                    ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)]"
                 }`}
               >
@@ -359,13 +361,10 @@ export default function GameDetailPage() {
                   className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95"
                   title="Abrir ficha oficial en RAWG"
                 >
-                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-white text-black leading-none tracking-tight">
+                  <span className="font-mono font-bold text-xs tracking-tight">
                     RAWG
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm">
-                    Ver en RAWG
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}
             </div>
