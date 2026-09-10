@@ -402,7 +402,8 @@ export default function GameDetailPage() {
                   {game.userGame.userRating?.toFixed(1) ?? "—"}
                 </span>
                 <span className="text-sm text-cine-500 font-mono">
-                  {game.userGame.userRating !== null && game.userGame.userRating !== undefined
+                  {game.userGame.userRating !== null &&
+                  game.userGame.userRating !== undefined
                     ? "/ 10"
                     : "(Sin puntuar)"}
                 </span>
@@ -471,7 +472,9 @@ export default function GameDetailPage() {
 
             {/* Estado y Fecha */}
             <div className="space-y-1">
-              <span className="text-xs text-cine-400 font-medium">Estado & Fecha</span>
+              <span className="text-xs text-cine-400 font-medium">
+                Estado & Fecha
+              </span>
               <div className="pt-1 flex flex-col gap-1">
                 <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 w-fit">
                   {game.userGame.status}

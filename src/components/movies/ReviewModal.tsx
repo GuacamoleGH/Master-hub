@@ -11,6 +11,7 @@ import {
   Sparkles,
   Tv,
   History,
+  Zap,
 } from "lucide-react";
 import MoviePoster from "./MoviePoster";
 import { sounds } from "@/lib/sounds";
@@ -57,10 +58,20 @@ export default function ReviewModal({
   apiEndpoint = "/api/user-movies",
   mediaLabel = "película",
 }: ReviewModalProps) {
+  const getInitialRating = () => {
+    if (initialRating !== null && initialRating !== undefined) {
+      return initialRating;
+    }
+    if (typeof movie.imdbRating === "number" && movie.imdbRating > 0) {
+      return Number(movie.imdbRating.toFixed(1));
+    }
+    return 8.0;
+  };
+
   const [hasRating, setHasRating] = useState<boolean>(
     initialRating !== null && initialRating !== undefined ? true : true,
   );
-  const [rating, setRating] = useState<number>(initialRating ?? 8.0);
+  const [rating, setRating] = useState<number>(getInitialRating);
   const [review, setReview] = useState<string>(initialReview ?? "");
   const [platform, setPlatform] = useState<string>(
     initialPlatform ||
@@ -69,7 +80,11 @@ export default function ReviewModal({
         : "Pirata / Stremio"),
   );
   const [hasWatchedDate, setHasWatchedDate] = useState<boolean>(
-    initialDate !== null && initialDate !== undefined ? true : initialDate === null ? false : true,
+    initialDate !== null && initialDate !== undefined
+      ? true
+      : initialDate === null
+        ? false
+        : true,
   );
   const [watchedDate, setWatchedDate] = useState<string>(
     initialDate
@@ -97,32 +112,42 @@ export default function ReviewModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (initialRating !== undefined) {
-      setHasRating(initialRating !== null);
-      if (initialRating !== null) {
-        setRating(initialRating);
+    if (isOpen) {
+      const fallbackRating =
+        typeof movie.imdbRating === "number" && movie.imdbRating > 0
+          ? Number(movie.imdbRating.toFixed(1))
+          : 8.0;
+
+      if (initialRating !== undefined) {
+        setHasRating(initialRating !== null);
+        if (initialRating !== null) {
+          setRating(initialRating);
+        } else {
+          setRating(fallbackRating);
+        }
+      } else {
+        setHasRating(true);
+        setRating(fallbackRating);
       }
-    } else {
-      setHasRating(true);
-    }
-    if (initialReview) {
-      setReview(initialReview);
-    }
-    if (initialDate !== undefined) {
-      setHasWatchedDate(initialDate !== null);
-      if (initialDate !== null) {
-        setWatchedDate(new Date(initialDate).toISOString().split("T")[0]);
+      if (initialReview) {
+        setReview(initialReview);
+      }
+      if (initialDate !== undefined) {
+        setHasWatchedDate(initialDate !== null);
+        if (initialDate !== null) {
+          setWatchedDate(new Date(initialDate).toISOString().split("T")[0]);
+        }
+      }
+      if (initialPlatform) {
+        setPlatform(initialPlatform);
+      } else if (
+        movie.streamingPlatforms &&
+        movie.streamingPlatforms.length > 0
+      ) {
+        setPlatform(movie.streamingPlatforms[0]);
       }
     }
-    if (initialPlatform) {
-      setPlatform(initialPlatform);
-    } else if (
-      movie.streamingPlatforms &&
-      movie.streamingPlatforms.length > 0
-    ) {
-      setPlatform(movie.streamingPlatforms[0]);
-    }
-  }, [initialRating, initialReview, initialDate, initialPlatform, isOpen]);
+  }, [initialRating, initialReview, initialDate, initialPlatform, isOpen, movie.imdbRating]);
 
   if (!isOpen || !mounted) return null;
 
@@ -183,7 +208,9 @@ export default function ReviewModal({
           userRating: hasRating ? Number(rating.toFixed(1)) : null,
           review: review.trim() || null,
           platform: platform || null,
-          watchedDate: hasWatchedDate ? new Date(watchedDate).toISOString() : null,
+          watchedDate: hasWatchedDate
+            ? new Date(watchedDate).toISOString()
+            : null,
         }),
       });
 
@@ -267,9 +294,10 @@ export default function ReviewModal({
               type="button"
               disabled={isSubmitting}
               onClick={handleQuickSeenLongAgo}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-cine-950 transition-all shrink-0 shadow-sm flex items-center gap-1 active:scale-95"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-cine-950 transition-all shrink-0 shadow-sm flex items-center gap-1.5 active:scale-95"
             >
-              <span>⚡ Guardar rápido</span>
+              <Zap className="w-3.5 h-3.5 fill-cine-950 text-cine-950 shrink-0" />
+              <span>Guardar rápido</span>
             </button>
           </div>
 
@@ -398,7 +426,8 @@ export default function ReviewModal({
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-cine-400" /> Fecha de visionado
+                <Calendar className="w-3.5 h-3.5 text-cine-400" /> Fecha de
+                visionado
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -427,7 +456,10 @@ export default function ReviewModal({
             ) : (
               <div className="p-3 rounded-xl bg-cine-950/40 border border-cine-800/80 text-xs text-cine-400 italic text-center flex items-center justify-center gap-2">
                 <span>📼</span>
-                <span>Se guardará como visto en el pasado (sin fecha fija en el diario).</span>
+                <span>
+                  Se guardará como visto en el pasado (sin fecha fija en el
+                  diario).
+                </span>
               </div>
             )}
           </div>

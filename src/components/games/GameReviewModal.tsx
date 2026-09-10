@@ -12,6 +12,7 @@ import {
   Check,
   Plus,
   History,
+  Zap,
 } from "lucide-react";
 import { ALL_PLATFORMS, PlatformOption } from "@/lib/platforms";
 import { PlatformProgress } from "@/types/game";
@@ -66,8 +67,18 @@ export default function GameReviewModal({
   initialPlatformDetails,
   initialReview,
 }: GameReviewModalProps) {
+  const getInitialGameRating = () => {
+    if (initialRating !== null && initialRating !== undefined) {
+      return initialRating;
+    }
+    if (typeof game.metacritic === "number" && game.metacritic > 0) {
+      return Number((game.metacritic / 10).toFixed(1));
+    }
+    return 8.5;
+  };
+
   const [status, setStatus] = useState(initialStatus);
-  const [rating, setRating] = useState<number>(initialRating ?? 8.5);
+  const [rating, setRating] = useState<number>(getInitialGameRating);
   const [hasRating, setHasRating] = useState<boolean>(
     initialRating !== null && initialRating !== undefined,
   );
@@ -102,7 +113,15 @@ export default function GameReviewModal({
   useEffect(() => {
     if (isOpen) {
       setStatus(initialStatus);
-      setRating(initialRating ?? 8.5);
+      const fallbackGameRating =
+        typeof game.metacritic === "number" && game.metacritic > 0
+          ? Number((game.metacritic / 10).toFixed(1))
+          : 8.5;
+      setRating(
+        initialRating !== null && initialRating !== undefined
+          ? initialRating
+          : fallbackGameRating,
+      );
       setHasRating(initialRating !== null && initialRating !== undefined);
 
       // Cargar desglose de plataformas
@@ -375,9 +394,10 @@ export default function GameReviewModal({
               type="button"
               disabled={isSubmitting}
               onClick={handleQuickPlayedLongAgo}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white transition-all shrink-0 shadow-sm flex items-center gap-1 active:scale-95"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white transition-all shrink-0 shadow-sm flex items-center gap-1.5 active:scale-95"
             >
-              <span>⚡ Guardar rápido</span>
+              <Zap className="w-3.5 h-3.5 fill-white text-white shrink-0" />
+              <span>Guardar rápido</span>
             </button>
           </div>
 

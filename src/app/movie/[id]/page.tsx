@@ -391,7 +391,8 @@ export default function MovieDetailPage() {
                   {movie.userMovie.userRating?.toFixed(1) ?? "—"}
                 </span>
                 <span className="text-sm text-cine-500">
-                  {movie.userMovie.userRating !== null && movie.userMovie.userRating !== undefined
+                  {movie.userMovie.userRating !== null &&
+                  movie.userMovie.userRating !== undefined
                     ? "/ 10"
                     : "(Sin puntuar)"}
                 </span>

@@ -391,7 +391,8 @@ export default function SeriesDetailPage() {
                   {series.userSeries.userRating?.toFixed(1) ?? "—"}
                 </span>
                 <span className="text-sm text-cine-500">
-                  {series.userSeries.userRating !== null && series.userSeries.userRating !== undefined
+                  {series.userSeries.userRating !== null &&
+                  series.userSeries.userRating !== undefined
                     ? "/ 10"
                     : "(Sin puntuar)"}
                 </span>
