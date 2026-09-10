@@ -61,8 +61,11 @@ export default function GamerLevelBar({ totalXp }: GamerLevelBarProps) {
             <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />{" "}
             Experiencia Total
           </div>
-          <div className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight">
-            {totalXp.toLocaleString()}{" "}
+          <div
+            suppressHydrationWarning
+            className="text-xl sm:text-2xl font-black text-white font-mono tracking-tight"
+          >
+            {(totalXp || 0).toLocaleString()}{" "}
             <span className="text-xs font-bold text-purple-400">XP</span>
           </div>
         </div>
