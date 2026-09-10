@@ -83,7 +83,9 @@ export default function TopFiveCard({ type, title, items }: TopFiveCardProps) {
                 className="aspect-[2/3] rounded-2xl border-2 border-dashed border-cine-800/80 bg-cine-950/40 flex flex-col items-center justify-center p-3 text-center gap-2 group transition-all hover:border-cine-700"
               >
                 <div className="w-8 h-8 rounded-full bg-cine-900 flex items-center justify-center text-cine-600 group-hover:text-cine-400 transition-colors">
-                  <span className="text-xs font-mono font-bold">#{idx + 1}</span>
+                  <span className="text-xs font-mono font-bold">
+                    #{idx + 1}
+                  </span>
                 </div>
                 <span className="text-[10px] text-cine-500 font-medium leading-tight">
                   Espacio disponible
@@ -121,10 +123,10 @@ export default function TopFiveCard({ type, title, items }: TopFiveCardProps) {
                   idx === 0
                     ? "border-amber-400/80 text-amber-300"
                     : idx === 1
-                    ? "border-slate-300/80 text-slate-200"
-                    : idx === 2
-                    ? "border-amber-700/80 text-amber-500"
-                    : "border-white/10 text-white"
+                      ? "border-slate-300/80 text-slate-200"
+                      : idx === 2
+                        ? "border-amber-700/80 text-amber-500"
+                        : "border-white/10 text-white"
                 }`}
               >
                 #{idx + 1}

@@ -42,6 +42,9 @@ import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
 import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
+import WatchedCatalogSection, {
+  WatchedCatalogItem,
+} from "@/components/profile/WatchedCatalogSection";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { UserAchievement } from "@/lib/achievements";
 import { GamerStats } from "@/types/game";
@@ -59,6 +62,7 @@ interface ProfileResponse {
     bio: string | null;
   };
   topGames?: TopFiveItem[];
+  gamesCatalog?: WatchedCatalogItem[];
   stats: GamerStats;
 }
 
@@ -402,6 +406,12 @@ export default function GamerProfilePage() {
           items={profileData.topGames || []}
         />
       </section>
+
+      {/* Catálogo Completo de Videojuegos */}
+      <WatchedCatalogSection
+        type="gaming"
+        items={profileData.gamesCatalog || []}
+      />
 
       {/* Vitrina de Trofeos Gamer - Banner Resumen Destacado */}
       {achievementsData && (
@@ -845,9 +855,11 @@ export default function GamerProfilePage() {
           totalHours: stats.totalHours,
           totalCompletedGames: stats.totalCompleted,
           totalPlatinum: stats.totalPlatinum,
+          averageRating: stats.averageRating,
           ballKnowledge: null,
           gameKnowledge: stats.globalGameKnowledge,
         }}
+        topItems={profileData.topGames?.slice(0, 3) || []}
         achievements={achievementsData?.achievements || []}
       />
     </div>

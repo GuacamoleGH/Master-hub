@@ -3,20 +3,24 @@
 import React, { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  Sparkles,
   Download,
   Share2,
   X,
-  Trophy,
   Film,
   Gamepad2,
-  Check,
   Loader2,
-  Camera,
 } from "lucide-react";
-import { UserAchievement } from "@/lib/achievements";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
+
+export interface WrappedTopItem {
+  id: string;
+  title: string;
+  image?: string | null;
+  year?: number | string | null;
+  rating?: number | null;
+  mediaType?: "movie" | "series" | "game";
+}
 
 interface SocialWrappedModalProps {
   isOpen: boolean;
@@ -33,11 +37,43 @@ interface SocialWrappedModalProps {
     totalHours?: number;
     totalCompletedGames?: number;
     totalPlatinum?: number;
+    averageRating?: number | null;
     ballKnowledge?: number | null;
     gameKnowledge?: number | null;
   };
-  achievements?: UserAchievement[];
+  topItems?: WrappedTopItem[];
+  achievements?: any[];
 }
+
+// Cargar imagen a través del proxy local para evitar problemas de CORS y canvas tainting
+const loadProxiedImage = (src: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      if (
+        !src.startsWith("/api/proxy-image") &&
+        (src.startsWith("http://") || src.startsWith("https://"))
+      ) {
+        const proxySrc = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+        const fallback = new Image();
+        fallback.crossOrigin = "anonymous";
+        fallback.onload = () => resolve(fallback);
+        fallback.onerror = reject;
+        fallback.src = proxySrc;
+      } else {
+        reject(new Error(`Failed to load ${src}`));
+      }
+    };
+
+    if (src.startsWith("http://") || src.startsWith("https://")) {
+      img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+    } else {
+      img.src = src;
+    }
+  });
+};
 
 export default function SocialWrappedModal({
   isOpen,
@@ -45,7 +81,7 @@ export default function SocialWrappedModal({
   universe = "CINE",
   user,
   stats,
-  achievements = [],
+  topItems = [],
 }: SocialWrappedModalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const toast = useToast();
@@ -71,17 +107,6 @@ export default function SocialWrappedModal({
     };
   }, [isOpen]);
 
-  const unlockedAchievements = achievements
-    .filter((a) => {
-      if (!a.isUnlocked) return false;
-      if (isGaming) {
-        return a.universe === "GAMING";
-      }
-      return a.universe === "CINE";
-    })
-    .slice(0, 3);
-
-  // Generador Canvas
   const drawCard = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -98,45 +123,45 @@ export default function SocialWrappedModal({
     // 1. Fondo Oscuro Profundo
     const bgGradient = ctx.createLinearGradient(0, 0, W, H);
     if (isGaming) {
-      bgGradient.addColorStop(0, "#060714");
-      bgGradient.addColorStop(0.5, "#0b0e24");
-      bgGradient.addColorStop(1, "#04050d");
+      bgGradient.addColorStop(0, "#050612");
+      bgGradient.addColorStop(0.5, "#0d1026");
+      bgGradient.addColorStop(1, "#03040a");
     } else {
       bgGradient.addColorStop(0, "#08090d");
-      bgGradient.addColorStop(0.5, "#0e111a");
-      bgGradient.addColorStop(1, "#06070a");
+      bgGradient.addColorStop(0.5, "#121522");
+      bgGradient.addColorStop(1, "#050609");
     }
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, W, H);
 
-    // 2. Luces ambientales y destellos radiales
-    const glow1 = ctx.createRadialGradient(900, 200, 50, 900, 200, 650);
+    // 2. Luces radiales atmosféricas
+    const glow1 = ctx.createRadialGradient(880, 220, 50, 880, 220, 700);
     if (isGaming) {
-      glow1.addColorStop(0, "rgba(168, 85, 247, 0.35)");
+      glow1.addColorStop(0, "rgba(168, 85, 247, 0.4)");
       glow1.addColorStop(1, "rgba(168, 85, 247, 0)");
     } else {
-      glow1.addColorStop(0, "rgba(245, 158, 11, 0.35)");
+      glow1.addColorStop(0, "rgba(245, 158, 11, 0.4)");
       glow1.addColorStop(1, "rgba(245, 158, 11, 0)");
     }
     ctx.fillStyle = glow1;
     ctx.fillRect(0, 0, W, H);
 
-    const glow2 = ctx.createRadialGradient(200, 1600, 50, 200, 1600, 750);
+    const glow2 = ctx.createRadialGradient(200, 1600, 50, 200, 1600, 800);
     if (isGaming) {
-      glow2.addColorStop(0, "rgba(6, 182, 212, 0.3)");
+      glow2.addColorStop(0, "rgba(6, 182, 212, 0.35)");
       glow2.addColorStop(1, "rgba(6, 182, 212, 0)");
     } else {
-      glow2.addColorStop(0, "rgba(217, 119, 6, 0.25)");
+      glow2.addColorStop(0, "rgba(217, 119, 6, 0.3)");
       glow2.addColorStop(1, "rgba(217, 119, 6, 0)");
     }
     ctx.fillStyle = glow2;
     ctx.fillRect(0, 0, W, H);
 
-    // Borde exterior estilizado
+    // Marco perimetral
     ctx.strokeStyle = isGaming
-      ? "rgba(168, 85, 247, 0.25)"
-      : "rgba(245, 158, 11, 0.25)";
-    ctx.lineWidth = 12;
+      ? "rgba(168, 85, 247, 0.3)"
+      : "rgba(245, 158, 11, 0.3)";
+    ctx.lineWidth = 10;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
       ctx.roundRect(40, 40, W - 80, H - 80, 48);
@@ -146,38 +171,38 @@ export default function SocialWrappedModal({
     }
 
     // 3. Encabezado MasterHub
-    ctx.fillStyle = isGaming ? "#a855f7" : "#f59e0b";
-    ctx.font = "bold 32px monospace";
+    ctx.fillStyle = isGaming ? "#c084fc" : "#fbbf24";
+    ctx.font = "bold 34px monospace";
     ctx.textAlign = "left";
     ctx.fillText(
       isGaming ? "MASTERHUB • GAMER WRAPPED" : "MASTERHUB • CINEPHILE WRAPPED",
       100,
-      140,
+      135,
     );
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.font = "24px sans-serif";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+    ctx.font = "26px sans-serif";
     ctx.fillText(
       isGaming
         ? "RESUMEN DE AVENTURAS & PLATINOS"
         : "HISTORIAL DEL SÉPTIMO ARTE & SERIES",
       100,
-      180,
+      175,
     );
 
-    // Fecha / Año
+    // Año actual
     ctx.textAlign = "right";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    ctx.font = "bold 28px monospace";
-    ctx.fillText(new Date().getFullYear().toString(), W - 100, 140);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "bold 34px monospace";
+    ctx.fillText(new Date().getFullYear().toString(), W - 100, 135);
 
     // 4. Tarjeta del Usuario
-    const cardY = 240;
-    const cardH = 260;
-    ctx.fillStyle = "rgba(17, 24, 39, 0.8)";
+    const cardY = 225;
+    const cardH = 240;
+    ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
     ctx.strokeStyle = isGaming
-      ? "rgba(168, 85, 247, 0.4)"
-      : "rgba(245, 158, 11, 0.4)";
+      ? "rgba(168, 85, 247, 0.45)"
+      : "rgba(245, 158, 11, 0.45)";
     ctx.lineWidth = 3;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
@@ -186,22 +211,15 @@ export default function SocialWrappedModal({
       ctx.stroke();
     }
 
-    // Avatar o Monograma
-    const avatarSize = 140;
-    const avatarX = 150;
-    const avatarY = cardY + 60;
+    // Avatar del Usuario
+    const avatarSize = 150;
+    const avatarX = 145;
+    const avatarY = cardY + (cardH - avatarSize) / 2;
 
     let avatarDrawn = false;
     if (user.avatarUrl) {
       try {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = user.avatarUrl!;
-        });
-
+        const avatarImg = await loadProxiedImage(user.avatarUrl);
         ctx.save();
         ctx.beginPath();
         ctx.arc(
@@ -212,14 +230,30 @@ export default function SocialWrappedModal({
           Math.PI * 2,
         );
         ctx.clip();
-        ctx.drawImage(img, avatarX, avatarY, avatarSize, avatarSize);
+        ctx.drawImage(avatarImg, avatarX, avatarY, avatarSize, avatarSize);
         ctx.restore();
+
+        // Borde circular brillante alrededor del avatar
+        ctx.beginPath();
+        ctx.arc(
+          avatarX + avatarSize / 2,
+          avatarY + avatarSize / 2,
+          avatarSize / 2 + 3,
+          0,
+          Math.PI * 2,
+        );
+        ctx.strokeStyle = isGaming ? "#c084fc" : "#f59e0b";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
         avatarDrawn = true;
-      } catch {}
+      } catch (err) {
+        console.warn("Could not load user avatar for canvas:", err);
+      }
     }
 
     if (!avatarDrawn) {
-      // Monograma
+      // Fallback Monograma degradado
       const grad = ctx.createLinearGradient(
         avatarX,
         avatarY,
@@ -245,33 +279,46 @@ export default function SocialWrappedModal({
       ctx.fill();
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = "black 54px sans-serif";
+      ctx.font = "black 64px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const initial = (user.displayName ||
-        (isGaming ? "G" : "C"))[0].toUpperCase();
+      const initial = (user.displayName || (isGaming ? "G" : "C"))[0].toUpperCase();
       ctx.fillText(initial, avatarX + avatarSize / 2, avatarY + avatarSize / 2);
     }
 
-    // Datos de texto del usuario
+    // Textos del usuario
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 48px sans-serif";
-    ctx.fillText(user.displayName, avatarX + avatarSize + 40, avatarY + 65);
+    ctx.font = "bold 50px sans-serif";
+
+    // Truncar nombre si es muy largo
+    let displayName = user.displayName;
+    if (displayName.length > 20) {
+      displayName = displayName.substring(0, 19) + "…";
+    }
+    ctx.fillText(displayName, avatarX + avatarSize + 40, avatarY + 70);
 
     ctx.fillStyle = isGaming ? "#c084fc" : "#fbbf24";
-    ctx.font = "28px monospace";
+    ctx.font = "bold 28px monospace";
     ctx.fillText(
       user.username ? `@${user.username}` : isGaming ? "@gamer" : "@cinefilo",
       avatarX + avatarSize + 40,
-      avatarY + 115,
+      avatarY + 120,
     );
 
-    // 5. SECCIÓN DE ESTADÍSTICAS (4 CAJAS GIGANTES)
-    const statsY = 550;
+    // 5. SECCIÓN DE ESTADÍSTICAS (4 CAJAS COMPACTAS Y EQUILIBRADAS)
+    // Se corrigen los espacios excesivos y se aumentan los números a 88px
+    const statsY = 495;
     const boxW = (W - 240) / 2;
-    const boxH = 240;
+    const boxH = 260;
+    const gapX = 40;
+    const gapY = 25;
+
+    const avgRatingFormatted =
+      stats.averageRating !== null && stats.averageRating !== undefined
+        ? `${stats.averageRating.toFixed(1)} ★`
+        : "—";
 
     if (isGaming) {
       // Caja 1: Videojuegos
@@ -283,54 +330,50 @@ export default function SocialWrappedModal({
         boxH,
         "VIDEOJUEGOS",
         (stats.totalCompletedGames || 0).toString(),
-        "títulos completados",
+        "títulos terminados",
         "#a855f7",
-        "rgba(168, 85, 247, 0.15)",
       );
 
       // Caja 2: Horas Gamer
       drawStatBox(
         ctx,
-        100 + boxW + 40,
+        100 + boxW + gapX,
         statsY,
         boxW,
         boxH,
         "HORAS EN PANTALLA",
         `${Math.round(stats.totalHours || 0)}h`,
-        "tiempo de juego total",
+        "tiempo acumulado",
         "#06b6d4",
-        "rgba(6, 182, 212, 0.15)",
       );
 
-      // Caja 3: Trofeos Platino
+      // Caja 3: Game Knowledge
       drawStatBox(
         ctx,
         100,
-        statsY + boxH + 35,
-        boxW,
-        boxH,
-        "TROFEOS PLATINO",
-        (stats.totalPlatinum || 0).toString(),
-        "títulos dominados al 100%",
-        "#eab308",
-        "rgba(234, 179, 8, 0.15)",
-      );
-
-      // Caja 4: Game Knowledge
-      drawStatBox(
-        ctx,
-        100 + boxW + 40,
-        statsY + boxH + 35,
+        statsY + boxH + gapY,
         boxW,
         boxH,
         "GAME KNOWLEDGE",
         stats.gameKnowledge ? `${stats.gameKnowledge}%` : "—",
         "precisión con Metacritic",
         "#38bdf8",
-        "rgba(56, 189, 248, 0.15)",
+      );
+
+      // Caja 4: Nota Media (se quita el rango cultural)
+      drawStatBox(
+        ctx,
+        100 + boxW + gapX,
+        statsY + boxH + gapY,
+        boxW,
+        boxH,
+        "TU NOTA MEDIA",
+        avgRatingFormatted,
+        "promedio de veredictos",
+        "#fbbf24",
       );
     } else {
-      // Caja 1: Cine Visto
+      // Caja 1: Películas
       drawStatBox(
         ctx,
         100,
@@ -341,145 +384,243 @@ export default function SocialWrappedModal({
         (stats.totalMovies || 0).toString(),
         "vistas en catálogo",
         "#f59e0b",
-        "rgba(245, 158, 11, 0.15)",
       );
 
-      // Caja 2: Series en Seguimiento
+      // Caja 2: Series
       drawStatBox(
         ctx,
-        100 + boxW + 40,
+        100 + boxW + gapX,
         statsY,
         boxW,
         boxH,
         "SERIES",
         (stats.totalSeries || 0).toString(),
         "en seguimiento o vistas",
-        "#eab308",
-        "rgba(234, 179, 8, 0.15)",
+        "#fbbf24",
       );
 
       // Caja 3: Sofa Knowledge
       drawStatBox(
         ctx,
         100,
-        statsY + boxH + 35,
+        statsY + boxH + gapY,
         boxW,
         boxH,
         "SOFA KNOWLEDGE",
         stats.ballKnowledge ? `${stats.ballKnowledge}%` : "—",
         "precisión frente a IMDb",
         "#10b981",
-        "rgba(16, 185, 129, 0.15)",
       );
 
-      // Caja 4: Rango Cinéfilo
-      const rankName =
-        stats.ballKnowledge && stats.ballKnowledge >= 75
-          ? "Cátedra de Oro"
-          : stats.ballKnowledge && stats.ballKnowledge >= 50
-            ? "Crítico Experto"
-            : "Cinéfilo Activo";
+      // Caja 4: Nota Media (se quita el rango cultural)
       drawStatBox(
         ctx,
-        100 + boxW + 40,
-        statsY + boxH + 35,
+        100 + boxW + gapX,
+        statsY + boxH + gapY,
         boxW,
         boxH,
-        "RANGO CULTURAL",
-        rankName,
-        "índice de criterio",
+        "TU NOTA MEDIA",
+        avgRatingFormatted,
+        "promedio de valoración",
         "#f59e0b",
-        "rgba(245, 158, 11, 0.15)",
       );
     }
 
-    // 6. VITRINA DE MEDALLAS / TOP LOGROS
-    const trophySectionY = 1130;
+    // 6. SECCIÓN TOP 3 DEL PERFIL (En vez de los logros)
+    const topSectionY = statsY + boxH * 2 + gapY + 35;
+    const topSectionH = 610;
+
     ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
     ctx.strokeStyle = isGaming
-      ? "rgba(168, 85, 247, 0.4)"
-      : "rgba(245, 158, 11, 0.4)";
+      ? "rgba(168, 85, 247, 0.45)"
+      : "rgba(245, 158, 11, 0.45)";
     ctx.lineWidth = 3;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
-      ctx.roundRect(100, trophySectionY, W - 200, 480, 36);
+      ctx.roundRect(100, topSectionY, W - 200, topSectionH, 36);
       ctx.fill();
       ctx.stroke();
     }
 
+    // Cabecera Top 3
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 38px sans-serif";
+    ctx.font = "bold 40px sans-serif";
     ctx.fillText(
-      isGaming ? "🏆 Vitrina Gamer Insignia" : "🏆 Vitrina Cinéfila Insignia",
-      150,
-      trophySectionY + 80,
+      isGaming ? "👑 TOP 3 VIDEOJUEGOS PREDILECTOS" : "👑 TOP 3 CINÉFILO PREDILECTO",
+      140,
+      topSectionY + 70,
     );
 
-    ctx.fillStyle = "#9ca3af";
+    ctx.fillStyle = "rgba(156, 163, 175, 0.9)";
     ctx.font = "24px sans-serif";
     ctx.fillText(
       isGaming
-        ? "Mayores trofeos y hazañas alcanzadas en videojuegos"
-        : "Mayores hazañas culturales alcanzadas en el séptimo arte",
-      150,
-      trophySectionY + 120,
+        ? "Las obras maestras e insignia de tu biblioteca gamer"
+        : "Las 3 obras cumbres e insignia de tu colección",
+      140,
+      topSectionY + 110,
     );
 
-    // Dibujar hasta 3 medallas
-    if (unlockedAchievements.length === 0) {
-      ctx.fillStyle = "#6b7280";
-      ctx.font = "italic 28px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(
-        isGaming
-          ? "Sigue jugando y desbloqueando trofeos para tu vitrina."
-          : "Continúa explorando catálogo para desbloquear medallas.",
-        W / 2,
-        trophySectionY + 280,
-      );
-    } else {
-      unlockedAchievements.forEach((ach, idx) => {
-        const itemY = trophySectionY + 160 + idx * 95;
+    // Dibujar 3 puestos del Top 3
+    const topThree = topItems.slice(0, 3);
+    const slots = [
+      topThree[0] || null,
+      topThree[1] || null,
+      topThree[2] || null,
+    ];
 
-        // Círculo de medalla
-        ctx.fillStyle =
-          ach.rarity === "DIAMOND"
-            ? "#06b6d4"
-            : ach.rarity === "GOLD"
-              ? "#eab308"
-              : ach.rarity === "SILVER"
-                ? "#cbd5e1"
-                : "#d97706";
+    const slotH = 125;
+    const slotGap = 20;
+    const slotStartY = topSectionY + 145;
+
+    for (let i = 0; i < 3; i++) {
+      const item = slots[i];
+      const itemY = slotStartY + i * (slotH + slotGap);
+      const itemW = W - 280;
+      const itemX = 140;
+
+      // Fondo del slot
+      ctx.fillStyle = item
+        ? "rgba(15, 23, 42, 0.7)"
+        : "rgba(15, 23, 42, 0.3)";
+      ctx.strokeStyle =
+        i === 0
+          ? "rgba(234, 179, 8, 0.5)"
+          : i === 1
+            ? "rgba(203, 213, 225, 0.4)"
+            : "rgba(217, 119, 6, 0.4)";
+      ctx.lineWidth = 2;
+
+      if (typeof ctx.roundRect === "function") {
         ctx.beginPath();
-        ctx.arc(180, itemY + 25, 24, 0, Math.PI * 2);
+        ctx.roundRect(itemX, itemY, itemW, slotH, 20);
         ctx.fill();
+        ctx.stroke();
+      }
 
+      // Medalla #1, #2, #3
+      const medalColors = ["#eab308", "#cbd5e1", "#d97706"];
+      const medalBg = medalColors[i];
+      const medalX = itemX + 22;
+      const medalY = itemY + (slotH - 56) / 2;
+
+      if (typeof ctx.roundRect === "function") {
+        ctx.fillStyle = medalBg;
+        ctx.beginPath();
+        ctx.roundRect(medalX, medalY, 56, 56, 14);
+        ctx.fill();
+      }
+      ctx.fillStyle = i === 1 ? "#090a10" : "#ffffff";
+      ctx.font = "black 28px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`#${i + 1}`, medalX + 28, medalY + 29);
+
+      ctx.textBaseline = "alphabetic";
+
+      if (!item) {
+        // Espacio disponible
         ctx.textAlign = "left";
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 28px sans-serif";
-        ctx.fillText(ach.title, 230, itemY + 24);
+        ctx.fillStyle = "#6b7280";
+        ctx.font = "italic 26px sans-serif";
+        ctx.fillText("Espacio disponible en tu Top 3", medalX + 80, itemY + slotH / 2 + 8);
+        continue;
+      }
 
-        ctx.fillStyle = "#9ca3af";
-        ctx.font = "20px sans-serif";
-        ctx.fillText(ach.description, 230, itemY + 52);
+      // Poster del título
+      const posterW = 75;
+      const posterH = 100;
+      const posterX = medalX + 75;
+      const posterY = itemY + (slotH - posterH) / 2;
 
-        // Badge de XP
-        ctx.textAlign = "right";
-        ctx.fillStyle = isGaming ? "#a855f7" : "#f59e0b";
-        ctx.font = "bold 24px monospace";
-        ctx.fillText(`+${ach.xp} XP`, W - 150, itemY + 35);
-      });
+      let posterDrawn = false;
+      if (item.image) {
+        try {
+          const posterImg = await loadProxiedImage(item.image);
+          ctx.save();
+          if (typeof ctx.roundRect === "function") {
+            ctx.beginPath();
+            ctx.roundRect(posterX, posterY, posterW, posterH, 12);
+            ctx.clip();
+          }
+          ctx.drawImage(posterImg, posterX, posterY, posterW, posterH);
+          ctx.restore();
+          posterDrawn = true;
+        } catch {}
+      }
+
+      if (!posterDrawn) {
+        ctx.fillStyle = "rgba(30, 41, 59, 0.8)";
+        if (typeof ctx.roundRect === "function") {
+          ctx.beginPath();
+          ctx.roundRect(posterX, posterY, posterW, posterH, 12);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "bold 20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("MH", posterX + posterW / 2, posterY + posterH / 2 + 7);
+      }
+
+      // Título y detalles
+      const textX = posterX + posterW + 25;
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 32px sans-serif";
+
+      let titleStr = item.title;
+      if (titleStr.length > 25) {
+        titleStr = titleStr.substring(0, 24) + "…";
+      }
+      ctx.fillText(titleStr, textX, itemY + 54);
+
+      // Subtítulo (Año · Tipo)
+      const typeLabel =
+        item.mediaType === "series"
+          ? "Serie TV"
+          : item.mediaType === "game"
+            ? "Videojuego"
+            : "Película";
+      const yearStr = item.year ? `${item.year} · ` : "";
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "24px monospace";
+      ctx.fillText(`${yearStr}${typeLabel}`, textX, itemY + 95);
+
+      // Badge de Calificación a la derecha
+      if (item.rating !== null && item.rating !== undefined) {
+        const ratingBoxW = 120;
+        const ratingBoxH = 50;
+        const ratingBoxX = itemX + itemW - ratingBoxW - 25;
+        const ratingBoxY = itemY + (slotH - ratingBoxH) / 2;
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+        ctx.lineWidth = 2;
+        if (typeof ctx.roundRect === "function") {
+          ctx.beginPath();
+          ctx.roundRect(ratingBoxX, ratingBoxY, ratingBoxW, ratingBoxH, 14);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "black 28px monospace";
+        ctx.fillText(`★ ${item.rating.toFixed(1)}`, ratingBoxX + ratingBoxW / 2, ratingBoxY + ratingBoxH / 2);
+        ctx.textBaseline = "alphabetic";
+      }
     }
 
     // 7. Pie de Tarjeta
-    const footerY = 1720;
+    const footerY = 1755;
     ctx.textAlign = "center";
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 32px sans-serif";
     ctx.fillText(
       isGaming
-        ? "MasterHub Gaming • Conectado con Metacritic & RAWG"
+        ? "MasterHub Gaming • Conectado con RAWG & Metacritic"
         : "MasterHub Cinephile • Pasión por el Séptimo Arte",
       W / 2,
       footerY,
@@ -494,10 +635,10 @@ export default function SocialWrappedModal({
     );
 
     ctx.fillStyle = isGaming
-      ? "rgba(168, 85, 247, 0.8)"
-      : "rgba(245, 158, 11, 0.8)";
-    ctx.font = "20px sans-serif";
-    ctx.fillText("Hecho con pasión por Guacamole", W / 2, footerY + 90);
+      ? "rgba(168, 85, 247, 0.9)"
+      : "rgba(245, 158, 11, 0.9)";
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText("Hecho con pasión por Guacamole", W / 2, footerY + 85);
 
     const generated = canvas.toDataURL("image/png");
     setDataUrl(generated);
@@ -514,10 +655,9 @@ export default function SocialWrappedModal({
     value: string,
     sub: string,
     accentColor: string,
-    accentBg: string,
   ) => {
-    ctx.fillStyle = "rgba(17, 24, 39, 0.7)";
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.fillStyle = "rgba(17, 24, 39, 0.8)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     ctx.lineWidth = 2;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
@@ -526,18 +666,21 @@ export default function SocialWrappedModal({
       ctx.stroke();
     }
 
+    // Etiqueta superior
     ctx.fillStyle = accentColor;
-    ctx.font = "bold 22px monospace";
+    ctx.font = "bold 26px monospace";
     ctx.textAlign = "left";
-    ctx.fillText(label, x + 35, y + 55);
+    ctx.fillText(label, x + 35, y + 52);
 
+    // Número / Valor Principal (Mucho más grande y visible: 88px)
     ctx.fillStyle = "#ffffff";
-    ctx.font = "black 62px monospace";
-    ctx.fillText(value, x + 35, y + 140);
+    ctx.font = "black 88px sans-serif";
+    ctx.fillText(value, x + 35, y + 155);
 
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "20px sans-serif";
-    ctx.fillText(sub, x + 35, y + 190);
+    // Subtítulo informativo
+    ctx.fillStyle = "rgba(156, 163, 175, 0.9)";
+    ctx.font = "24px sans-serif";
+    ctx.fillText(sub, x + 35, y + 215);
   };
 
   useEffect(() => {
@@ -546,7 +689,7 @@ export default function SocialWrappedModal({
         drawCard();
       }, 100);
     }
-  }, [isOpen, universe]);
+  }, [isOpen, universe, topItems]);
 
   const handleDownload = () => {
     if (!dataUrl) return;
@@ -591,7 +734,6 @@ export default function SocialWrappedModal({
       }
     }
 
-    // Fallback: copiar enlace
     if (navigator.clipboard) {
       const url = `${window.location.origin}/u/${user.username || ""}`;
       navigator.clipboard.writeText(url);
@@ -661,7 +803,7 @@ export default function SocialWrappedModal({
                 }`}
               />
               <span className="text-sm font-medium">
-                Renderizando tu tarjeta en alta resolución...
+                Generando tu tarjeta con Top 3 y telemetría...
               </span>
             </div>
           ) : dataUrl ? (

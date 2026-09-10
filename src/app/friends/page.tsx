@@ -53,8 +53,12 @@ export default function FriendsPage() {
   const [friends, setFriends] = useState<FriendUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "cinema" | "gaming">("all");
-  const [sortBy, setSortBy] = useState<"recent" | "cine" | "gaming" | "hours">("recent");
+  const [activeFilter, setActiveFilter] = useState<"all" | "cinema" | "gaming">(
+    "all",
+  );
+  const [sortBy, setSortBy] = useState<"recent" | "cine" | "gaming" | "hours">(
+    "recent",
+  );
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -281,7 +285,9 @@ export default function FriendsPage() {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-700 to-indigo-900 flex items-center justify-center font-black text-white text-lg">
-                          {(friend.name || friend.username || "U")[0].toUpperCase()}
+                          {(friend.name ||
+                            friend.username ||
+                            "U")[0].toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -342,7 +348,9 @@ export default function FriendsPage() {
                       <div className="flex items-center justify-between text-[10px] text-cine-400 font-mono pt-1">
                         <span>Nota Media</span>
                         <span className="text-white font-bold">
-                          {friend.cinema.avgRating ? `${friend.cinema.avgRating} ★` : "—"}
+                          {friend.cinema.avgRating
+                            ? `${friend.cinema.avgRating} ★`
+                            : "—"}
                         </span>
                       </div>
                     </div>

@@ -23,6 +23,7 @@ export async function GET() {
           bio: "Inicia sesión para guardar tu progreso de videojuegos y subir de nivel.",
         },
         topGames: [],
+        gamesCatalog: [],
         stats: {
           totalHours: 0,
           totalCompleted: 0,
@@ -354,6 +355,25 @@ export async function GET() {
         mediaType: "game" as const,
       }));
 
+    const gamesCatalog = userGames
+      .map((ug) => ({
+        id: ug.id,
+        title: ug.game.title,
+        posterPath: ug.game.backgroundImage,
+        year: ug.game.released ? ug.game.released.split("-")[0] : null,
+        userRating: ug.userRating,
+        metacritic: ug.game.metacritic,
+        gameKnowledge: ug.gameKnowledge,
+        hoursPlayed: ug.hoursPlayed,
+        status: ug.status,
+        platform: ug.platform,
+        review: ug.review,
+        isFavorite: Boolean(ug.isFavorite),
+        link: `/games/${ug.game.rawgId}`,
+        mediaType: "game" as const,
+      }))
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+
     return NextResponse.json({
       profile: {
         id: user?.id || "gamer-default",
@@ -363,6 +383,7 @@ export async function GET() {
         bio: user?.bio || null,
       },
       topGames,
+      gamesCatalog,
       stats,
     });
   } catch (error) {
