@@ -154,10 +154,12 @@ export default function ProfilePage() {
   if (!stats) return null;
 
   return (
-    <div className="space-y-12 pb-20">
-      {/* 1. Cabecera del Perfil */}
-      <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-cine-800 bg-gradient-to-r from-cine-900 via-cine-950 to-cine-900 shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+    <div className="space-y-10 pb-16 animate-fade-in">
+      {/* 1. Cabecera del Perfil Cinéfilo */}
+      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar con botón de cambio */}
             <div className="relative group/avatar w-24 h-24 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
@@ -196,41 +198,24 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            {/* Datos Personales */}
+            {/* Bloque de Textos Tipográfico */}
             <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
-              {stats?.rankTitle && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
-                    Perfil Cinéfilo
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    {stats.rankTitle}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
+                  Perfil Cinéfilo
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  {stats.rankTitle}
+                </span>
+              </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
                 {profileData.displayName}
               </h1>
 
               <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed pt-0.5">
                 {profileData.bio || "Explorador y crítico del séptimo arte."}
               </p>
-
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-cine-400">
-                <span className="font-semibold text-white">
-                  {stats?.totalWatched ?? 0}
-                </span>{" "}
-                películas vistas ·{" "}
-                <span className="font-semibold text-white">
-                  {stats?.totalReviews ?? 0}
-                </span>{" "}
-                reseñas escritas ·{" "}
-                <span className="font-semibold text-white">
-                  {stats?.totalWatchlist ?? 0}
-                </span>{" "}
-                en Watchlist
-              </div>
             </div>
 
             {/* Columna de Botones de Acción */}
@@ -271,40 +256,76 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Sello Gigante de Sofa Knowledge Global */}
-          <div className="glass-card p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-cine-950/80 flex flex-col items-center text-center gap-1 shadow-gold-glow w-full lg:w-auto shrink-0">
-            <span className="text-[11px] uppercase font-bold tracking-widest text-amber-400 flex items-center gap-1">
-              🛋️ SOFA KNOWLEDGE SCORE
-            </span>
-            <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
-              {stats.globalBallKnowledge !== null
-                ? `${stats.globalBallKnowledge}%`
-                : "—"}
-            </div>
-            <p className="text-[11px] text-cine-400 max-w-[200px] leading-tight">
-              {stats.globalBallKnowledge !== null
-                ? `Tu criterio coincide un ${stats.globalBallKnowledge}% con la valoración media de IMDb.`
-                : "Puntúa tus primeras películas para calcular tu índice."}
-            </p>
+          {/* Barra de Nivel Cinéfilo */}
+          <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
+            <CinephileLevelBar totalXp={stats.totalXp} variant="cinema" />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 2. Mi Carrera Cinematográfica (Niveles y Gamificación) */}
-      <CinephileLevelBar
-        level={stats.level}
-        totalXp={stats.totalXp}
-        rankTitle={stats.rankTitle}
-        rankIcon={stats.rankIcon}
-        rankColor={stats.rankColor}
-        xpProgressPercent={stats.xpProgressPercent}
-        currentLevelBaseXp={stats.currentLevelBaseXp}
-        nextLevelXp={stats.nextLevelXp}
-      />
+      {/* Highlights Rápidos */}
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {/* Películas Vistas */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Film className="w-4 h-4 text-amber-400" /> Películas Vistas
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.totalWatched}
+            <span className="text-xs font-normal text-cine-400"> títulos</span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            {stats.totalReviews} reseñas escritas
+          </div>
+        </div>
 
-      {/* 2.5 Vitrina de Trofeos Cinéfilos - Banner Resumen Destacado */}
+        {/* En Watchlist */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Trophy className="w-4 h-4 text-amber-400" /> En Watchlist
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.totalWatchlist}
+            <span className="text-xs font-normal text-cine-400"> pendientes</span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Por ver en streaming / cine
+          </div>
+        </div>
+
+        {/* Global Sofa Knowledge */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Brain className="w-4 h-4 text-amber-400" /> Sofa Knowledge
+          </div>
+          <div className="text-3xl font-black text-amber-400 font-mono">
+            {stats.globalBallKnowledge !== null
+              ? `${stats.globalBallKnowledge}%`
+              : "—"}
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Frente al consenso de IMDb
+          </div>
+        </div>
+
+        {/* Tu Nota Media */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Tu Nota Media
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.averageRating || "—"}
+            <span className="text-xs font-normal text-cine-400"> / 10</span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Género top: <strong className="text-amber-400">{stats.topGenre || "—"}</strong>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Vitrina de Trofeos Cinéfilos - Banner Resumen Destacado */}
       {achievementsData && (
-        <section className="glass-panel p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-950 to-cine-900 shadow-xl relative overflow-hidden">
+        <section className="glass-panel p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-xl relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
@@ -375,139 +396,7 @@ export default function ProfilePage() {
         </section>
       )}
 
-      {/* 3. Estadísticas Divertidas Automáticas */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <h2 className="text-xl font-bold text-white tracking-wide">
-            Highlights Cinéfilos
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🎬
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Volumen de visionados
-              </div>
-              <div className="text-sm font-bold text-white">
-                Has visto{" "}
-                <span className="text-amber-400 font-mono">
-                  {stats.totalWatched}
-                </span>{" "}
-                películas
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              ⭐
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Criterio cuantitativo
-              </div>
-              <div className="text-sm font-bold text-white">
-                Tu nota media es{" "}
-                <span className="text-amber-400 font-mono">
-                  {stats.averageRating ? `${stats.averageRating} / 10` : "—"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🛋️
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Precisión comunitaria
-              </div>
-              <div className="text-sm font-bold text-white">
-                Sofa Knowledge global:{" "}
-                <span className="text-emerald-400 font-mono">
-                  {stats.globalBallKnowledge !== null
-                    ? `${stats.globalBallKnowledge}%`
-                    : "—"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🔥
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Tu género predilecto
-              </div>
-              <div className="text-sm font-bold text-white">
-                {stats.topGenre ? stats.topGenre : "Aún por definir"}
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              💀
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Tu peor valoración
-              </div>
-              <div className="text-sm font-bold text-white">
-                {stats.lowestRatedMovie ? (
-                  <>
-                    <span className="text-red-400 font-mono">
-                      {stats.lowestRatedMovie.userRating.toFixed(1)}/10
-                    </span>{" "}
-                    en{" "}
-                    <span className="text-cine-300 italic">
-                      {stats.lowestRatedMovie.title}
-                    </span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🧠
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Mayor coincidencia
-              </div>
-              <div className="text-sm font-bold text-white truncate">
-                {stats.biggestW ? (
-                  <>
-                    <span className="text-purple-300 font-mono">
-                      {stats.biggestW.ballKnowledge}%
-                    </span>{" "}
-                    en{" "}
-                    <span className="text-cine-300 italic">
-                      {stats.biggestW.title}
-                    </span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Rankings Personales: Biggest W vs Biggest L */}
+      {/* 3. Rankings Personales: Biggest W vs Biggest L */}
       {(stats.biggestW || stats.biggestL) && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
