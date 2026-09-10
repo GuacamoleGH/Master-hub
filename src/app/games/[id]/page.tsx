@@ -201,7 +201,7 @@ export default function GameDetailPage() {
         {/* Contenido del Hero */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-stretch">
           {/* Portada Principal */}
-          <div className="relative w-56 sm:w-72 md:w-[330px] lg:w-[335px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[430px]">
+          <div className="relative w-56 sm:w-64 md:w-[260px] lg:w-[270px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[390px]">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
@@ -210,7 +210,7 @@ export default function GameDetailPage() {
           </div>
 
           {/* Datos y Ficha */}
-          <div className="flex-1 flex flex-col justify-between min-h-[430px] gap-6">
+          <div className="flex-1 flex flex-col justify-between min-h-[390px] gap-6">
             {/* 1. Categoría y Metacritic Arriba */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold w-fit">
@@ -312,11 +312,11 @@ export default function GameDetailPage() {
             </div>
 
             {/* 3. Botones de Acción Abajo */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="w-full flex flex-wrap md:flex-nowrap items-center justify-between gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={handleToggleBacklog}
                 disabled={isUpdatingBacklog}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
                   isBacklog
                     ? "bg-cyan-500 text-cine-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                     : "glass-card border border-purple-500/30 text-cine-200 hover:text-white hover:bg-purple-950/40"
@@ -330,7 +330,7 @@ export default function GameDetailPage() {
 
               <button
                 onClick={() => setIsReviewOpen(true)}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
                   isFinished
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)]"
@@ -346,14 +346,14 @@ export default function GameDetailPage() {
                 <button
                   onClick={handleMarkPlayedLongAgo}
                   disabled={isUpdatingPlayedLongAgo}
-                  className="px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-cyan-500/30 text-cyan-200 hover:text-white hover:bg-cyan-950/40 active:scale-95 shadow"
+                  className="px-3.5 sm:px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-cyan-500/30 text-cyan-200 hover:text-white hover:bg-cyan-950/40 active:scale-95 shadow flex-shrink-0"
                   title="Marcar como jugado en su día sin nota exacta ni horas (+15 XP)"
                 >
                   <History className="w-4 h-4 text-cyan-400" />
                   <span>Jugado en su día</span>
                 </button>
               ) : game.userGame?.completedDate === null ? (
-                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5">
+                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5 flex-shrink-0">
                   <History className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Jugado en el pasado</span>
                 </div>
@@ -364,7 +364,7 @@ export default function GameDetailPage() {
                   href={rawgUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95"
+                  className="px-3.5 sm:px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95 flex-shrink-0"
                   title="Abrir ficha oficial en RAWG"
                 >
                   <span className="font-mono font-bold text-xs tracking-tight">
