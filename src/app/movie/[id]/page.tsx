@@ -16,6 +16,7 @@ import {
   User as UserIcon,
   Tv,
   ExternalLink,
+  History,
 } from "lucide-react";
 import { MovieDetail } from "@/types/movie";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
@@ -25,6 +26,8 @@ import StreamingBadge from "@/components/StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
 import MasterHubScoreBadge from "@/components/shared/MasterHubScoreBadge";
 import CommunityReviewsSection from "@/components/shared/CommunityReviewsSection";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function MovieDetailPage() {
   const params = useParams();
@@ -35,6 +38,8 @@ export default function MovieDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isUpdatingWatchlist, setIsUpdatingWatchlist] = useState(false);
+  const [isUpdatingSeenLongAgo, setIsUpdatingSeenLongAgo] = useState(false);
+  const toast = useToast();
 
   const fetchMovie = async () => {
     try {
@@ -60,22 +65,29 @@ export default function MovieDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-        <p className="text-sm text-cine-400 font-medium">
-          Cargando detalles cinematográficos...
-        </p>
+        <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+        <p className="text-cine-400 text-sm">Cargando película...</p>
       </div>
     );
   }
 
   if (!movie) {
     return (
-      <div className="min-h-[50vh] flex flex-col items-center justify-center text-center gap-4">
-        <Film className="w-12 h-12 text-cine-600" />
-        <h2 className="text-xl font-bold text-white">Película no encontrada</h2>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-cine-900 border border-cine-800 flex items-center justify-center text-cine-500">
+          <Film className="w-8 h-8" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold text-white">
+            Película no encontrada
+          </h2>
+          <p className="text-sm text-cine-400">
+            No se pudo encontrar la película solicitada en el catálogo.
+          </p>
+        </div>
         <button
           onClick={() => router.back()}
-          className="px-4 py-2 bg-cine-800 hover:bg-cine-700 text-sm rounded-xl transition-colors"
+          className="px-4 py-2 rounded-xl bg-cine-800 hover:bg-cine-700 text-sm font-semibold text-white transition-colors"
         >
           Volver atrás
         </button>
@@ -108,6 +120,41 @@ export default function MovieDetailPage() {
       console.error(err);
     } finally {
       setIsUpdatingWatchlist(false);
+    }
+  };
+
+  const handleMarkSeenLongAgo = async () => {
+    setIsUpdatingSeenLongAgo(true);
+    try {
+      const res = await fetch("/api/user-movies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tmdbId: movie.tmdbId,
+          status: "WATCHED",
+          userRating: null,
+          watchedDate: null,
+          review: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar películas en tu historial");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Película registrada!",
+          "Marcada como vista hace tiempo 📼 (+10 XP)",
+        );
+        await fetchMovie();
+      }
+    } catch (err) {
+      console.error("Error al registrar como visto hace tiempo:", err);
+    } finally {
+      setIsUpdatingSeenLongAgo(false);
     }
   };
 
@@ -276,6 +323,23 @@ export default function MovieDetailPage() {
                 {isWatched ? "Editar valoración" : "Marcar como vista"}
               </button>
 
+              {!isWatched ? (
+                <button
+                  onClick={handleMarkSeenLongAgo}
+                  disabled={isUpdatingSeenLongAgo}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow"
+                  title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
+                >
+                  <History className="w-4 h-4 text-amber-400" />
+                  <span>Visto hace tiempo</span>
+                </button>
+              ) : movie.userMovie?.watchedDate === null ? (
+                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Visto en el pasado</span>
+                </div>
+              ) : null}
+
               {imdbUrl && (
                 <a
                   href={imdbUrl}
@@ -326,7 +390,11 @@ export default function MovieDetailPage() {
                 <span className="text-3xl font-extrabold text-amber-400 font-mono">
                   {movie.userMovie.userRating?.toFixed(1) ?? "—"}
                 </span>
-                <span className="text-sm text-cine-500">/ 10</span>
+                <span className="text-sm text-cine-500">
+                  {movie.userMovie.userRating !== null && movie.userMovie.userRating !== undefined
+                    ? "/ 10"
+                    : "(Sin puntuar)"}
+                </span>
                 {movie.imdbRating && (
                   <span className="text-xs text-cine-400 ml-2">
                     (IMDb:{" "}
@@ -396,8 +464,13 @@ export default function MovieDetailPage() {
                 Fecha de Visionado
               </span>
               <div className="text-sm font-semibold text-cine-200">
-                {formatSpanishDate(movie.userMovie.watchedDate) ||
-                  "No especificada"}
+                {movie.userMovie.watchedDate ? (
+                  formatSpanishDate(movie.userMovie.watchedDate)
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-amber-300 font-mono text-xs">
+                    <span>📼</span> Visto en el pasado (sin fecha fija)
+                  </span>
+                )}
               </div>
             </div>
           </div>

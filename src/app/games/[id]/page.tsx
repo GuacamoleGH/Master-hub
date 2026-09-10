@@ -18,6 +18,7 @@ import {
   Play,
   Layers,
   ExternalLink,
+  History,
 } from "lucide-react";
 import { GameDetail } from "@/types/game";
 import GameKnowledgeBadge from "@/components/games/GameKnowledgeBadge";
@@ -27,6 +28,8 @@ import PlatformBadge from "@/components/games/PlatformBadge";
 import { getRawgUrl } from "@/lib/externalLinks";
 import MasterHubScoreBadge from "@/components/shared/MasterHubScoreBadge";
 import CommunityReviewsSection from "@/components/shared/CommunityReviewsSection";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -37,6 +40,8 @@ export default function GameDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isUpdatingBacklog, setIsUpdatingBacklog] = useState(false);
+  const [isUpdatingPlayedLongAgo, setIsUpdatingPlayedLongAgo] = useState(false);
+  const toast = useToast();
 
   const fetchGame = async () => {
     try {
@@ -114,6 +119,52 @@ export default function GameDetailPage() {
     } finally {
       setIsUpdatingBacklog(false);
     }
+  };
+
+  const handleMarkPlayedLongAgo = async () => {
+    setIsUpdatingPlayedLongAgo(true);
+    try {
+      const res = await fetch("/api/user-games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rawgId: game.rawgId,
+          status: "COMPLETED",
+          userRating: null,
+          hoursPlayed: null,
+          review: null,
+          completedDate: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar videojuegos en tu catálogo");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Juego registrado!",
+          "Marcado como completado en su día 🕹️ (+15 XP)",
+        );
+        await fetchGame();
+      }
+    } catch (err) {
+      console.error("Error al registrar juego como jugado en su día:", err);
+    } finally {
+      setIsUpdatingPlayedLongAgo(false);
+    }
+  };
+
+  const formatSpanishDate = (isoStr: string | null) => {
+    if (!isoStr) return null;
+    const date = new Date(isoStr);
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   const criticScore = game.metacritic
@@ -283,6 +334,23 @@ export default function GameDetailPage() {
                   : "Registrar partida"}
               </button>
 
+              {!isFinished ? (
+                <button
+                  onClick={handleMarkPlayedLongAgo}
+                  disabled={isUpdatingPlayedLongAgo}
+                  className="px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-cyan-500/30 text-cyan-200 hover:text-white hover:bg-cyan-950/40 active:scale-95 shadow"
+                  title="Marcar como jugado en su día sin nota exacta ni horas (+15 XP)"
+                >
+                  <History className="w-4 h-4 text-cyan-400" />
+                  <span>Jugado en su día</span>
+                </button>
+              ) : game.userGame?.completedDate === null ? (
+                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5">
+                  <History className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Jugado en el pasado</span>
+                </div>
+              ) : null}
+
               {rawgUrl && (
                 <a
                   href={rawgUrl}
@@ -333,7 +401,11 @@ export default function GameDetailPage() {
                 <span className="text-3xl font-black text-purple-400 font-mono">
                   {game.userGame.userRating?.toFixed(1) ?? "—"}
                 </span>
-                <span className="text-sm text-cine-500 font-mono">/ 10</span>
+                <span className="text-sm text-cine-500 font-mono">
+                  {game.userGame.userRating !== null && game.userGame.userRating !== undefined
+                    ? "/ 10"
+                    : "(Sin puntuar)"}
+                </span>
                 {criticScore && (
                   <span className="text-xs text-cine-400 ml-1">
                     (MC: <strong className="text-white">{criticScore}</strong>)
@@ -397,12 +469,21 @@ export default function GameDetailPage() {
               </div>
             </div>
 
-            {/* Estado */}
+            {/* Estado y Fecha */}
             <div className="space-y-1">
-              <span className="text-xs text-cine-400 font-medium">Estado</span>
-              <div className="pt-1">
-                <span className="px-3 py-1 rounded-xl text-xs font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span className="text-xs text-cine-400 font-medium">Estado & Fecha</span>
+              <div className="pt-1 flex flex-col gap-1">
+                <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 w-fit">
                   {game.userGame.status}
+                </span>
+                <span className="text-[11px] text-cine-400">
+                  {game.userGame.completedDate ? (
+                    formatSpanishDate(game.userGame.completedDate)
+                  ) : (
+                    <span className="text-cyan-300/90 font-mono">
+                      🕹️ Jugado en su día
+                    </span>
+                  )}
                 </span>
               </div>
             </div>

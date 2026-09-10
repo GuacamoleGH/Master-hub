@@ -139,14 +139,31 @@ export default function SeriesCard({
             </div>
           )}
 
-          {/* Ball Knowledge si está vista */}
-          {isWatched && userSeries?.ballKnowledge !== undefined && (
+          {/* Calificación, Ball Knowledge o Badge Visto si está vista */}
+          {isWatched && (
             <div className="absolute bottom-2.5 left-2.5">
-              <BallKnowledgeBadge
-                score={userSeries.ballKnowledge}
-                difference={userSeries.difference}
-                size="sm"
-              />
+              {userSeries?.userRating !== undefined && userSeries.userRating !== null ? (
+                <div
+                  className="flex items-center gap-1 bg-purple-600/90 text-white px-2 py-0.5 rounded-lg text-xs font-bold shadow cursor-help"
+                  title={`Tu valoración: ${userSeries.userRating.toFixed(1)} / 10`}
+                >
+                  <Star className="w-3 h-3 fill-white text-white" />
+                  <span>{userSeries.userRating.toFixed(1)}</span>
+                </div>
+              ) : userSeries?.ballKnowledge !== undefined && userSeries.ballKnowledge !== null ? (
+                <BallKnowledgeBadge
+                  score={userSeries.ballKnowledge}
+                  difference={userSeries.difference}
+                  size="sm"
+                />
+              ) : (
+                <div
+                  className="flex items-center gap-1 bg-cine-950/80 border border-purple-500/40 text-purple-300 px-2 py-0.5 rounded-lg text-[10px] font-bold shadow backdrop-blur-md"
+                  title="Serie en tu historial (sin nota)"
+                >
+                  <span>📼 Vista</span>
+                </div>
+              )}
             </div>
           )}
 
