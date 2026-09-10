@@ -20,6 +20,7 @@ import {
   Trophy,
   MessageSquare,
   Award,
+  Users,
 } from "lucide-react";
 import MovieSearchInput from "./MovieSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -36,6 +37,7 @@ export default function Header() {
     { href: "/series", label: "Series", icon: Tv },
     { href: "/watchlist", label: "Watchlist", icon: Bookmark },
     { href: "/watched", label: "Vistas", icon: CheckCircle2 },
+    { href: "/friends", label: "Amigos", icon: Users },
     { href: "/leaderboard", label: "Ranking", icon: Trophy },
     { href: "/reviews", label: "Reseñas", icon: MessageSquare },
     { href: "/achievements", label: "Logros", icon: Award },
@@ -45,6 +47,8 @@ export default function Header() {
     if (href === "/movies") return pathname === "/movies";
     if (href === "/series")
       return pathname === "/series" || pathname.startsWith("/series/");
+    if (href === "/friends")
+      return pathname === "/friends" || pathname.startsWith("/friends/") || pathname === "/amigos";
     if (href === "/leaderboard")
       return pathname === "/leaderboard" || pathname === "/ranking";
     if (href === "/reviews")
@@ -55,7 +59,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-cine-800 bg-cine-950/90 backdrop-blur-xl shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Izquierda: Botón Volver al Hub + Logo Cine */}
         <div className="flex items-center gap-3 shrink-0">
           <Link

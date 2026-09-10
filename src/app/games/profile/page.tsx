@@ -24,6 +24,8 @@ import {
   Flame,
   Camera,
   Medal,
+  Share2,
+  Check,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -39,20 +41,24 @@ import CriticVsYouChart from "@/components/games/CriticVsYouChart";
 import HotTakesTable from "@/components/games/HotTakesTable";
 import EditGamerProfileModal from "@/components/games/EditGamerProfileModal";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { UserAchievement } from "@/lib/achievements";
 import { GamerStats } from "@/types/game";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 interface ProfileResponse {
   profile: {
     id: string;
     displayName: string;
+    username?: string | null;
     avatarUrl: string | null;
     bio: string | null;
   };
+  topGames?: TopFiveItem[];
   stats: GamerStats;
 }
 
@@ -75,6 +81,34 @@ export default function GamerProfilePage() {
     totalXpEarned: number;
   } | null>(null);
   const [isWrappedOpen, setIsWrappedOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const toast = useToast();
+
+  const handleShare = async () => {
+    try {
+      const targetUser =
+        profileData?.profile?.username ||
+        session?.user?.username ||
+        session?.user?.name;
+      if (!targetUser) {
+        toast.error("Inicia sesión para compartir tu perfil.");
+        return;
+      }
+      const shareUrl = `${window.location.origin}/u/${encodeURIComponent(targetUser)}`;
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+      sounds.playSuccess();
+      setCopied(true);
+      toast.success(
+        "¡Enlace de perfil copiado!",
+        "Compártelo con tus amigos para que exploren tu catálogo gamer.",
+      );
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast.error("No se pudo copiar el enlace automáticamente.");
+    }
+  };
 
   const handleOpenEdit = () => {
     sounds.playClick();
@@ -256,6 +290,24 @@ export default function GamerProfilePage() {
               </button>
 
               <button
+                onClick={handleShare}
+                className="justify-center px-3.5 py-1.5 bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 hover:text-white border border-purple-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title="Copiar enlace a tu perfil público para compartir con amigos"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-300">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Compartir Perfil</span>
+                  </>
+                )}
+              </button>
+
+              <button
                 onClick={() => {
                   sounds.shutter();
                   setIsWrappedOpen(true);
@@ -340,6 +392,15 @@ export default function GamerProfilePage() {
             / 10
           </div>
         </div>
+      </section>
+
+      {/* Vitrina de Top 5 Videojuegos */}
+      <section>
+        <TopFiveCard
+          type="gaming"
+          title="Top 5 Videojuegos"
+          items={profileData.topGames || []}
+        />
       </section>
 
       {/* Vitrina de Trofeos Gamer - Banner Resumen Destacado */}

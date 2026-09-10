@@ -20,6 +20,7 @@ import {
   Trophy,
   MessageSquare,
   Award,
+  Users,
 } from "lucide-react";
 import GameSearchInput from "./GameSearchInput";
 import SoundToggle from "@/components/shared/SoundToggle";
@@ -35,6 +36,7 @@ export default function GameHeader() {
     { href: "/games", label: "Inicio", icon: Gamepad2 },
     { href: "/games/backlog", label: "Backlog", icon: Bookmark },
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
+    { href: "/friends", label: "Amigos", icon: Users },
     { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
     { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
     { href: "/games/achievements", label: "Logros", icon: Award },
@@ -42,6 +44,8 @@ export default function GameHeader() {
 
   const isActive = (href: string) => {
     if (href === "/games") return pathname === "/games";
+    if (href === "/friends")
+      return pathname === "/friends" || pathname.startsWith("/friends/") || pathname === "/amigos";
     if (href === "/games/reviews")
       return pathname === "/games/reviews" || pathname === "/games/resenas";
     if (href.startsWith("/leaderboard"))
@@ -53,7 +57,7 @@ export default function GameHeader() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-purple-500/20 bg-cine-950/90 backdrop-blur-xl shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Izquierda: Botón Volver al Hub + Logo Gamer */}
         <div className="flex items-center gap-3 shrink-0">
           <Link

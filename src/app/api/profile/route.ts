@@ -12,9 +12,11 @@ export async function GET() {
       return NextResponse.json({
         profile: {
           displayName: "Invitado",
+          username: null,
           avatarUrl: null,
           bio: "Inicia sesión para guardar tu historial y subir de nivel.",
         },
+        topCine: [],
         stats: {
           totalWatched: 0,
           totalWatchlist: 0,
@@ -112,6 +114,9 @@ export async function GET() {
     }
     const allUserSeries = await prisma.userSeries.findMany({
       where: { userId },
+      include: {
+        series: true,
+      },
     });
     for (const us of allUserSeries) {
       const isWatched = us.status === "WATCHED";
@@ -242,12 +247,46 @@ export async function GET() {
         count: decadeMap[decade],
       }));
 
+    const movieItems = watchedList.map((um) => ({
+      id: `movie-${um.id}`,
+      title: um.movie.title,
+      image: um.movie.posterPath,
+      year: um.movie.year,
+      rating: um.userRating,
+      isFavorite: Boolean(um.isFavorite),
+      link: `/movie/${um.movie.tmdbId}`,
+      mediaType: "movie" as const,
+    }));
+
+    const seriesItems = allUserSeries
+      .filter((us) => us.status === "WATCHED")
+      .map((us) => ({
+        id: `series-${us.id}`,
+        title: us.series.name,
+        image: us.series.posterPath,
+        year: us.series.firstAirYear,
+        rating: us.userRating,
+        isFavorite: false,
+        link: `/series/${us.series.tmdbId}`,
+        mediaType: "series" as const,
+      }));
+
+    const topCine = [...movieItems, ...seriesItems]
+      .sort((a, b) => {
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
+        return (b.rating || 0) - (a.rating || 0);
+      })
+      .slice(0, 5);
+
     return NextResponse.json({
       profile: {
         displayName: user?.name || user?.username || "Cinéfilo",
+        username: user?.username || null,
         avatarUrl: user?.image || null,
         bio: user?.bio || null,
       },
+      topCine,
       stats: {
         totalWatched: watchedList.length,
         totalWatchlist: watchlistCount,
