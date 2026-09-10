@@ -204,7 +204,7 @@ export default function MovieDetailPage() {
         {/* Contenido Principal de Cabecera */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-6 sm:gap-8 items-stretch">
           {/* Póster Oficial */}
-          <div className="relative w-56 sm:w-72 md:w-[330px] lg:w-[335px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto md:min-h-[430px]">
+          <div className="relative w-56 sm:w-64 md:w-[260px] lg:w-[270px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto md:min-h-[390px]">
             <MoviePoster
               src={movie.posterPath}
               alt={movie.title}
@@ -214,7 +214,7 @@ export default function MovieDetailPage() {
           </div>
 
           {/* Información y Títulos */}
-          <div className="flex-1 flex flex-col justify-between min-h-[430px] gap-6">
+          <div className="flex-1 flex flex-col justify-between min-h-[390px] gap-6">
             {/* 1. Categoría Arriba */}
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold w-fit">
@@ -307,11 +307,11 @@ export default function MovieDetailPage() {
             </div>
 
             {/* 3. Botones de acción principales Abajo */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="w-full flex flex-wrap md:flex-nowrap items-center justify-between gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdatingWatchlist}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
                   isWatchlist
                     ? "bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold shadow-[0_0_20px_rgba(14,165,233,0.35)]"
                     : "glass-card border border-cine-700 text-cine-200 hover:text-white hover:bg-cine-800"
@@ -325,7 +325,7 @@ export default function MovieDetailPage() {
 
               <button
                 onClick={() => setIsReviewModalOpen(true)}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`px-4 sm:px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold shadow-gold-glow"
@@ -339,14 +339,14 @@ export default function MovieDetailPage() {
                 <button
                   onClick={handleMarkSeenLongAgo}
                   disabled={isUpdatingSeenLongAgo}
-                  className="px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow"
+                  className="px-3.5 sm:px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow flex-shrink-0"
                   title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
                 >
                   <History className="w-4 h-4 text-amber-400" />
                   <span>Visto hace tiempo</span>
                 </button>
               ) : movie.userMovie?.watchedDate === null ? (
-                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5">
+                <div className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 flex-shrink-0">
                   <History className="w-3.5 h-3.5 text-amber-400" />
                   <span>Visto en el pasado</span>
                 </div>
@@ -357,16 +357,16 @@ export default function MovieDetailPage() {
                   href={imdbUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-lg group active:scale-95"
+                  className="px-3.5 sm:px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group flex-shrink-0"
                   title="Abrir ficha oficial en IMDb"
                 >
-                  <span className="font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
+                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
                     IMDb
                   </span>
                   <span className="font-semibold text-xs sm:text-sm">
                     Ver en IMDb
                   </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-black/75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <ExternalLink className="w-3.5 h-3.5 text-black/70 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </a>
               )}
             </div>
