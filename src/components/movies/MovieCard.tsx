@@ -171,11 +171,13 @@ export default function MovieCard({
                 }
                 className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
                   isWatchlist
-                    ? "bg-amber-500 text-cine-950 border-amber-400 font-bold shadow-gold-glow"
+                    ? "bg-sky-500 text-cine-950 border-sky-400 font-bold shadow-[0_0_12px_rgba(14,165,233,0.4)]"
                     : "bg-black/60 text-cine-300 hover:text-white border-white/10 hover:bg-black/80"
                 }`}
               >
-                <Bookmark className="w-3.5 h-3.5" />
+                <Bookmark
+                  className={`w-3.5 h-3.5 ${isWatchlist ? "fill-cine-950" : ""}`}
+                />
               </button>
 
               <button

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Loader2, Film, Tv, Star, X } from "lucide-react";
+import { sortSearchResultsByRelevance } from "@/lib/searchRanking";
 
 interface SearchItem {
   id: number;
@@ -13,6 +14,8 @@ interface SearchItem {
   backdropPath: string | null;
   overview: string;
   voteAverage: number;
+  popularity?: number;
+  voteCount?: number;
   mediaType: "movie" | "tv";
 }
 
@@ -57,6 +60,8 @@ export default function MovieSearchInput() {
             backdropPath: m.backdropPath,
             overview: m.overview,
             voteAverage: m.voteAverage,
+            popularity: m.popularity,
+            voteCount: m.voteCount,
             mediaType: "movie" as const,
           }),
         );
@@ -71,20 +76,19 @@ export default function MovieSearchInput() {
             backdropPath: s.backdropPath,
             overview: s.overview,
             voteAverage: s.voteAverage,
+            popularity: s.popularity,
+            voteCount: s.voteCount,
             mediaType: "tv" as const,
           }),
         );
 
-        // Combinar y ordenar priorizando coincidencias exactas y mejor valoración
-        const cleanQ = query.trim().toLowerCase();
-        const combined = [...movieItems, ...seriesItems].sort((a, b) => {
-          const aExact = a.title.toLowerCase() === cleanQ ? 1 : 0;
-          const bExact = b.title.toLowerCase() === cleanQ ? 1 : 0;
-          if (aExact !== bExact) return bExact - aExact;
-          return (b.voteAverage || 0) - (a.voteAverage || 0);
-        });
+        // Ordenar con algoritmo de relevancia inteligente (prioriza coincidencias léxicas y popularidad real de TMDB)
+        const sorted = sortSearchResultsByRelevance(
+          [...movieItems, ...seriesItems],
+          query,
+        );
 
-        setResults(combined.slice(0, 16));
+        setResults(sorted.slice(0, 16));
         setIsOpen(true);
       } catch (err) {
         console.error("Error buscando películas y series:", err);
