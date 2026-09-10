@@ -204,7 +204,7 @@ export default function MovieDetailPage() {
         {/* Contenido Principal de Cabecera */}
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-5 sm:gap-6 items-stretch">
           {/* Póster Oficial */}
-          <div className="relative w-56 sm:w-72 md:w-[320px] lg:w-[335px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto md:min-h-[460px]">
+          <div className="relative w-64 sm:w-80 md:w-[360px] lg:w-[380px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto md:min-h-[480px]">
             <MoviePoster
               src={movie.posterPath}
               alt={movie.title}
@@ -214,10 +214,10 @@ export default function MovieDetailPage() {
           </div>
 
           {/* Información y Títulos */}
-          <div className="flex-1 flex flex-col justify-between min-h-[460px] gap-6">
+          <div className="flex-1 flex flex-col justify-between min-h-[480px] gap-6">
             {/* 1. Categoría Arriba */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold w-fit tracking-wide shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm font-semibold w-fit tracking-wide shadow-sm">
                 <Film className="w-4 h-4 text-amber-400" />
                 <span>Película</span>
               </div>
@@ -226,7 +226,7 @@ export default function MovieDetailPage() {
             {/* 2. Bloque Central: Títulos, Metadatos, Géneros y Streaming */}
             <div className="space-y-4">
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] drop-shadow-md">
                   {movie.title}
                 </h1>
                 {movie.originalTitle && movie.originalTitle !== movie.title && (
@@ -237,16 +237,16 @@ export default function MovieDetailPage() {
               </div>
 
               {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Master Hub */}
-              <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 text-sm sm:text-base">
+              <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 text-sm sm:text-base font-medium">
                 {movie.year && (
-                  <div className="flex items-center gap-1.5 text-cine-200 font-medium">
+                  <div className="flex items-center gap-1.5 text-cine-200">
                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-cine-400" />
                     <span>{movie.year}</span>
                   </div>
                 )}
 
                 {movie.runtime && (
-                  <div className="flex items-center gap-1.5 text-cine-200 font-medium">
+                  <div className="flex items-center gap-1.5 text-cine-200">
                     <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-cine-400" />
                     <span>{formatRuntime(movie.runtime)}</span>
                   </div>
@@ -257,7 +257,7 @@ export default function MovieDetailPage() {
                     href={imdbUrl || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3.5 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer text-sm sm:text-base"
+                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3.5 py-1.5 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer text-sm sm:text-base shadow-sm"
                     title="Ver ficha oficial en IMDb"
                   >
                     <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400" />
@@ -277,11 +277,11 @@ export default function MovieDetailPage() {
 
               {/* Pills de Géneros */}
               {movie.genres && movie.genres.length > 0 && (
-                <div className="flex flex-wrap gap-2 sm:gap-2.5">
+                <div className="flex flex-wrap gap-2.5 sm:gap-3">
                   {movie.genres.map((genre) => (
                     <span
                       key={genre}
-                      className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold bg-cine-800/80 border border-cine-700/80 text-cine-200 shadow-sm"
+                      className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-cine-800/80 border border-cine-700/80 text-cine-200 shadow-sm"
                     >
                       {genre}
                     </span>
@@ -307,11 +307,11 @@ export default function MovieDetailPage() {
             </div>
 
             {/* 3. Botones de acción principales Abajo */}
-            <div className="flex flex-wrap md:flex-nowrap items-center gap-2.5 sm:gap-3 pt-2">
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-3 sm:gap-3.5 pt-2">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdatingWatchlist}
-                className={`px-4 sm:px-4.5 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
+                className={`px-4.5 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
                   isWatchlist
                     ? "bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold shadow-[0_0_20px_rgba(14,165,233,0.35)]"
                     : "glass-card border border-cine-700 text-cine-200 hover:text-white hover:bg-cine-800"
@@ -325,7 +325,7 @@ export default function MovieDetailPage() {
 
               <button
                 onClick={() => setIsReviewModalOpen(true)}
-                className={`px-4 sm:px-4.5 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
+                className={`px-4.5 sm:px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 flex-shrink-0 ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold shadow-gold-glow"
@@ -339,14 +339,14 @@ export default function MovieDetailPage() {
                 <button
                   onClick={handleMarkSeenLongAgo}
                   disabled={isUpdatingSeenLongAgo}
-                  className="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow flex-shrink-0"
+                  className="px-4 sm:px-4.5 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-1.5 sm:gap-2 glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow flex-shrink-0"
                   title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
                 >
                   <History className="w-4 h-4 text-amber-400" />
                   <span>Visto hace tiempo</span>
                 </button>
               ) : movie.userMovie?.watchedDate === null ? (
-                <div className="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 flex-shrink-0">
+                <div className="px-4 py-3 rounded-xl text-sm font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5 flex-shrink-0">
                   <History className="w-3.5 h-3.5 text-amber-400" />
                   <span>Visto en el pasado</span>
                 </div>
@@ -357,13 +357,13 @@ export default function MovieDetailPage() {
                   href={imdbUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 sm:gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group flex-shrink-0"
+                  className="px-4 sm:px-4.5 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 sm:gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group flex-shrink-0"
                   title="Abrir ficha oficial en IMDb"
                 >
                   <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
                     IMDb
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm">
+                  <span className="font-semibold text-sm">
                     Ver en IMDb
                   </span>
                   <ExternalLink className="w-3.5 h-3.5 text-black/70 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
