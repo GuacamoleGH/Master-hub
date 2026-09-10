@@ -57,8 +57,11 @@ export default function DynamicNavHeader() {
   if (pathname === "/") {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group shrink-0 z-10"
+          >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 via-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center">
               <span className="text-sm font-black text-white">MH</span>
             </div>
@@ -72,7 +75,7 @@ export default function DynamicNavHeader() {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center justify-center gap-1.5 xl:gap-2 flex-1">
+          <nav className="hidden md:flex items-center justify-center gap-1.5 xl:gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-auto">
             <Link
               href="/movies"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
@@ -106,7 +109,7 @@ export default function DynamicNavHeader() {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0 z-10">
             <SoundToggle />
 
             {session?.user ? (

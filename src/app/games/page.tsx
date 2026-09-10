@@ -3,7 +3,10 @@ import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
+import {
+  calculateGamerLevelAndRank,
+  calculateGameXp,
+} from "@/lib/gameKnowledge";
 import GameCard from "@/components/games/GameCard";
 import GamerLevelBar from "@/components/games/GamerLevelBar";
 import ExploreGamesSection from "@/components/games/ExploreGamesSection";
@@ -26,29 +29,41 @@ export default async function GamerHomePage() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
-  // 1. Obtener perfil
-  let profile = {
-    id: "guest",
-    displayName: "Invitado",
-    avatarUrl: null as string | null,
-    bio: "Inicia sesión para guardar tus partidas y calcular tu Game Knowledge.",
-    totalXp: 0,
-    updatedAt: new Date(),
-  };
+  // 1. Obtener usuario y partidas para calcular Gamer XP aislado
+  const [user, allUserGames] = userId
+    ? await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.userGame.findMany({
+          where: { userId },
+          include: { game: true },
+        }),
+      ])
+    : [null, []];
 
-  if (userId) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (user) {
-      profile = {
-        id: user.id,
-        displayName: user.name || user.username || "Gamer",
-        avatarUrl: user.image,
-        bio: user.bio || "Explorador de mundos virtuales.",
-        totalXp: user.totalXp,
-        updatedAt: user.updatedAt,
-      };
-    }
+  let gamerXp = 0;
+  for (const ug of allUserGames) {
+    const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
+    gamerXp += calculateGameXp(
+      ug.status,
+      hasReview,
+      ug.hoursPlayed,
+      ug.gameKnowledge,
+    );
   }
+
+  const profile = {
+    id: user?.id || "guest",
+    displayName:
+      user?.name || user?.username || (userId ? "Gamer" : "Invitado"),
+    avatarUrl: user?.image || null,
+    bio:
+      user?.bio ||
+      (userId
+        ? "Explorador de mundos virtuales."
+        : "Inicia sesión para guardar tus partidas y calcular tu Game Knowledge."),
+    totalXp: gamerXp,
+    updatedAt: user?.updatedAt || new Date(),
+  };
 
   const levelInfo = calculateGamerLevelAndRank(profile.totalXp);
 
@@ -81,18 +96,12 @@ export default async function GamerHomePage() {
       })
     : [];
 
-  // 5. Estadísticas de resumen
-  const allUserGames = userId
-    ? await prisma.userGame.findMany({
-        where: { userId },
-        include: { game: true },
-      })
-    : [];
+  // 5. Estadísticas de resumen (reutilizando allUserGames)
 
   let totalHours = 0;
   let totalCompleted = 0;
   const withGk = allUserGames.filter(
-    (ug) => typeof ug.gameKnowledge === "number"
+    (ug) => typeof ug.gameKnowledge === "number",
   );
   const avgGk =
     withGk.length > 0
