@@ -3,47 +3,73 @@
 /.pnp
 .pnp.js
 
-# testing
+# testing & coverage
 /coverage
+/.nyc_output
 
-# next.js
+# next.js & production
 /.next/
 /out/
-
-# production
 /build
 
-# misc
-.DS_Store
+# local env files & secrets
+.env*
+!.env.example
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env*.local
-.env
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# prisma local dev db if any
-*.db
-*.db-journal
-dev.db
-
-# scratch scripts
-scratch/
-
-.vscode/
+*.key
+*.cert
+credentials.json
+service-account*.json
 
 # secrets & keys
 APIs.md
 apis.md
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# vercel
+.vercel
+
+# typescript & cache
+*.tsbuildinfo
+next-env.d.ts
+
+# database local files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+dev.db
+
+# ides & editors
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# os generated files
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# scratch & internal
+scratch/
+
 
