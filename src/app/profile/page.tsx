@@ -61,7 +61,9 @@ export default function ProfilePage() {
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
   const [topCine, setTopCine] = useState<TopFiveItem[]>([]);
-  const [watchedCatalog, setWatchedCatalog] = useState<WatchedCatalogItem[]>([]);
+  const [watchedCatalog, setWatchedCatalog] = useState<WatchedCatalogItem[]>(
+    [],
+  );
   const [copied, setCopied] = useState(false);
   const toast = useToast();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
@@ -305,7 +307,7 @@ export default function ProfilePage() {
                 title="Generar tarjeta de resumen para redes sociales"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>MasterHub Wrapped</span>
+                <span>Cinephile Hub Wrapped</span>
               </button>
             </div>
           </div>

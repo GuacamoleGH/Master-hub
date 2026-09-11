@@ -131,7 +131,9 @@ export async function GET(
       })),
     ].sort((a, b) => {
       if (a.watchedDate && b.watchedDate) {
-        return new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime();
+        return (
+          new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
+        );
       }
       return (b.userRating || 0) - (a.userRating || 0);
     });
@@ -141,7 +143,9 @@ export async function GET(
     let biggestW: any = null;
     let biggestL: any = null;
 
-    const ratedMovies = watchedMovies.filter((r) => typeof r.userRating === "number");
+    const ratedMovies = watchedMovies.filter(
+      (r) => typeof r.userRating === "number",
+    );
     if (ratedMovies.length > 0) {
       const sortedByRating = [...ratedMovies].sort(
         (a, b) => (b.userRating || 0) - (a.userRating || 0),
@@ -202,7 +206,8 @@ export async function GET(
       count: ratingBuckets[Number(k)],
     }));
 
-    const genreMap: { [key: string]: { count: number; totalScore: number } } = {};
+    const genreMap: { [key: string]: { count: number; totalScore: number } } =
+      {};
     for (const r of watchedMovies) {
       let genres: string[] = [];
       try {
@@ -220,7 +225,10 @@ export async function GET(
       .map(([genre, data]) => ({
         genre,
         count: data.count,
-        avgRating: data.count > 0 ? Number((data.totalScore / data.count).toFixed(1)) : 0,
+        avgRating:
+          data.count > 0
+            ? Number((data.totalScore / data.count).toFixed(1))
+            : 0,
       }))
       .sort((a, b) => b.count - a.count);
 
@@ -421,7 +429,16 @@ export async function GET(
     const platformGamesCountMap: Record<string, number> = {};
     const genreHoursMap: Record<string, number> = {};
     const gameRatingDist: Record<number, number> = {
-      1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
     };
     const hotTakes: any[] = [];
     const criticVsYou: any[] = [];

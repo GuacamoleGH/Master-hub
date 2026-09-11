@@ -315,12 +315,16 @@ export async function GET() {
         })),
     ].sort((a, b) => {
       if (a.watchedDate && b.watchedDate) {
-        return new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime();
+        return (
+          new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
+        );
       }
       return (b.userRating || 0) - (a.userRating || 0);
     });
 
-    const watchedSeriesList = allUserSeries.filter((us) => us.status === "WATCHED");
+    const watchedSeriesList = allUserSeries.filter(
+      (us) => us.status === "WATCHED",
+    );
 
     return NextResponse.json({
       profile: {
