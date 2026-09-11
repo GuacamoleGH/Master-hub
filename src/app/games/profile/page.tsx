@@ -89,7 +89,7 @@ export default function GamerProfilePage() {
         toast.error("Inicia sesión para compartir tu perfil.");
         return;
       }
-      const shareUrl = `${window.location.origin}/games/u/${encodeURIComponent(targetUser)}`;
+      const shareUrl = `${window.location.origin}/u/${encodeURIComponent(targetUser)}?tab=gaming`;
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl);
       }

@@ -16,6 +16,8 @@ import {
   MessageSquare,
   Share2,
   Users,
+  Menu,
+  X,
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
@@ -25,6 +27,7 @@ export default function DynamicNavHeader() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Páginas de Autenticación
   if (pathname === "/login" || pathname === "/register") {
@@ -54,8 +57,8 @@ export default function DynamicNavHeader() {
     return <GameHeader />;
   }
 
-  // Launcher Principal (Centro de Mando)
-  if (pathname === "/") {
+  // Launcher Principal (Centro de Mando) y Perfil Público Unificado
+  if (pathname === "/" || pathname.startsWith("/u/")) {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
         <div className="relative w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -118,7 +121,7 @@ export default function DynamicNavHeader() {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-3 shrink-0 z-10">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-10">
             <SoundToggle />
 
             {session?.user ? (
@@ -210,8 +213,67 @@ export default function DynamicNavHeader() {
                 </Link>
               </div>
             )}
+
+            {/* Botón hamburguesa móvil */}
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="p-2 rounded-xl text-cine-400 hover:text-white hover:bg-cine-900 border border-cine-800 md:hidden"
+              aria-label="Abrir menú"
+            >
+              {isMobileNavOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Menú desplegable móvil */}
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-cine-800 bg-cine-950/95 px-4 py-3 space-y-1.5 backdrop-blur-xl animate-fade-in">
+            <Link
+              href="/movies"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Film className="w-4 h-4 text-amber-400" />
+              <span>Cine & Series</span>
+            </Link>
+            <Link
+              href="/games"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Gamepad2 className="w-4 h-4 text-purple-400" />
+              <span>Videojuegos</span>
+            </Link>
+            <Link
+              href="/friends"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Users className="w-4 h-4 text-sky-400" />
+              <span>Amigos</span>
+            </Link>
+            <Link
+              href="/leaderboard"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Trophy className="w-4 h-4 text-amber-400" />
+              <span>Ranking</span>
+            </Link>
+            <Link
+              href="/reviews"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <MessageSquare className="w-4 h-4 text-pink-400" />
+              <span>Reseñas</span>
+            </Link>
+          </div>
+        )}
       </header>
     );
   }
