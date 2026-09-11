@@ -7,7 +7,6 @@ import {
   calculateGamerLevelAndRank,
   classifyHotTake,
 } from "@/lib/gameKnowledge";
-import { evaluateUserAchievements } from "@/lib/achievements";
 
 export async function GET(
   request: NextRequest,
@@ -644,18 +643,6 @@ export async function GET(
       }
     }
 
-    // 4. Evaluar vitrina de logros
-    const achievementsData = evaluateUserAchievements({
-      movies: userMovies,
-      series: userSeries,
-      games: userGames,
-      stats: {
-        avgBallKnowledge: globalBallKnowledge,
-        avgGameKnowledge: globalGameKnowledge,
-        totalHours,
-      },
-    });
-
     return NextResponse.json({
       user: targetUser,
       isOwner: visitorId === userId,
@@ -710,7 +697,6 @@ export async function GET(
         hotTakes,
       },
       affinity,
-      achievements: achievementsData,
     });
   } catch (error) {
     console.error("Error en GET /api/u/[username]:", error);

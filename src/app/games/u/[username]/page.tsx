@@ -39,7 +39,6 @@ import WatchedCatalogSection, {
 } from "@/components/profile/WatchedCatalogSection";
 import AffinityCard from "@/components/profile/AffinityCard";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
-import { UserAchievement } from "@/lib/achievements";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -72,8 +71,16 @@ interface PublicGamerProfileData {
     gamesCatalog?: WatchedCatalogItem[];
     recentGames: any[];
     longestGame?: { title: string; cover: string | null; hours: number } | null;
-    highestRatedGame?: { title: string; cover: string | null; rating: number } | null;
-    lowestRatedGame?: { title: string; cover: string | null; rating: number } | null;
+    highestRatedGame?: {
+      title: string;
+      cover: string | null;
+      rating: number;
+    } | null;
+    lowestRatedGame?: {
+      title: string;
+      cover: string | null;
+      rating: number;
+    } | null;
     averageCompletionHours?: number | null;
     statusBreakdown?: {
       completed: number;
@@ -89,13 +96,6 @@ interface PublicGamerProfileData {
     hotTakes?: any[];
   };
   affinity: any;
-  achievements?: {
-    achievements: UserAchievement[];
-    totalUnlocked: number;
-    totalAvailable: number;
-    totalXpEarned: number;
-    completionRate: number;
-  };
 }
 
 export default function PublicGamerProfilePage() {
@@ -357,7 +357,9 @@ export default function PublicGamerProfilePage() {
             <Brain className="w-4 h-4 text-purple-400" /> Game Knowledge
           </div>
           <div className="text-3xl font-black text-purple-400 font-mono">
-            {gaming.globalGameKnowledge ? `${gaming.globalGameKnowledge}%` : "—"}
+            {gaming.globalGameKnowledge
+              ? `${gaming.globalGameKnowledge}%`
+              : "—"}
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
             Frente al consenso de Metacritic
@@ -367,7 +369,8 @@ export default function PublicGamerProfilePage() {
         {/* Nota Media vs Prensa */}
         <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota Media
+            <Star className="w-4 h-4 text-purple-400 fill-purple-400" /> Tu Nota
+            Media
           </div>
           <div className="text-3xl font-black text-white font-mono">
             {gaming.averageRating || "—"}
@@ -398,78 +401,6 @@ export default function PublicGamerProfilePage() {
         items={gaming.gamesCatalog || []}
         isOwner={isOwner}
       />
-
-      {/* Vitrina de Trofeos Gamer */}
-      {data.achievements && (
-        <section className="glass-panel p-6 rounded-3xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-cine-900 to-cine-950 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                <Trophy className="w-5 h-5 text-purple-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-white">
-                    Vitrina de Trofeos Gamer
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    {data.achievements.totalUnlocked} /{" "}
-                    {data.achievements.totalAvailable} Desbloqueados
-                  </span>
-                </div>
-                <p className="text-xs text-cine-400 mt-0.5">
-                  {data.achievements.completionRate}% completado ·{" "}
-                  {data.achievements.totalXpEarned} XP acumulados
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/games/achievements"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer shrink-0"
-            >
-              <Award className="w-4 h-4" />
-              <span>Explorar Todos los Logros Gamer</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Muestra de Trofeos Destacados */}
-          <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {data.achievements.achievements
-              .filter((a) => !a.universe || a.universe === "GAMING")
-              .slice(0, 6)
-              .map((ach) => (
-                <div
-                  key={ach.id}
-                  className={`p-3 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 ${
-                    ach.isUnlocked
-                      ? "bg-purple-950/30 border-purple-500/40 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.15)]"
-                      : "bg-cine-900/40 border-cine-800 text-cine-500 opacity-60"
-                  }`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${
-                      ach.isUnlocked
-                        ? "bg-purple-500/20 text-purple-300 border border-purple-500/50"
-                        : "bg-cine-800 text-cine-600"
-                    }`}
-                  >
-                    {ach.isUnlocked ? "🏆" : "🔒"}
-                  </div>
-                  <div className="min-w-0 w-full">
-                    <p className="text-xs font-bold text-white truncate">
-                      {ach.title}
-                    </p>
-                    <p className="text-[10px] text-cine-400 font-mono mt-0.5">
-                      +{ach.xp} XP
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </section>
-      )}
 
       {/* Récords y Métricas Extremas */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -530,7 +461,9 @@ export default function PublicGamerProfilePage() {
                 </p>
                 <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
                   ★ {gaming.highestRatedGame.rating}{" "}
-                  <span className="text-xs text-cine-400 font-normal">/ 10</span>
+                  <span className="text-xs text-cine-400 font-normal">
+                    / 10
+                  </span>
                 </p>
               </div>
             </div>
@@ -556,13 +489,17 @@ export default function PublicGamerProfilePage() {
               </span>
             </div>
             <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-              <span className="text-cine-400 block text-[10px]">Pendientes</span>
+              <span className="text-cine-400 block text-[10px]">
+                Pendientes
+              </span>
               <span className="text-base font-black text-white font-mono">
                 {gaming.statusBreakdown?.backlog ?? gaming.totalBacklog}
               </span>
             </div>
             <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-              <span className="text-cine-400 block text-[10px]">Media / Título</span>
+              <span className="text-cine-400 block text-[10px]">
+                Media / Título
+              </span>
               <span className="text-base font-black text-cyan-300 font-mono">
                 {gaming.averageCompletionHours
                   ? `${gaming.averageCompletionHours}h`
@@ -570,7 +507,9 @@ export default function PublicGamerProfilePage() {
               </span>
             </div>
             <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-              <span className="text-cine-400 block text-[10px]">Platinados</span>
+              <span className="text-cine-400 block text-[10px]">
+                Platinados
+              </span>
               <span className="text-base font-black text-amber-400 font-mono">
                 {gaming.statusBreakdown?.platinum ?? gaming.totalPlatinum ?? 0}
               </span>
@@ -590,7 +529,9 @@ export default function PublicGamerProfilePage() {
                   Distribución de Puntuaciones
                 </h3>
               </div>
-              <span className="text-xs text-cine-400 font-mono">Escala 1 a 10</span>
+              <span className="text-xs text-cine-400 font-mono">
+                Escala 1 a 10
+              </span>
             </div>
 
             <div className="w-full h-48">
@@ -651,7 +592,8 @@ export default function PublicGamerProfilePage() {
                 </h2>
               </div>
               <p className="text-xs text-cine-400 mt-0.5">
-                Comparativa directa entre el criterio del usuario y la media de analistas de Metacritic.
+                Comparativa directa entre el criterio del usuario y la media de
+                analistas de Metacritic.
               </p>
             </div>
             <span className="text-[11px] font-mono text-cine-500">
@@ -829,7 +771,6 @@ export default function PublicGamerProfilePage() {
           gameKnowledge: gaming.globalGameKnowledge,
         }}
         topItems={topFiveGames.slice(0, 3)}
-        achievements={data.achievements?.achievements || []}
       />
     </div>
   );
