@@ -2,14 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  Download,
-  Share2,
-  X,
-  Film,
-  Gamepad2,
-  Loader2,
-} from "lucide-react";
+import { Download, Share2, X, Film, Gamepad2, Loader2 } from "lucide-react";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -170,12 +163,12 @@ export default function SocialWrappedModal({
       ctx.strokeRect(40, 40, W - 80, H - 80);
     }
 
-    // 3. Encabezado MasterHub
+    // 3. Encabezado
     ctx.fillStyle = isGaming ? "#c084fc" : "#fbbf24";
     ctx.font = "bold 34px monospace";
     ctx.textAlign = "left";
     ctx.fillText(
-      isGaming ? "MASTERHUB • GAMER WRAPPED" : "MASTERHUB • CINEPHILE WRAPPED",
+      isGaming ? "GAMER HUB • WRAPPED" : "CINEPHILE HUB • WRAPPED",
       100,
       135,
     );
@@ -279,10 +272,11 @@ export default function SocialWrappedModal({
       ctx.fill();
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = "black 64px sans-serif";
+      ctx.font = "bold 64px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const initial = (user.displayName || (isGaming ? "G" : "C"))[0].toUpperCase();
+      const initial = (user.displayName ||
+        (isGaming ? "G" : "C"))[0].toUpperCase();
       ctx.fillText(initial, avatarX + avatarSize / 2, avatarY + avatarSize / 2);
     }
 
@@ -308,12 +302,11 @@ export default function SocialWrappedModal({
     );
 
     // 5. SECCIÓN DE ESTADÍSTICAS (4 CAJAS COMPACTAS Y EQUILIBRADAS)
-    // Se corrigen los espacios excesivos y se aumentan los números a 88px
     const statsY = 495;
     const boxW = (W - 240) / 2;
-    const boxH = 260;
+    const boxH = 220;
     const gapX = 40;
-    const gapY = 25;
+    const gapY = 22;
 
     const avgRatingFormatted =
       stats.averageRating !== null && stats.averageRating !== undefined
@@ -427,8 +420,8 @@ export default function SocialWrappedModal({
     }
 
     // 6. SECCIÓN TOP 3 DEL PERFIL (En vez de los logros)
-    const topSectionY = statsY + boxH * 2 + gapY + 35;
-    const topSectionH = 610;
+    const topSectionY = statsY + boxH * 2 + gapY + 30;
+    const topSectionH = 670;
 
     ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
     ctx.strokeStyle = isGaming
@@ -447,9 +440,11 @@ export default function SocialWrappedModal({
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 40px sans-serif";
     ctx.fillText(
-      isGaming ? "👑 TOP 3 VIDEOJUEGOS PREDILECTOS" : "👑 TOP 3 CINÉFILO PREDILECTO",
+      isGaming
+        ? "👑 TOP 3 VIDEOJUEGOS PREDILECTOS"
+        : "👑 TOP 3 CINÉFILO PREDILECTO",
       140,
-      topSectionY + 70,
+      topSectionY + 68,
     );
 
     ctx.fillStyle = "rgba(156, 163, 175, 0.9)";
@@ -459,7 +454,7 @@ export default function SocialWrappedModal({
         ? "Las obras maestras e insignia de tu biblioteca gamer"
         : "Las 3 obras cumbres e insignia de tu colección",
       140,
-      topSectionY + 110,
+      topSectionY + 108,
     );
 
     // Dibujar 3 puestos del Top 3
@@ -470,7 +465,7 @@ export default function SocialWrappedModal({
       topThree[2] || null,
     ];
 
-    const slotH = 125;
+    const slotH = 140;
     const slotGap = 20;
     const slotStartY = topSectionY + 145;
 
@@ -481,9 +476,7 @@ export default function SocialWrappedModal({
       const itemX = 140;
 
       // Fondo del slot
-      ctx.fillStyle = item
-        ? "rgba(15, 23, 42, 0.7)"
-        : "rgba(15, 23, 42, 0.3)";
+      ctx.fillStyle = item ? "rgba(15, 23, 42, 0.7)" : "rgba(15, 23, 42, 0.3)";
       ctx.strokeStyle =
         i === 0
           ? "rgba(234, 179, 8, 0.5)"
@@ -512,7 +505,7 @@ export default function SocialWrappedModal({
         ctx.fill();
       }
       ctx.fillStyle = i === 1 ? "#090a10" : "#ffffff";
-      ctx.font = "black 28px monospace";
+      ctx.font = "bold 28px monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(`#${i + 1}`, medalX + 28, medalY + 29);
@@ -524,7 +517,11 @@ export default function SocialWrappedModal({
         ctx.textAlign = "left";
         ctx.fillStyle = "#6b7280";
         ctx.font = "italic 26px sans-serif";
-        ctx.fillText("Espacio disponible en tu Top 3", medalX + 80, itemY + slotH / 2 + 8);
+        ctx.fillText(
+          "Espacio disponible en tu Top 3",
+          medalX + 80,
+          itemY + slotH / 2 + 8,
+        );
         continue;
       }
 
@@ -607,8 +604,12 @@ export default function SocialWrappedModal({
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#fbbf24";
-        ctx.font = "black 28px monospace";
-        ctx.fillText(`★ ${item.rating.toFixed(1)}`, ratingBoxX + ratingBoxW / 2, ratingBoxY + ratingBoxH / 2);
+        ctx.font = "bold 28px monospace";
+        ctx.fillText(
+          `★ ${item.rating.toFixed(1)}`,
+          ratingBoxX + ratingBoxW / 2,
+          ratingBoxY + ratingBoxH / 2,
+        );
         ctx.textBaseline = "alphabetic";
       }
     }
@@ -620,8 +621,8 @@ export default function SocialWrappedModal({
     ctx.font = "bold 32px sans-serif";
     ctx.fillText(
       isGaming
-        ? "MasterHub Gaming • Conectado con RAWG & Metacritic"
-        : "MasterHub Cinephile • Pasión por el Séptimo Arte",
+        ? "Gamer Hub • Conectado con RAWG & Metacritic"
+        : "Cinephile Hub • Pasión por el Séptimo Arte",
       W / 2,
       footerY,
     );
@@ -656,31 +657,31 @@ export default function SocialWrappedModal({
     sub: string,
     accentColor: string,
   ) => {
-    ctx.fillStyle = "rgba(17, 24, 39, 0.8)";
+    ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     ctx.lineWidth = 2;
     if (typeof ctx.roundRect === "function") {
       ctx.beginPath();
-      ctx.roundRect(x, y, w, h, 28);
+      ctx.roundRect(x, y, w, h, 24);
       ctx.fill();
       ctx.stroke();
     }
 
     // Etiqueta superior
     ctx.fillStyle = accentColor;
-    ctx.font = "bold 26px monospace";
+    ctx.font = "bold 24px monospace";
     ctx.textAlign = "left";
-    ctx.fillText(label, x + 35, y + 52);
+    ctx.fillText(label, x + 32, y + 46);
 
-    // Número / Valor Principal (Mucho más grande y visible: 88px)
+    // Número / Valor Principal (Mucho más grande y visible: 92px bold)
     ctx.fillStyle = "#ffffff";
-    ctx.font = "black 88px sans-serif";
-    ctx.fillText(value, x + 35, y + 155);
+    ctx.font = "bold 92px sans-serif";
+    ctx.fillText(value, x + 32, y + 140);
 
     // Subtítulo informativo
     ctx.fillStyle = "rgba(156, 163, 175, 0.9)";
-    ctx.font = "24px sans-serif";
-    ctx.fillText(sub, x + 35, y + 215);
+    ctx.font = "bold 22px sans-serif";
+    ctx.fillText(sub, x + 32, y + 192);
   };
 
   useEffect(() => {

@@ -390,22 +390,23 @@ export default function WatchedCatalogSection({
                   <div className="absolute inset-0 bg-gradient-to-t from-cine-950/80 via-transparent to-transparent opacity-80" />
 
                   {/* Badge de Calificación */}
-                  {item.userRating !== null && item.userRating !== undefined && (
-                    <div
-                      className={`absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold flex items-center gap-1 backdrop-blur-md shadow border ${
-                        isCinema
-                          ? "bg-black/80 text-amber-400 border-amber-500/40"
-                          : "bg-black/80 text-purple-400 border-purple-500/40"
-                      }`}
-                    >
-                      <Star
-                        className={`w-2.5 h-2.5 ${
-                          isCinema ? "fill-amber-400" : "fill-purple-400"
+                  {item.userRating !== null &&
+                    item.userRating !== undefined && (
+                      <div
+                        className={`absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold flex items-center gap-1 backdrop-blur-md shadow border ${
+                          isCinema
+                            ? "bg-black/80 text-amber-400 border-amber-500/40"
+                            : "bg-black/80 text-purple-400 border-purple-500/40"
                         }`}
-                      />
-                      <span>{item.userRating.toFixed(1)}</span>
-                    </div>
-                  )}
+                      >
+                        <Star
+                          className={`w-2.5 h-2.5 ${
+                            isCinema ? "fill-amber-400" : "fill-purple-400"
+                          }`}
+                        />
+                        <span>{item.userRating.toFixed(1)}</span>
+                      </div>
+                    )}
 
                   {/* Badge de Tipo (Serie) */}
                   {isSeries && (
@@ -475,7 +476,8 @@ export default function WatchedCatalogSection({
             className="px-5 py-2.5 rounded-xl bg-cine-900 hover:bg-cine-800 border border-cine-700 text-xs font-bold text-white flex items-center gap-2 transition-all shadow-md hover:border-cine-500 cursor-pointer"
           >
             <span>
-              Ver más títulos ({displayedItems.length} de {filteredItems.length})
+              Ver más títulos ({displayedItems.length} de {filteredItems.length}
+              )
             </span>
             <ChevronDown className="w-3.5 h-3.5" />
           </button>

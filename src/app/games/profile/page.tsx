@@ -98,7 +98,7 @@ export default function GamerProfilePage() {
         toast.error("Inicia sesión para compartir tu perfil.");
         return;
       }
-      const shareUrl = `${window.location.origin}/u/${encodeURIComponent(targetUser)}`;
+      const shareUrl = `${window.location.origin}/games/u/${encodeURIComponent(targetUser)}`;
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl);
       }
@@ -320,7 +320,7 @@ export default function GamerProfilePage() {
                 title="Generar tarjeta de resumen para redes sociales"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>MasterHub Wrapped</span>
+                <span>Gamer Hub Wrapped</span>
               </button>
             </div>
           </div>
