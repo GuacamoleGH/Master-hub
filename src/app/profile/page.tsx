@@ -182,7 +182,7 @@ export default function ProfilePage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar con botón de cambio */}
-            <div className="relative group/avatar w-24 h-24 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
+            <div className="relative group/avatar w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
               {profileData.avatarUrl ? (
                 <img
                   src={profileData.avatarUrl}
@@ -296,7 +296,11 @@ export default function ProfilePage() {
 
           {/* Barra de Nivel Cinéfilo */}
           <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
-            <CinephileLevelBar totalXp={stats.totalXp} variant="cinema" />
+            <CinephileLevelBar
+              totalXp={stats.totalXp}
+              variant="cinema"
+              className="h-full lg:h-[166px]"
+            />
           </div>
         </div>
       </section>

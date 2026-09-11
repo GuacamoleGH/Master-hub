@@ -6,9 +6,13 @@ import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
 
 interface GamerLevelBarProps {
   totalXp: number;
+  className?: string;
 }
 
-export default function GamerLevelBar({ totalXp }: GamerLevelBarProps) {
+export default function GamerLevelBar({
+  totalXp,
+  className = "",
+}: GamerLevelBarProps) {
   const {
     level,
     rankTitle,
@@ -23,7 +27,9 @@ export default function GamerLevelBar({ totalXp }: GamerLevelBarProps) {
   const xpNeededForNext = nextLevelXp - currentLevelBaseXp;
 
   return (
-    <div className="glass-panel p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-lg">
+    <div
+      className={`glass-panel p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-lg flex flex-col justify-between ${className}`}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Nivel y Rango */}
         <div className="flex items-center gap-3.5">
