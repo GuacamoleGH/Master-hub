@@ -195,7 +195,7 @@ export default function GamerProfilePage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar */}
-            <div className="relative group/avatar w-24 h-24 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-400 shadow-[0_0_20px_rgba(139,92,246,0.4)] shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
+            <div className="relative group/avatar w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-400 shadow-[0_0_20px_rgba(139,92,246,0.4)] shrink-0 bg-cine-900 flex items-center justify-center text-purple-300">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
@@ -310,7 +310,7 @@ export default function GamerProfilePage() {
 
           {/* Barra de Nivel Gamer */}
           <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
-            <GamerLevelBar totalXp={stats.totalXp} />
+            <GamerLevelBar totalXp={stats.totalXp} className="h-full lg:h-[166px]" />
           </div>
         </div>
       </section>

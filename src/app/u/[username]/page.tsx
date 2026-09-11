@@ -199,7 +199,7 @@ export default function PublicCinephileProfilePage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar */}
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
               {user.image ? (
                 <img
                   src={user.image}
@@ -298,6 +298,7 @@ export default function PublicCinephileProfilePage() {
             <CinephileLevelBar
               totalXp={cinema.totalXp ?? user.totalXp ?? 0}
               variant="cinema"
+              className="h-full lg:h-[166px]"
             />
           </div>
         </div>

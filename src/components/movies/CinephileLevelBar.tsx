@@ -15,6 +15,7 @@ interface CinephileLevelBarProps {
   nextLevelXp?: number;
   variant?: "cinema" | "series";
   universeLabel?: string;
+  className?: string;
 }
 
 export default function CinephileLevelBar({
@@ -28,6 +29,7 @@ export default function CinephileLevelBar({
   nextLevelXp: propNextLevelXp,
   variant = "cinema",
   universeLabel,
+  className = "",
 }: CinephileLevelBarProps) {
   const info = calculateLevelAndRank(totalXp || 0);
 
@@ -48,11 +50,11 @@ export default function CinephileLevelBar({
 
   return (
     <div
-      className={`glass-panel p-5 rounded-2xl border shadow-lg relative overflow-hidden ${
+      className={`glass-panel p-5 rounded-2xl border shadow-lg relative overflow-hidden flex flex-col justify-between ${
         isSeries
           ? "border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-cine-900 to-cine-950 shadow-[0_0_20px_rgba(168,85,247,0.15)]"
           : "border-amber-500/20 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-gold-glow"
-      }`}
+      } ${className}`}
     >
       {/* Luz ambiental decorativa */}
       <div

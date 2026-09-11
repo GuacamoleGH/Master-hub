@@ -36,18 +36,18 @@ export default function GameHeader() {
     { href: "/games", label: "Inicio", icon: Gamepad2 },
     { href: "/games/backlog", label: "Backlog", icon: Bookmark },
     { href: "/games/completed", label: "Completados", icon: CheckCircle2 },
-    { href: "/friends", label: "Amigos", icon: Users },
+    { href: "/games/friends", label: "Amigos", icon: Users },
     { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
     { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
   ];
 
   const isActive = (href: string) => {
     if (href === "/games") return pathname === "/games";
-    if (href === "/friends")
+    if (href === "/games/friends")
       return (
-        pathname === "/friends" ||
-        pathname.startsWith("/friends/") ||
-        pathname === "/amigos"
+        pathname === "/games/friends" ||
+        pathname.startsWith("/games/friends/") ||
+        pathname === "/games/amigos"
       );
     if (href === "/games/reviews")
       return pathname === "/games/reviews" || pathname === "/games/resenas";
