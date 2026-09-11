@@ -303,7 +303,7 @@ export default function GamerFriendsPage() {
                 {/* Botón de Enlace a Perfil Gamer */}
                 <div className="pt-4 mt-3 border-t border-cine-800/60">
                   <Link
-                    href={`/games/u/${friend.username || friend.id}`}
+                    href={`/u/${friend.username || friend.id}?tab=gaming`}
                     onClick={() => sounds.click()}
                     className="w-full py-2.5 px-3 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]"
                   >

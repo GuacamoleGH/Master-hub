@@ -156,7 +156,7 @@ export default function GameHeader() {
                     </p>
                   </div>
                   <Link
-                    href={`/u/${session.user.username || session.user.id}`}
+                    href={`/u/${session.user.username || session.user.id}?tab=gaming`}
                     onClick={() => setIsUserMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-xs text-purple-300 hover:bg-cine-800 hover:text-white"
                   >

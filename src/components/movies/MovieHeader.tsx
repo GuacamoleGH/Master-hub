@@ -159,11 +159,11 @@ export default function Header() {
                     </p>
                   </div>
                   <Link
-                    href={`/u/${session.user.username || session.user.id}`}
+                    href={`/u/${session.user.username || session.user.id}?tab=cinema`}
                     onClick={() => setIsUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs text-purple-300 hover:bg-cine-800 hover:text-white"
+                    className="flex items-center gap-2 px-3 py-2 text-xs text-amber-300 hover:bg-cine-800 hover:text-white"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                    <Share2 className="w-3.5 h-3.5 text-amber-400" />
                     <span>Mi Perfil Público</span>
                   </Link>
                   <Link
