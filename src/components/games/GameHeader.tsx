@@ -39,7 +39,6 @@ export default function GameHeader() {
     { href: "/friends", label: "Amigos", icon: Users },
     { href: "/games/reviews", label: "Reseñas", icon: MessageSquare },
     { href: "/leaderboard?tab=gaming", label: "Ranking", icon: Trophy },
-    { href: "/games/achievements", label: "Logros", icon: Award },
   ];
 
   const isActive = (href: string) => {
@@ -54,8 +53,6 @@ export default function GameHeader() {
       return pathname === "/games/reviews" || pathname === "/games/resenas";
     if (href.startsWith("/leaderboard"))
       return pathname === "/leaderboard" || pathname === "/ranking";
-    if (href === "/games/achievements")
-      return pathname.startsWith("/games/achievements");
     return pathname.startsWith(href);
   };
 

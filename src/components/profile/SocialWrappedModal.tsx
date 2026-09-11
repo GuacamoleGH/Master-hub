@@ -35,7 +35,6 @@ interface SocialWrappedModalProps {
     gameKnowledge?: number | null;
   };
   topItems?: WrappedTopItem[];
-  achievements?: any[];
 }
 
 // Cargar imagen a través del proxy local para evitar problemas de CORS y canvas tainting

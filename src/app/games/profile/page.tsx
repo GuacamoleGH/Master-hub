@@ -46,7 +46,6 @@ import WatchedCatalogSection, {
   WatchedCatalogItem,
 } from "@/components/profile/WatchedCatalogSection";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
-import { UserAchievement } from "@/lib/achievements";
 import { GamerStats } from "@/types/game";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -76,14 +75,6 @@ export default function GamerProfilePage() {
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
-  // Logros y Wrapped
-  const [achievementsData, setAchievementsData] = useState<{
-    achievements: UserAchievement[];
-    totalUnlocked: number;
-    totalAvailable: number;
-    completionRate: number;
-    totalXpEarned: number;
-  } | null>(null);
   const [isWrappedOpen, setIsWrappedOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const toast = useToast();
@@ -126,19 +117,11 @@ export default function GamerProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const [resProfile, resAch] = await Promise.all([
-        fetch("/api/games/profile"),
-        fetch("/api/profile/achievements?universe=GAMING"),
-      ]);
+      const resProfile = await fetch("/api/games/profile");
 
       if (resProfile.ok) {
         const data = await resProfile.json();
         setProfileData(data);
-      }
-
-      if (resAch.ok) {
-        const dataAch = await resAch.json();
-        setAchievementsData(dataAch);
       }
     } catch (err) {
       console.error("Error al cargar perfil gamer:", err);
@@ -412,79 +395,6 @@ export default function GamerProfilePage() {
         type="gaming"
         items={profileData.gamesCatalog || []}
       />
-
-      {/* Vitrina de Trofeos Gamer - Banner Resumen Destacado */}
-      {achievementsData && (
-        <section className="glass-panel p-6 rounded-3xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-cine-900 to-cine-950 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                <Trophy className="w-5 h-5 text-purple-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-white">
-                    Vitrina de Trofeos Gamer
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    {achievementsData.totalUnlocked} /{" "}
-                    {achievementsData.totalAvailable} Desbloqueados
-                  </span>
-                </div>
-                <p className="text-xs text-cine-400 mt-0.5">
-                  {achievementsData.completionRate}% completado ·{" "}
-                  {achievementsData.totalXpEarned} XP acumulados
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/games/achievements"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer shrink-0"
-            >
-              <Award className="w-4 h-4" />
-              <span>
-                Ver Vitrina Completa de Logros (
-                {achievementsData.totalAvailable})
-              </span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Muestra de Trofeos Destacados */}
-          <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {achievementsData.achievements.slice(0, 6).map((ach) => (
-              <Link
-                key={ach.id}
-                href="/games/achievements"
-                className={`p-3 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 hover:scale-[1.02] cursor-pointer ${
-                  ach.isUnlocked
-                    ? "bg-purple-950/30 border-purple-500/40 text-purple-200 shadow-[0_0_10px_rgba(139,92,246,0.15)]"
-                    : "bg-cine-900/40 border-cine-800 text-cine-500 opacity-60"
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${
-                    ach.isUnlocked
-                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/50"
-                      : "bg-cine-800 text-cine-600"
-                  }`}
-                >
-                  {ach.isUnlocked ? "🏆" : "🔒"}
-                </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-xs font-bold text-white truncate">
-                    {ach.title}
-                  </p>
-                  <p className="text-[10px] text-cine-400 font-mono mt-0.5">
-                    +{ach.xp} XP
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Récords Personales y Desglose de Biblioteca */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -860,7 +770,6 @@ export default function GamerProfilePage() {
           gameKnowledge: stats.globalGameKnowledge,
         }}
         topItems={profileData.topGames?.slice(0, 3) || []}
-        achievements={achievementsData?.achievements || []}
       />
     </div>
   );

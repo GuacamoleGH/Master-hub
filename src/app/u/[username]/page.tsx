@@ -30,7 +30,6 @@ import WatchedCatalogSection, {
 } from "@/components/profile/WatchedCatalogSection";
 import AffinityCard from "@/components/profile/AffinityCard";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
-import { UserAchievement } from "@/lib/achievements";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
 
@@ -72,13 +71,6 @@ interface PublicCinemaProfileData {
     watchesByMonth?: any[];
   };
   affinity: any;
-  achievements?: {
-    achievements: UserAchievement[];
-    totalUnlocked: number;
-    totalAvailable: number;
-    totalXpEarned: number;
-    completionRate: number;
-  };
 }
 
 export default function PublicCinephileProfilePage() {
@@ -171,24 +163,27 @@ export default function PublicCinephileProfilePage() {
   const { user, isOwner, cinema, affinity } = data;
 
   // Formatear Top 5 Cinéfilo
-  const topFiveCine: TopFiveItem[] = (cinema.topCine || cinema.topMovies || []).map(
-    (m: any) => ({
-      id: m.id,
-      title: m.title || m.movie?.title || m.series?.name,
-      image: m.image ?? m.posterPath ?? m.movie?.posterPath ?? m.series?.posterPath,
-      year: m.year ?? m.movie?.year ?? m.series?.firstAirYear,
-      rating: m.rating ?? m.userRating,
-      isFavorite: m.isFavorite,
-      link:
-        m.link ||
-        (m.movie
-          ? `/movie/${m.movie.tmdbId}`
-          : m.series
-            ? `/series/${m.series.tmdbId}`
-            : "#"),
-      mediaType: m.mediaType || (m.series ? "series" : "movie"),
-    }),
-  );
+  const topFiveCine: TopFiveItem[] = (
+    cinema.topCine ||
+    cinema.topMovies ||
+    []
+  ).map((m: any) => ({
+    id: m.id,
+    title: m.title || m.movie?.title || m.series?.name,
+    image:
+      m.image ?? m.posterPath ?? m.movie?.posterPath ?? m.series?.posterPath,
+    year: m.year ?? m.movie?.year ?? m.series?.firstAirYear,
+    rating: m.rating ?? m.userRating,
+    isFavorite: m.isFavorite,
+    link:
+      m.link ||
+      (m.movie
+        ? `/movie/${m.movie.tmdbId}`
+        : m.series
+          ? `/series/${m.series.tmdbId}`
+          : "#"),
+    mediaType: m.mediaType || (m.series ? "series" : "movie"),
+  }));
 
   const memberYear = user.createdAt
     ? new Date(user.createdAt).getFullYear()
@@ -338,7 +333,10 @@ export default function PublicCinephileProfilePage() {
           </div>
           <div className="text-3xl font-black text-white font-mono">
             {cinema.totalWatchlist}
-            <span className="text-xs font-normal text-cine-400"> pendientes</span>
+            <span className="text-xs font-normal text-cine-400">
+              {" "}
+              pendientes
+            </span>
           </div>
           <div className="text-[11px] text-cine-500 mt-1">
             Por ver en streaming / cine
@@ -363,7 +361,8 @@ export default function PublicCinephileProfilePage() {
         {/* Tu Nota Media */}
         <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
           <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
-            <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Tu Nota Media
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Tu Nota
+            Media
           </div>
           <div className="text-3xl font-black text-white font-mono">
             {cinema.averageRating || "—"}
@@ -388,78 +387,6 @@ export default function PublicCinephileProfilePage() {
         isOwner={isOwner}
       />
 
-      {/* Vitrina de Trofeos Cinéfilos */}
-      {data.achievements && (
-        <section className="glass-panel p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                <Trophy className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-white">
-                    Vitrina de Trofeos Cinéfilos
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {data.achievements.totalUnlocked} /{" "}
-                    {data.achievements.totalAvailable} Desbloqueados
-                  </span>
-                </div>
-                <p className="text-xs text-cine-400 mt-0.5">
-                  {data.achievements.completionRate}% completado ·{" "}
-                  {data.achievements.totalXpEarned} XP acumulados
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/achievements"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black text-xs rounded-xl shadow-gold-glow transition-all cursor-pointer shrink-0"
-            >
-              <Award className="w-4 h-4" />
-              <span>Explorar Todos los Logros</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Muestra de Trofeos Destacados */}
-          <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {data.achievements.achievements
-              .filter((a) => !a.universe || a.universe === "CINE")
-              .slice(0, 6)
-              .map((ach) => (
-                <div
-                  key={ach.id}
-                  className={`p-3 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 ${
-                    ach.isUnlocked
-                      ? "bg-amber-950/30 border-amber-500/40 text-amber-200 shadow-[0_0_10px_rgba(245,158,11,0.15)]"
-                      : "bg-cine-900/40 border-cine-800 text-cine-500 opacity-60"
-                  }`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${
-                      ach.isUnlocked
-                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
-                        : "bg-cine-800 text-cine-600"
-                    }`}
-                  >
-                    {ach.isUnlocked ? "🏆" : "🔒"}
-                  </div>
-                  <div className="min-w-0 w-full">
-                    <p className="text-xs font-bold text-white truncate">
-                      {ach.title}
-                    </p>
-                    <p className="text-[10px] text-cine-400 font-mono mt-0.5">
-                      +{ach.xp} XP
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </section>
-      )}
-
       {/* Rankings Personales: Biggest W vs Biggest L */}
       {(cinema.biggestW || cinema.biggestL) && (
         <section className="space-y-4">
@@ -476,7 +403,9 @@ export default function PublicCinephileProfilePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">👑</span>
-                    <h3 className="font-bold text-white text-base">BIGGEST W</h3>
+                    <h3 className="font-bold text-white text-base">
+                      BIGGEST W
+                    </h3>
                   </div>
                   <BallKnowledgeBadge
                     score={cinema.biggestW.ballKnowledge}
@@ -525,7 +454,9 @@ export default function PublicCinephileProfilePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🤡</span>
-                    <h3 className="font-bold text-white text-base">BIGGEST L</h3>
+                    <h3 className="font-bold text-white text-base">
+                      BIGGEST L
+                    </h3>
                   </div>
                   <BallKnowledgeBadge
                     score={cinema.biggestL.ballKnowledge}
@@ -546,7 +477,8 @@ export default function PublicCinephileProfilePage() {
                       {cinema.biggestL.title}
                     </h4>
                     <p className="text-xs text-cine-300">
-                      Tu mayor discrepancia respecto a la nota comunitaria de IMDb.
+                      Tu mayor discrepancia respecto a la nota comunitaria de
+                      IMDb.
                     </p>
                     <div className="flex items-center gap-3 text-xs font-mono pt-1">
                       <span className="text-amber-400 font-bold">
@@ -643,7 +575,6 @@ export default function PublicCinephileProfilePage() {
           gameKnowledge: null,
         }}
         topItems={topFiveCine.slice(0, 3)}
-        achievements={data.achievements?.achievements || []}
       />
     </div>
   );
