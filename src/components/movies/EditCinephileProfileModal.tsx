@@ -33,7 +33,7 @@ export default function EditCinephileProfileModal({
   initialBio,
   initialAvatar,
 }: EditCinephileProfileModalProps) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
@@ -76,6 +76,12 @@ export default function EditCinephileProfileModal({
       });
 
       if (res.ok) {
+        if (update) {
+          await update({
+            name: displayName.trim(),
+            image: avatarUrl.trim() || null,
+          });
+        }
         sounds.playSuccess();
         onSaved();
         onClose();

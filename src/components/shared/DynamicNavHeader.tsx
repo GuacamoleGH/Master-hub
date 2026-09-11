@@ -128,16 +128,16 @@ export default function DynamicNavHeader() {
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cine-900 hover:bg-cine-800 border border-cine-700/80 transition-colors"
+                  className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cine-900 hover:bg-cine-800 border border-cine-700/80 transition-colors"
                 >
                   {session.user.image ? (
                     <img
                       src={session.user.image}
                       alt={session.user.name || "Usuario"}
-                      className="w-5 h-5 rounded-full object-cover"
+                      className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shadow-sm shrink-0"
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold flex items-center justify-center shrink-0">
                       {(session.user.name ||
                         session.user.username ||
                         "U")[0].toUpperCase()}
@@ -151,16 +151,31 @@ export default function DynamicNavHeader() {
 
                 {isMenuOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-48 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
+                    className="absolute right-0 mt-2 w-52 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
                     onMouseLeave={() => setIsMenuOpen(false)}
                   >
-                    <div className="px-3 py-2 border-b border-cine-800">
-                      <p className="text-xs font-bold text-white truncate">
-                        {session.user.name || session.user.username}
-                      </p>
-                      <p className="text-[10px] text-cine-400 truncate font-mono">
-                        {session.user.email}
-                      </p>
+                    <div className="px-3 py-2.5 border-b border-cine-800 flex items-center gap-2.5">
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name || "Usuario"}
+                          className="w-8 h-8 rounded-full object-cover border border-purple-500/40 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold flex items-center justify-center shrink-0">
+                          {(session.user.name ||
+                            session.user.username ||
+                            "U")[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-white truncate">
+                          {session.user.name || session.user.username}
+                        </p>
+                        <p className="text-[10px] text-cine-400 truncate font-mono">
+                          {session.user.email}
+                        </p>
+                      </div>
                     </div>
                     <Link
                       href={`/u/${session.user.username || session.user.id}`}
