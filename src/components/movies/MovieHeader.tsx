@@ -130,10 +130,10 @@ export default function Header() {
                   <img
                     src={session.user.image}
                     alt={session.user.name || "Usuario"}
-                    className="w-5 h-5 rounded-lg object-cover"
+                    className="w-6 h-6 rounded-lg object-cover border border-amber-500/40 shrink-0"
                   />
                 ) : (
-                  <div className="w-5 h-5 rounded-lg bg-amber-500/20 text-amber-400 text-[11px] font-bold flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0">
                     {(session.user.name ||
                       session.user.username ||
                       "U")[0].toUpperCase()}
@@ -147,16 +147,31 @@ export default function Header() {
 
               {isUserMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-48 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
+                  className="absolute right-0 mt-2 w-52 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
                   onMouseLeave={() => setIsUserMenuOpen(false)}
                 >
-                  <div className="px-3 py-2 border-b border-cine-800">
-                    <p className="text-xs font-bold text-white truncate">
-                      {session.user.name || session.user.username}
-                    </p>
-                    <p className="text-[10px] text-cine-400 truncate font-mono">
-                      {session.user.email}
-                    </p>
+                  <div className="px-3 py-2.5 border-b border-cine-800 flex items-center gap-2.5">
+                    {session.user.image ? (
+                      <img
+                        src={session.user.image}
+                        alt={session.user.name || "Usuario"}
+                        className="w-8 h-8 rounded-lg object-cover border border-amber-500/40 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0">
+                        {(session.user.name ||
+                          session.user.username ||
+                          "U")[0].toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">
+                        {session.user.name || session.user.username}
+                      </p>
+                      <p className="text-[10px] text-cine-400 truncate font-mono">
+                        {session.user.email}
+                      </p>
+                    </div>
                   </div>
                   <Link
                     href={`/u/${session.user.username || session.user.id}?tab=cinema`}
@@ -231,11 +246,19 @@ export default function Header() {
         <div className="lg:hidden border-t border-cine-800 bg-cine-950/95 px-4 py-3 space-y-1">
           {session?.user ? (
             <div className="flex items-center gap-3 p-2.5 rounded-xl bg-cine-900 border border-cine-800 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center">
-                {(session.user.name ||
-                  session.user.username ||
-                  "U")[0].toUpperCase()}
-              </div>
+              {session.user.image ? (
+                <img
+                  src={session.user.image}
+                  alt={session.user.name || "Usuario"}
+                  className="w-8 h-8 rounded-lg object-cover border border-amber-500/40 shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 text-xs font-bold flex items-center justify-center shrink-0">
+                  {(session.user.name ||
+                    session.user.username ||
+                    "U")[0].toUpperCase()}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-white truncate">
                   {session.user.name || session.user.username}
