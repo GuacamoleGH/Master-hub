@@ -40,7 +40,6 @@ export default function Header() {
     { href: "/friends", label: "Amigos", icon: Users },
     { href: "/leaderboard", label: "Ranking", icon: Trophy },
     { href: "/reviews", label: "Reseñas", icon: MessageSquare },
-    { href: "/achievements", label: "Logros", icon: Award },
   ];
 
   const isActive = (href: string) => {
@@ -57,7 +56,6 @@ export default function Header() {
       return pathname === "/leaderboard" || pathname === "/ranking";
     if (href === "/reviews")
       return pathname === "/reviews" || pathname === "/resenas";
-    if (href === "/achievements") return pathname.startsWith("/achievements");
     return pathname === href || pathname.startsWith(href + "/");
   };
 

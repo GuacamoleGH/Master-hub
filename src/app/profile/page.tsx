@@ -29,14 +29,12 @@ import GenreChart from "@/components/charts/GenreChart";
 import WatchesTimelineChart from "@/components/charts/WatchesTimelineChart";
 import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
 import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
-import AchievementsShowcase from "@/components/profile/AchievementsShowcase";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
 import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
 import WatchedCatalogSection, {
   WatchedCatalogItem,
 } from "@/components/profile/WatchedCatalogSection";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
-import { UserAchievement } from "@/lib/achievements";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
@@ -69,14 +67,6 @@ export default function ProfilePage() {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Logros y Wrapped
-  const [achievementsData, setAchievementsData] = useState<{
-    achievements: UserAchievement[];
-    totalUnlocked: number;
-    totalAvailable: number;
-    completionRate: number;
-    totalXpEarned: number;
-  } | null>(null);
   const [isWrappedOpen, setIsWrappedOpen] = useState(false);
 
   // Modal de edición de perfil cinéfilo
@@ -122,10 +112,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const [resProfile, resAch] = await Promise.all([
-        fetch("/api/profile"),
-        fetch("/api/profile/achievements?universe=CINE"),
-      ]);
+      const resProfile = await fetch("/api/profile");
 
       if (resProfile.ok) {
         const data = await resProfile.json();
@@ -133,11 +120,6 @@ export default function ProfilePage() {
         setStats(data.stats);
         setTopCine(data.topCine || []);
         setWatchedCatalog(data.watchedCatalog || []);
-      }
-
-      if (resAch.ok) {
-        const dataAch = await resAch.json();
-        setAchievementsData(dataAch);
       }
     } catch (err) {
       console.error("Error al cargar perfil:", err);
@@ -392,80 +374,7 @@ export default function ProfilePage() {
       {/* Catálogo Completo de Películas y Series Vistas */}
       <WatchedCatalogSection type="cinema" items={watchedCatalog} />
 
-      {/* 2. Vitrina de Trofeos Cinéfilos - Banner Resumen Destacado */}
-      {achievementsData && (
-        <section className="glass-panel p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cine-800/80 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                <Trophy className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-white">
-                    Vitrina de Trofeos Cinéfilos
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {achievementsData.totalUnlocked} /{" "}
-                    {achievementsData.totalAvailable} Desbloqueados
-                  </span>
-                </div>
-                <p className="text-xs text-cine-400 mt-0.5">
-                  {achievementsData.completionRate}% completado ·{" "}
-                  {achievementsData.totalXpEarned} XP acumulados
-                </p>
-              </div>
-            </div>
-
-            <Link
-              href="/achievements"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black text-xs rounded-xl shadow-gold-glow transition-all cursor-pointer shrink-0"
-            >
-              <Award className="w-4 h-4" />
-              <span>
-                Ver Vitrina Completa de Logros (
-                {achievementsData.totalAvailable})
-              </span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Muestra de Trofeos Destacados */}
-          <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {achievementsData.achievements.slice(0, 6).map((ach) => (
-              <Link
-                key={ach.id}
-                href="/achievements"
-                className={`p-3 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 hover:scale-[1.02] cursor-pointer ${
-                  ach.isUnlocked
-                    ? "bg-amber-950/30 border-amber-500/40 text-amber-200 shadow-[0_0_10px_rgba(245,158,11,0.15)]"
-                    : "bg-cine-900/40 border-cine-800 text-cine-500 opacity-60"
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${
-                    ach.isUnlocked
-                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/50"
-                      : "bg-cine-800 text-cine-600"
-                  }`}
-                >
-                  {ach.isUnlocked ? "🏆" : "🔒"}
-                </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-xs font-bold text-white truncate">
-                    {ach.title}
-                  </p>
-                  <p className="text-[10px] text-cine-400 font-mono mt-0.5">
-                    +{ach.xp} XP
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 3. Rankings Personales: Biggest W vs Biggest L */}
+      {/* 2. Rankings Personales: Biggest W vs Biggest L */}
       {(stats.biggestW || stats.biggestL) && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
@@ -662,7 +571,6 @@ export default function ProfilePage() {
           gameKnowledge: null,
         }}
         topItems={topCine.slice(0, 3)}
-        achievements={achievementsData?.achievements || []}
       />
     </div>
   );
