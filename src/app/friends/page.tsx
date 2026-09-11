@@ -39,9 +39,9 @@ export default function CinemaFriendsPage() {
   const [friends, setFriends] = useState<FriendUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"recent" | "watched" | "ballKnowledge" | "rating">(
-    "recent",
-  );
+  const [sortBy, setSortBy] = useState<
+    "recent" | "watched" | "ballKnowledge" | "rating"
+  >("recent");
 
   useEffect(() => {
     const fetchFriends = async () => {

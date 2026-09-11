@@ -210,7 +210,7 @@ export default function PublicGamerProfilePage() {
         {/* Glow de fondo */}
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none bg-purple-600/10" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar */}
             <div className="relative w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.3)] shrink-0 bg-cine-900 flex items-center justify-center">

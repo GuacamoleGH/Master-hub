@@ -179,7 +179,7 @@ export default function ProfilePage() {
       <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar con botón de cambio */}
             <div className="relative group/avatar w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
@@ -239,7 +239,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Columna de Botones de Acción */}
-            <div className="flex flex-row sm:flex-col gap-3 sm:gap-3.5 shrink-0 self-start sm:self-center sm:ml-auto sm:mr-12 lg:mr-20">
+            <div className="flex flex-row sm:flex-col gap-2.5 sm:gap-3 shrink-0 self-start sm:self-center sm:ml-auto">
               <button
                 onClick={handleOpenEdit}
                 className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
