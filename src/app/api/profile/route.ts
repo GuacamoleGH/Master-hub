@@ -15,9 +15,11 @@ export async function GET() {
           username: null,
           avatarUrl: null,
           bio: "Inicia sesión para guardar tu historial y subir de nivel.",
+          isWatchlistPublic: true,
         },
         topCine: [],
         watchedCatalog: [],
+        watchlistCatalog: [],
         stats: {
           totalWatched: 0,
           totalMovies: 0,
@@ -326,15 +328,53 @@ export async function GET() {
       (us) => us.status === "WATCHED",
     );
 
+    const watchlistMovies = allRecords.filter((r) => r.status === "WATCHLIST");
+    const watchlistSeries = allUserSeries.filter(
+      (s) => s.status === "WATCHLIST",
+    );
+    const watchlistCatalog = [
+      ...watchlistMovies.map((um) => ({
+        id: `movie-${um.id}`,
+        title: um.movie.title,
+        posterPath: um.movie.posterPath,
+        year: um.movie.year,
+        userRating: um.userRating,
+        imdbRating: um.movie.imdbRating,
+        genres: um.movie.genres,
+        overview: um.movie.overview,
+        mediaType: "movie" as const,
+        link: `/movie/${um.movie.tmdbId}`,
+        addedDate: um.createdAt,
+      })),
+      ...watchlistSeries.map((us) => ({
+        id: `series-${us.id}`,
+        title: us.series.name,
+        posterPath: us.series.posterPath,
+        year: us.series.firstAirYear,
+        userRating: us.userRating,
+        imdbRating: us.series.imdbRating,
+        genres: us.series.genres,
+        overview: us.series.overview,
+        mediaType: "series" as const,
+        link: `/series/${us.series.tmdbId}`,
+        addedDate: us.createdAt,
+      })),
+    ].sort(
+      (a, b) =>
+        new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+    );
+
     return NextResponse.json({
       profile: {
         displayName: user?.name || user?.username || "Cinéfilo",
         username: user?.username || null,
         avatarUrl: user?.image || null,
         bio: user?.bio || null,
+        isWatchlistPublic: user?.isWatchlistPublic ?? true,
       },
       topCine,
       watchedCatalog,
+      watchlistCatalog,
       stats: {
         totalWatched: watchedList.length + watchedSeriesList.length,
         totalMovies: watchedList.length,
@@ -374,7 +414,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { displayName, bio, avatarUrl } = body;
+    const { displayName, bio, avatarUrl, isWatchlistPublic } = body;
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
@@ -382,6 +422,10 @@ export async function PATCH(request: NextRequest) {
         name: displayName ? displayName.trim() : undefined,
         bio: bio !== undefined ? bio.trim() : undefined,
         image: avatarUrl !== undefined ? avatarUrl.trim() || null : undefined,
+        isWatchlistPublic:
+          typeof isWatchlistPublic === "boolean"
+            ? isWatchlistPublic
+            : undefined,
       },
     });
 
@@ -391,6 +435,7 @@ export async function PATCH(request: NextRequest) {
         displayName: updated.name || updated.username,
         bio: updated.bio,
         avatarUrl: updated.image,
+        isWatchlistPublic: updated.isWatchlistPublic,
       },
     });
   } catch (error) {

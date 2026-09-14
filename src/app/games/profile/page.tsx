@@ -45,6 +45,7 @@ import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
 import WatchedCatalogSection, {
   WatchedCatalogItem,
 } from "@/components/profile/WatchedCatalogSection";
+import WatchlistSection from "@/components/profile/WatchlistSection";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { GamerStats } from "@/types/game";
 import { useSession } from "next-auth/react";
@@ -59,9 +60,11 @@ interface ProfileResponse {
     username?: string | null;
     avatarUrl: string | null;
     bio: string | null;
+    isBacklogPublic?: boolean;
   };
   topGames?: TopFiveItem[];
   gamesCatalog?: WatchedCatalogItem[];
+  backlogCatalog?: WatchedCatalogItem[];
   stats: GamerStats;
 }
 
@@ -127,6 +130,42 @@ export default function GamerProfilePage() {
       console.error("Error al cargar perfil gamer:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToggleBacklogPrivacy = async (newVal: boolean) => {
+    if (!profileData) return;
+    setProfileData({
+      ...profileData,
+      profile: {
+        ...profileData.profile,
+        isBacklogPublic: newVal,
+      },
+    });
+
+    try {
+      const res = await fetch("/api/games/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isBacklogPublic: newVal }),
+      });
+      if (!res.ok) throw new Error("Error al guardar preferencia");
+      toast.success(
+        newVal ? "Backlog ahora es público" : "Backlog ahora es privado",
+        newVal
+          ? "Tus amigos y visitantes pueden ver los juegos que tienes en backlog."
+          : "Solo tú puedes ver tu backlog.",
+      );
+    } catch {
+      toast.error("No se pudo actualizar la privacidad de tu backlog.");
+      setProfileData((prev) =>
+        prev
+          ? {
+              ...prev,
+              profile: { ...prev.profile, isBacklogPublic: !newVal },
+            }
+          : prev,
+      );
     }
   };
 
@@ -397,6 +436,16 @@ export default function GamerProfilePage() {
       <WatchedCatalogSection
         type="gaming"
         items={profileData.gamesCatalog || []}
+      />
+
+      {/* Backlog de Videojuegos */}
+      <WatchlistSection
+        type="gaming"
+        items={profileData.backlogCatalog || []}
+        isOwner={true}
+        isPublic={profile.isBacklogPublic !== false}
+        username={profile.username}
+        onTogglePrivacy={handleToggleBacklogPrivacy}
       />
 
       {/* Récords Personales y Desglose de Biblioteca */}
@@ -750,6 +799,7 @@ export default function GamerProfilePage() {
         initialName={profile.displayName}
         initialBio={profile.bio}
         initialAvatar={profile.avatarUrl}
+        initialIsBacklogPublic={profile.isBacklogPublic}
       />
 
       {/* Modal de Social Wrapped */}

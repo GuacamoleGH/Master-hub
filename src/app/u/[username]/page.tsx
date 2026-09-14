@@ -44,6 +44,7 @@ import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
 import WatchedCatalogSection, {
   WatchedCatalogItem,
 } from "@/components/profile/WatchedCatalogSection";
+import WatchlistSection from "@/components/profile/WatchlistSection";
 import AffinityCard from "@/components/profile/AffinityCard";
 import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
 import { sounds } from "@/lib/sounds";
@@ -63,6 +64,8 @@ interface PublicUnifiedProfileData {
   cinema: {
     totalWatched: number;
     totalWatchlist: number;
+    isWatchlistPublic?: boolean;
+    watchlistCatalog?: WatchedCatalogItem[];
     totalMovies?: number;
     totalSeries?: number;
     totalReviews?: number;
@@ -89,6 +92,8 @@ interface PublicUnifiedProfileData {
   gaming: {
     totalCompleted: number;
     totalBacklog: number;
+    isBacklogPublic?: boolean;
+    backlogCatalog?: WatchedCatalogItem[];
     totalHours: number;
     totalPlatinum?: number;
     averageRating: number | null;
@@ -215,6 +220,78 @@ function PublicProfileContent() {
       setTimeout(() => setCopied(false), 3000);
     } catch {
       toast.error("No se pudo copiar el enlace automáticamente.");
+    }
+  };
+
+  const handleToggleWatchlistPrivacy = async (newVal: boolean) => {
+    if (!data) return;
+    setData({
+      ...data,
+      cinema: {
+        ...data.cinema,
+        isWatchlistPublic: newVal,
+      },
+    });
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isWatchlistPublic: newVal }),
+      });
+      if (!res.ok) throw new Error("Error al guardar preferencia");
+      toast.success(
+        newVal ? "Watchlist ahora es pública" : "Watchlist ahora es privada",
+        newVal
+          ? "Tus amigos y visitantes pueden ver los títulos que tienes pendientes."
+          : "Solo tú puedes ver tus títulos pendientes.",
+      );
+    } catch {
+      toast.error("No se pudo actualizar la privacidad de tu watchlist.");
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              cinema: { ...prev.cinema, isWatchlistPublic: !newVal },
+            }
+          : prev,
+      );
+    }
+  };
+
+  const handleToggleBacklogPrivacy = async (newVal: boolean) => {
+    if (!data) return;
+    setData({
+      ...data,
+      gaming: {
+        ...data.gaming,
+        isBacklogPublic: newVal,
+      },
+    });
+
+    try {
+      const res = await fetch("/api/games/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isBacklogPublic: newVal }),
+      });
+      if (!res.ok) throw new Error("Error al guardar preferencia");
+      toast.success(
+        newVal ? "Backlog ahora es público" : "Backlog ahora es privado",
+        newVal
+          ? "Tus amigos y visitantes pueden ver los juegos que tienes en backlog."
+          : "Solo tú puedes ver tu backlog.",
+      );
+    } catch {
+      toast.error("No se pudo actualizar la privacidad de tu backlog.");
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              gaming: { ...prev.gaming, isBacklogPublic: !newVal },
+            }
+          : prev,
+      );
     }
   };
 
@@ -666,6 +743,16 @@ function PublicProfileContent() {
             isOwner={isOwner}
           />
 
+          {/* Watchlist de Cine & Series */}
+          <WatchlistSection
+            type="cinema"
+            items={cinema.watchlistCatalog || []}
+            isOwner={isOwner}
+            isPublic={cinema.isWatchlistPublic !== false}
+            username={user.username || user.name}
+            onTogglePrivacy={handleToggleWatchlistPrivacy}
+          />
+
           {/* Rankings Personales: Biggest W vs Biggest L */}
           {(cinema.biggestW || cinema.biggestL) && (
             <section className="space-y-4">
@@ -918,6 +1005,16 @@ function PublicProfileContent() {
             type="gaming"
             items={gaming.gamesCatalog || []}
             isOwner={isOwner}
+          />
+
+          {/* Backlog de Videojuegos */}
+          <WatchlistSection
+            type="gaming"
+            items={gaming.backlogCatalog || []}
+            isOwner={isOwner}
+            isPublic={gaming.isBacklogPublic !== false}
+            username={user.username || user.name}
+            onTogglePrivacy={handleToggleBacklogPrivacy}
           />
 
           {/* Récords y Métricas Extremas */}

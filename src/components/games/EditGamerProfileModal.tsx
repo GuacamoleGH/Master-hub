@@ -2,7 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, User, Image, FileText, Loader2, Check } from "lucide-react";
+import {
+  X,
+  User,
+  Image,
+  FileText,
+  Loader2,
+  Check,
+  Gamepad2,
+  Globe,
+  Lock,
+  Bookmark,
+} from "lucide-react";
+import { PRESET_AVATARS } from "@/lib/avatars";
+import { sounds } from "@/lib/sounds";
+import { useSession } from "next-auth/react";
 
 interface EditGamerProfileModalProps {
   isOpen: boolean;
@@ -11,11 +25,8 @@ interface EditGamerProfileModalProps {
   initialName: string;
   initialBio: string | null;
   initialAvatar: string | null;
+  initialIsBacklogPublic?: boolean;
 }
-
-import { PRESET_AVATARS } from "@/lib/avatars";
-import { sounds } from "@/lib/sounds";
-import { useSession } from "next-auth/react";
 
 export default function EditGamerProfileModal({
   isOpen,
@@ -24,11 +35,13 @@ export default function EditGamerProfileModal({
   initialName,
   initialBio,
   initialAvatar,
+  initialIsBacklogPublic = true,
 }: EditGamerProfileModalProps) {
   const { data: session, update } = useSession();
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
+  const [isBacklogPublic, setIsBacklogPublic] = useState(initialIsBacklogPublic);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -38,6 +51,10 @@ export default function EditGamerProfileModal({
 
   useEffect(() => {
     if (isOpen) {
+      setDisplayName(initialName);
+      setBio(initialBio || "");
+      setAvatarUrl(initialAvatar || "");
+      setIsBacklogPublic(initialIsBacklogPublic);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -45,7 +62,7 @@ export default function EditGamerProfileModal({
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, initialName, initialBio, initialAvatar, initialIsBacklogPublic]);
 
   if (!isOpen || !mounted || !session?.user) return null;
 
@@ -61,6 +78,7 @@ export default function EditGamerProfileModal({
           displayName: displayName.trim(),
           bio: bio.trim() || null,
           avatarUrl: avatarUrl.trim() || null,
+          isBacklogPublic,
         }),
       });
 
@@ -200,6 +218,47 @@ export default function EditGamerProfileModal({
               rows={3}
               className="w-full p-3 bg-cine-900 border border-cine-700 rounded-xl text-sm text-cine-200 placeholder-cine-500 focus:outline-none focus:border-purple-400 resize-none"
             />
+          </div>
+
+          {/* Visibilidad de Backlog */}
+          <div className="p-3.5 rounded-2xl bg-cine-900/90 border border-cine-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bookmark className="w-4 h-4 text-purple-400" />
+                <span className="text-xs font-bold text-white">
+                  Visibilidad de Backlog
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.switch();
+                  setIsBacklogPublic(!isBacklogPublic);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border transition-all ${
+                  isBacklogPublic
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/40"
+                    : "bg-rose-500/10 text-rose-400 border-rose-500/40"
+                }`}
+              >
+                {isBacklogPublic ? (
+                  <>
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Pública</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Privada</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-[11px] text-cine-400 leading-tight">
+              {isBacklogPublic
+                ? "Tus amigos y visitantes pueden ver los videojuegos que tienes pendientes en tu perfil público."
+                : "Tu backlog es privado. Solo tú puedes ver tus videojuegos pendientes."}
+            </p>
           </div>
 
           {/* Botones */}

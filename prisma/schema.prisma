@@ -21,9 +21,11 @@ model User {
   username      String?      @unique
   passwordHash  String?      // Contraseña con hash bcryptjs
   bio           String?      @default("Explorador y analista del catálogo universal.")
-  totalXp       Int          @default(0)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  totalXp           Int          @default(0)
+  isWatchlistPublic Boolean      @default(true)
+  isBacklogPublic   Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   accounts      Account[]
   sessions      Session[]
