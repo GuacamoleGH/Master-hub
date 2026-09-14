@@ -32,6 +32,8 @@ export async function GET(
         image: true,
         bio: true,
         totalXp: true,
+        isWatchlistPublic: true,
+        isBacklogPublic: true,
         createdAt: true,
       },
     });
@@ -643,12 +645,75 @@ export async function GET(
       }
     }
 
+    const isOwner = visitorId === userId;
+    const isWatchlistPublic = targetUser.isWatchlistPublic !== false;
+    const canSeeWatchlist = isOwner || isWatchlistPublic;
+    const watchlistCatalog = canSeeWatchlist
+      ? [
+          ...watchlistMovies.map((um) => ({
+            id: `movie-${um.id}`,
+            title: um.movie.title,
+            posterPath: um.movie.posterPath,
+            year: um.movie.year,
+            userRating: um.userRating,
+            imdbRating: um.movie.imdbRating,
+            genres: um.movie.genres,
+            overview: um.movie.overview,
+            mediaType: "movie" as const,
+            link: `/movie/${um.movie.tmdbId}`,
+            addedDate: um.createdAt,
+          })),
+          ...watchlistSeries.map((us) => ({
+            id: `series-${us.id}`,
+            title: us.series.name,
+            posterPath: us.series.posterPath,
+            year: us.series.firstAirYear,
+            userRating: us.userRating,
+            imdbRating: us.series.imdbRating,
+            genres: us.series.genres,
+            overview: us.series.overview,
+            mediaType: "series" as const,
+            link: `/series/${us.series.tmdbId}`,
+            addedDate: us.createdAt,
+          })),
+        ].sort(
+          (a, b) =>
+            new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+        )
+      : [];
+
+    const isBacklogPublic = targetUser.isBacklogPublic !== false;
+    const canSeeBacklog = isOwner || isBacklogPublic;
+    const backlogCatalog = canSeeBacklog
+      ? backlogGames
+          .map((ug) => ({
+            id: ug.id,
+            title: ug.game.title,
+            posterPath: ug.game.backgroundImage,
+            year: ug.game.released ? ug.game.released.split("-")[0] : null,
+            userRating: ug.userRating,
+            metacritic: ug.game.metacritic,
+            genres: ug.game.genres,
+            platform: ug.platform,
+            status: ug.status,
+            mediaType: "game" as const,
+            link: `/games/${ug.game.rawgId}`,
+            addedDate: ug.createdAt,
+          }))
+          .sort(
+            (a, b) =>
+              new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+          )
+      : [];
+
     return NextResponse.json({
       user: targetUser,
-      isOwner: visitorId === userId,
+      isOwner,
       cinema: {
         totalWatched: watchedMovies.length + watchedSeries.length,
         totalWatchlist: watchlistMovies.length + watchlistSeries.length,
+        isWatchlistPublic,
+        watchlistCatalog,
         totalMovies: watchedMovies.length,
         totalSeries: watchedSeries.length,
         totalReviews: watchedMovies.filter(
@@ -674,6 +739,8 @@ export async function GET(
       gaming: {
         totalCompleted: completedGames.length,
         totalBacklog: backlogGames.length,
+        isBacklogPublic,
+        backlogCatalog,
         totalHours: Math.round(totalHours),
         totalPlatinum,
         averageRating: avgGameRating,

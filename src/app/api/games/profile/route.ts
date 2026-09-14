@@ -21,9 +21,11 @@ export async function GET() {
           username: null,
           avatarUrl: null,
           bio: "Inicia sesión para guardar tu progreso de videojuegos y subir de nivel.",
+          isBacklogPublic: true,
         },
         topGames: [],
         gamesCatalog: [],
+        backlogCatalog: [],
         stats: {
           totalHours: 0,
           totalCompleted: 0,
@@ -374,6 +376,27 @@ export async function GET() {
       }))
       .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
 
+    const backlogGames = userGames.filter((g) => g.status === "BACKLOG");
+    const backlogCatalog = backlogGames
+      .map((ug) => ({
+        id: ug.id,
+        title: ug.game.title,
+        posterPath: ug.game.backgroundImage,
+        year: ug.game.released ? ug.game.released.split("-")[0] : null,
+        userRating: ug.userRating,
+        metacritic: ug.game.metacritic,
+        genres: ug.game.genres,
+        platform: ug.platform,
+        status: ug.status,
+        mediaType: "game" as const,
+        link: `/games/${ug.game.rawgId}`,
+        addedDate: ug.createdAt,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+      );
+
     return NextResponse.json({
       profile: {
         id: user?.id || "gamer-default",
@@ -381,9 +404,11 @@ export async function GET() {
         username: user?.username || null,
         avatarUrl: user?.image || null,
         bio: user?.bio || null,
+        isBacklogPublic: user?.isBacklogPublic ?? true,
       },
       topGames,
       gamesCatalog,
+      backlogCatalog,
       stats,
     });
   } catch (error) {
@@ -403,7 +428,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { displayName, bio, avatarUrl } = body;
+    const { displayName, bio, avatarUrl, isBacklogPublic } = body;
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
@@ -411,6 +436,10 @@ export async function PATCH(request: NextRequest) {
         name: displayName ? displayName.trim() : undefined,
         bio: bio !== undefined ? bio.trim() : undefined,
         image: avatarUrl !== undefined ? avatarUrl.trim() || null : undefined,
+        isBacklogPublic:
+          typeof isBacklogPublic === "boolean"
+            ? isBacklogPublic
+            : undefined,
       },
     });
 
@@ -421,6 +450,7 @@ export async function PATCH(request: NextRequest) {
         displayName: updated.name || updated.username,
         bio: updated.bio,
         avatarUrl: updated.image,
+        isBacklogPublic: updated.isBacklogPublic,
       },
     });
   } catch (error) {

@@ -34,6 +34,7 @@ import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
 import WatchedCatalogSection, {
   WatchedCatalogItem,
 } from "@/components/profile/WatchedCatalogSection";
+import WatchlistSection from "@/components/profile/WatchlistSection";
 import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -50,11 +51,13 @@ export default function ProfilePage() {
     username?: string | null;
     avatarUrl: string | null;
     bio: string | null;
+    isWatchlistPublic?: boolean;
   }>({
     displayName: "Invitado",
     username: null,
     avatarUrl: null,
     bio: "",
+    isWatchlistPublic: true,
   });
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
@@ -62,6 +65,9 @@ export default function ProfilePage() {
   const [watchedCatalog, setWatchedCatalog] = useState<WatchedCatalogItem[]>(
     [],
   );
+  const [watchlistCatalog, setWatchlistCatalog] = useState<
+    WatchedCatalogItem[]
+  >([]);
   const [copied, setCopied] = useState(false);
   const toast = useToast();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
@@ -120,11 +126,34 @@ export default function ProfilePage() {
         setStats(data.stats);
         setTopCine(data.topCine || []);
         setWatchedCatalog(data.watchedCatalog || []);
+        setWatchlistCatalog(data.watchlistCatalog || []);
       }
     } catch (err) {
       console.error("Error al cargar perfil:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToggleWatchlistPrivacy = async (newVal: boolean) => {
+    setProfileData((prev) => ({ ...prev, isWatchlistPublic: newVal }));
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isWatchlistPublic: newVal }),
+      });
+      if (!res.ok) throw new Error("Error al guardar preferencia");
+      toast.success(
+        newVal ? "Watchlist ahora es pública" : "Watchlist ahora es privada",
+        newVal
+          ? "Tus amigos y visitantes pueden ver los títulos que tienes pendientes."
+          : "Solo tú puedes ver tus títulos pendientes.",
+      );
+    } catch {
+      toast.error("No se pudo actualizar la privacidad de tu watchlist.");
+      setProfileData((prev) => ({ ...prev, isWatchlistPublic: !newVal }));
     }
   };
 
@@ -378,6 +407,16 @@ export default function ProfilePage() {
       {/* Catálogo Completo de Películas y Series Vistas */}
       <WatchedCatalogSection type="cinema" items={watchedCatalog} />
 
+      {/* Watchlist de Cine & Series */}
+      <WatchlistSection
+        type="cinema"
+        items={watchlistCatalog}
+        isOwner={true}
+        isPublic={profileData.isWatchlistPublic !== false}
+        username={profileData.username}
+        onTogglePrivacy={handleToggleWatchlistPrivacy}
+      />
+
       {/* 2. Rankings Personales: Biggest W vs Biggest L */}
       {(stats.biggestW || stats.biggestL) && (
         <section className="space-y-4">
@@ -553,6 +592,7 @@ export default function ProfilePage() {
         initialName={profileData.displayName}
         initialBio={profileData.bio}
         initialAvatar={profileData.avatarUrl}
+        initialIsWatchlistPublic={profileData.isWatchlistPublic}
       />
 
       {/* Modal de Social Wrapped */}
