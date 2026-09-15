@@ -12,7 +12,12 @@ import {
 } from "recharts";
 
 interface RatingDistributionProps {
-  data: { rating: number; count: number }[];
+  data: {
+    rating: number;
+    count: number;
+    movies?: number;
+    series?: number;
+  }[];
 }
 
 export default function RatingDistributionChart({
@@ -48,12 +53,33 @@ export default function RatingDistributionChart({
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0].payload;
+                const movies = item.movies ?? item.count ?? 0;
+                const series = item.series ?? 0;
+
+                let breakdownText = "";
+                if (movies > 0 && series > 0) {
+                  breakdownText = `${movies} ${
+                    movies === 1 ? "película" : "películas"
+                  } y ${series} ${series === 1 ? "serie" : "series"}`;
+                } else if (movies > 0) {
+                  breakdownText = `${movies} ${
+                    movies === 1 ? "película" : "películas"
+                  }`;
+                } else if (series > 0) {
+                  breakdownText = `${series} ${
+                    series === 1 ? "serie" : "series"
+                  }`;
+                } else {
+                  breakdownText = "0 títulos";
+                }
+
                 return (
                   <div className="bg-cine-900 border border-cine-700 px-3 py-2 rounded-xl shadow-xl text-xs">
                     <span className="font-bold text-amber-400">
-                      {item.rating} Estrellas
+                      {item.rating}{" "}
+                      {item.rating === 1 ? "Estrella" : "Estrellas"}
                     </span>
-                    : <span className="text-white">{item.count} películas</span>
+                    : <span className="text-white">{breakdownText}</span>
                   </div>
                 );
               }
