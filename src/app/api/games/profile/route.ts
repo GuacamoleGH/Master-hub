@@ -437,9 +437,7 @@ export async function PATCH(request: NextRequest) {
         bio: bio !== undefined ? bio.trim() : undefined,
         image: avatarUrl !== undefined ? avatarUrl.trim() || null : undefined,
         isBacklogPublic:
-          typeof isBacklogPublic === "boolean"
-            ? isBacklogPublic
-            : undefined,
+          typeof isBacklogPublic === "boolean" ? isBacklogPublic : undefined,
       },
     });
 

@@ -457,7 +457,9 @@ export default function ProfilePage() {
                       {stats.biggestW.title}
                     </h4>
                     <p className="text-xs text-cine-300">
-                      Coincidencia casi idéntica con el consenso de IMDb.
+                      {Math.abs(stats.biggestW.diff || 0) < 0.05
+                        ? "Coincidencia idéntica con el consenso de IMDb."
+                        : "Coincidencia casi idéntica con el consenso de IMDb."}
                     </p>
                     <div className="flex items-center gap-3 text-xs font-mono pt-1">
                       <span className="text-amber-400 font-bold">

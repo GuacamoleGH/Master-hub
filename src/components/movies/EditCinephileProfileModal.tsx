@@ -42,7 +42,9 @@ export default function EditCinephileProfileModal({
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
-  const [isWatchlistPublic, setIsWatchlistPublic] = useState(initialIsWatchlistPublic);
+  const [isWatchlistPublic, setIsWatchlistPublic] = useState(
+    initialIsWatchlistPublic,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -63,7 +65,13 @@ export default function EditCinephileProfileModal({
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, initialName, initialBio, initialAvatar, initialIsWatchlistPublic]);
+  }, [
+    isOpen,
+    initialName,
+    initialBio,
+    initialAvatar,
+    initialIsWatchlistPublic,
+  ]);
 
   if (!isOpen || !mounted || !session?.user) return null;
 

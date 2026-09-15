@@ -101,8 +101,12 @@ export default function WatchlistSection({
     // Ordenación
     result.sort((a, b) => {
       if (sortBy === "recent") {
-        const dateA = (a as any).addedDate ? new Date((a as any).addedDate).getTime() : 0;
-        const dateB = (b as any).addedDate ? new Date((b as any).addedDate).getTime() : 0;
+        const dateA = (a as any).addedDate
+          ? new Date((a as any).addedDate).getTime()
+          : 0;
+        const dateB = (b as any).addedDate
+          ? new Date((b as any).addedDate).getTime()
+          : 0;
         return dateB - dateA;
       }
       if (sortBy === "rating_desc") {
@@ -252,7 +256,10 @@ export default function WatchlistSection({
               {isCinema ? "Watchlist Privada" : "Backlog Privado"}
             </h3>
             <p className="text-xs sm:text-sm text-cine-400 leading-relaxed">
-              {username ? `@${username}` : "Este usuario"} ha configurado su lista de pendientes como privada. Solo {username ? `@${username}` : "el usuario"} puede ver sus títulos pendientes.
+              {username ? `@${username}` : "Este usuario"} ha configurado su
+              lista de pendientes como privada. Solo{" "}
+              {username ? `@${username}` : "el usuario"} puede ver sus títulos
+              pendientes.
             </p>
           </div>
         </div>
@@ -397,8 +404,8 @@ export default function WatchlistSection({
                               item.metacritic >= 75
                                 ? "text-emerald-400 border-emerald-500/40"
                                 : item.metacritic >= 50
-                                ? "text-amber-400 border-amber-500/40"
-                                : "text-rose-400 border-rose-500/40"
+                                  ? "text-amber-400 border-amber-500/40"
+                                  : "text-rose-400 border-rose-500/40"
                             }`}
                           >
                             <span>MC {item.metacritic}</span>
@@ -440,8 +447,8 @@ export default function WatchlistSection({
                 {searchQuery
                   ? "No se encontraron títulos pendientes con esa búsqueda"
                   : isCinema
-                  ? "La watchlist está vacía"
-                  : "El backlog está vacío"}
+                    ? "La watchlist está vacía"
+                    : "El backlog está vacío"}
               </h3>
               <p className="text-xs text-cine-500 max-w-sm mx-auto">
                 {isOwner
@@ -461,7 +468,9 @@ export default function WatchlistSection({
                 }}
                 className="flex items-center gap-2 px-6 py-2.5 bg-cine-900 hover:bg-cine-800 border border-cine-700/60 rounded-xl text-xs font-bold text-white transition-all hover:scale-105"
               >
-                <span>Ver más ({filteredItems.length - visibleCount} restantes)</span>
+                <span>
+                  Ver más ({filteredItems.length - visibleCount} restantes)
+                </span>
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>

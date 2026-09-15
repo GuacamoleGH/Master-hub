@@ -41,7 +41,9 @@ export default function EditGamerProfileModal({
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
-  const [isBacklogPublic, setIsBacklogPublic] = useState(initialIsBacklogPublic);
+  const [isBacklogPublic, setIsBacklogPublic] = useState(
+    initialIsBacklogPublic,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 

@@ -147,64 +147,120 @@ export async function GET(
     const ratedMovies = watchedMovies.filter(
       (r) => typeof r.userRating === "number",
     );
-    if (ratedMovies.length > 0) {
-      const sortedByRating = [...ratedMovies].sort(
+    const ratedSeries = watchedSeries.filter(
+      (s) => typeof s.userRating === "number",
+    );
+
+    const allRatedCineItems = [
+      ...ratedMovies.map((um) => ({
+        title: um.movie.title,
+        posterPath: um.movie.posterPath,
+        userRating: um.userRating!,
+      })),
+      ...ratedSeries.map((us) => ({
+        title: us.series.name,
+        posterPath: us.series.posterPath,
+        userRating: us.userRating!,
+      })),
+    ];
+
+    if (allRatedCineItems.length > 0) {
+      const sortedByRating = [...allRatedCineItems].sort(
         (a, b) => (b.userRating || 0) - (a.userRating || 0),
       );
-      highestRatedMovie = {
-        title: sortedByRating[0].movie.title,
-        posterPath: sortedByRating[0].movie.posterPath,
-        userRating: sortedByRating[0].userRating,
-      };
-      lowestRatedMovie = {
-        title: sortedByRating[sortedByRating.length - 1].movie.title,
-        posterPath: sortedByRating[sortedByRating.length - 1].movie.posterPath,
-        userRating: sortedByRating[sortedByRating.length - 1].userRating,
-      };
+      highestRatedMovie = sortedByRating[0];
+      lowestRatedMovie = sortedByRating[sortedByRating.length - 1];
 
-      const bkRecords = ratedMovies.filter(
-        (r) =>
-          typeof r.ballKnowledge === "number" &&
-          typeof r.movie.imdbRating === "number",
-      );
+      const bkMovieRecords = ratedMovies
+        .filter(
+          (r) =>
+            typeof r.ballKnowledge === "number" &&
+            typeof r.movie.imdbRating === "number",
+        )
+        .map((r) => ({
+          title: r.movie.title,
+          posterPath: r.movie.posterPath,
+          userRating: r.userRating!,
+          imdbRating: r.movie.imdbRating!,
+          ballKnowledge: r.ballKnowledge!,
+          diff: r.difference ?? (r.userRating! - r.movie.imdbRating!),
+        }));
+
+      const bkSeriesRecords = ratedSeries
+        .filter(
+          (s) =>
+            typeof s.ballKnowledge === "number" &&
+            typeof s.series.imdbRating === "number",
+        )
+        .map((s) => ({
+          title: s.series.name,
+          posterPath: s.series.posterPath,
+          userRating: s.userRating!,
+          imdbRating: s.series.imdbRating!,
+          ballKnowledge: s.ballKnowledge!,
+          diff: s.difference ?? (s.userRating! - s.series.imdbRating!),
+        }));
+
+      const bkRecords = [...bkMovieRecords, ...bkSeriesRecords];
       if (bkRecords.length > 0) {
         const sortedW = [...bkRecords].sort(
           (a, b) => (b.ballKnowledge || 0) - (a.ballKnowledge || 0),
         );
         biggestW = {
-          title: sortedW[0].movie.title,
-          posterPath: sortedW[0].movie.posterPath,
+          title: sortedW[0].title,
+          posterPath: sortedW[0].posterPath,
           userRating: sortedW[0].userRating,
-          imdbRating: sortedW[0].movie.imdbRating,
+          imdbRating: sortedW[0].imdbRating,
           ballKnowledge: sortedW[0].ballKnowledge,
-          diff: sortedW[0].difference,
+          diff: sortedW[0].diff,
         };
 
         const sortedL = [...bkRecords].sort(
           (a, b) => (a.ballKnowledge || 0) - (b.ballKnowledge || 0),
         );
         biggestL = {
-          title: sortedL[0].movie.title,
-          posterPath: sortedL[0].movie.posterPath,
+          title: sortedL[0].title,
+          posterPath: sortedL[0].posterPath,
           userRating: sortedL[0].userRating,
-          imdbRating: sortedL[0].movie.imdbRating,
+          imdbRating: sortedL[0].imdbRating,
           ballKnowledge: sortedL[0].ballKnowledge,
-          diff: sortedL[0].difference,
+          diff: sortedL[0].diff,
         };
       }
     }
 
-    const ratingBuckets: { [key: number]: number } = {};
-    for (let i = 0; i <= 10; i++) ratingBuckets[i] = 0;
+    const ratingBuckets: {
+      [key: number]: { count: number; movies: number; series: number };
+    } = {};
+    for (let i = 0; i <= 10; i++) {
+      ratingBuckets[i] = { count: 0, movies: 0, series: 0 };
+    }
+
     for (const r of ratedMovies) {
       if (typeof r.userRating === "number") {
         const bucket = Math.round(r.userRating);
-        ratingBuckets[bucket] = (ratingBuckets[bucket] || 0) + 1;
+        if (ratingBuckets[bucket]) {
+          ratingBuckets[bucket].count += 1;
+          ratingBuckets[bucket].movies += 1;
+        }
       }
     }
+
+    for (const s of ratedSeries) {
+      if (typeof s.userRating === "number") {
+        const bucket = Math.round(s.userRating);
+        if (ratingBuckets[bucket]) {
+          ratingBuckets[bucket].count += 1;
+          ratingBuckets[bucket].series += 1;
+        }
+      }
+    }
+
     const movieRatingDistribution = Object.keys(ratingBuckets).map((k) => ({
       rating: Number(k),
-      count: ratingBuckets[Number(k)],
+      count: ratingBuckets[Number(k)].count,
+      movies: ratingBuckets[Number(k)].movies,
+      series: ratingBuckets[Number(k)].series,
     }));
 
     const genreMap: { [key: string]: { count: number; totalScore: number } } =
@@ -222,6 +278,20 @@ export async function GET(
         }
       }
     }
+    for (const s of watchedSeries) {
+      let genres: string[] = [];
+      try {
+        genres = JSON.parse(s.series.genres || "[]");
+      } catch {}
+      for (const g of genres) {
+        if (!genreMap[g]) genreMap[g] = { count: 0, totalScore: 0 };
+        genreMap[g].count += 1;
+        if (typeof s.userRating === "number") {
+          genreMap[g].totalScore += s.userRating;
+        }
+      }
+    }
+
     const movieGenreCounts = Object.entries(genreMap)
       .map(([genre, data]) => ({
         genre,
@@ -237,6 +307,12 @@ export async function GET(
     for (const r of watchedMovies) {
       if (r.watchedDate) {
         const key = r.watchedDate.toISOString().substring(0, 7);
+        monthMap[key] = (monthMap[key] || 0) + 1;
+      }
+    }
+    for (const s of watchedSeries) {
+      if (s.watchedDate) {
+        const key = s.watchedDate.toISOString().substring(0, 7);
         monthMap[key] = (monthMap[key] || 0) + 1;
       }
     }
