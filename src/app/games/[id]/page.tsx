@@ -102,20 +102,36 @@ export default function GameDetailPage() {
     try {
       if (isBacklog) {
         await fetch(`/api/user-games?gameId=${game.id}`, { method: "DELETE" });
+        toast.toast({
+          type: "info",
+          title: "Eliminado del Backlog",
+          description: "Juego retirado de tu lista",
+        });
       } else {
-        await fetch("/api/user-games", {
+        const res = await fetch("/api/user-games", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             rawgId: game.rawgId,
             status: "BACKLOG",
-            platform: game.platforms?.[0] || "PC",
           }),
         });
+        if (res.status === 401) {
+          toast.guestPrompt("guardar videojuegos en tu backlog");
+          return;
+        }
+        if (res.ok) {
+          sounds.playSuccess();
+          toast.success(
+            "Añadido al Backlog",
+            "Guardado en tus juegos pendientes 📌",
+          );
+        }
       }
       await fetchGame();
     } catch (err) {
       console.error(err);
+      toast.error("Error al actualizar tu backlog");
     } finally {
       setIsUpdatingBacklog(false);
     }
@@ -338,7 +354,9 @@ export default function GameDetailPage() {
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {game.userGame ? "Modificar veredicto" : "Registrar partida"}
+                {game.userGame && game.userGame.status !== "BACKLOG"
+                  ? "Modificar veredicto"
+                  : "Registrar partida"}
               </button>
 
               {!isFinished ? (
@@ -378,8 +396,8 @@ export default function GameDetailPage() {
         </div>
       </div>
 
-      {/* Sección: Tu Veredicto Gamer (Si está registrado) */}
-      {game.userGame && (
+      {/* Sección: Tu Veredicto Gamer (Si está registrado y no es solo backlog) */}
+      {game.userGame && game.userGame.status !== "BACKLOG" && (
         <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/40 bg-gradient-to-r from-purple-950/30 via-cine-900 to-cine-950 shadow-xl space-y-4">
           <div className="flex items-center justify-between border-b border-cine-800 pb-4">
             <div className="flex items-center gap-2">
@@ -656,7 +674,11 @@ export default function GameDetailPage() {
           metacritic: game.metacritic,
           platforms: game.platforms,
         }}
-        initialStatus={game.userGame?.status || "COMPLETED"}
+        initialStatus={
+          game.userGame?.status && game.userGame.status !== "BACKLOG"
+            ? game.userGame.status
+            : "COMPLETED"
+        }
         initialRating={game.userGame?.userRating}
         initialHours={game.userGame?.hoursPlayed}
         initialPlatform={game.userGame?.platform}

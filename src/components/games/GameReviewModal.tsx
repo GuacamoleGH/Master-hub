@@ -434,7 +434,8 @@ export default function GameReviewModal({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas Totales
+                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
+                Totales
               </label>
               {platformProgressList.length > 1 && (
                 <span className="text-[11px] font-mono text-cyan-300 bg-cyan-950/50 border border-cyan-500/20 px-2 py-0.5 rounded-md">
