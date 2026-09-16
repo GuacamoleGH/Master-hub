@@ -47,6 +47,43 @@ export async function GET(
           parsedScreenshots = JSON.parse(dbGame.screenshots);
       } catch {}
 
+      // Si los desarrolladores o publishers son genéricos ("Estudio Aclamado") o están vacíos, autocurar consultando RAWG
+      if (
+        parsedDevelopers.length === 0 ||
+        parsedDevelopers.some((d) => d.toLowerCase().includes("aclamado"))
+      ) {
+        try {
+          const rawgDetail = await getGameDetail(dbGame.rawgId);
+          if (rawgDetail) {
+            if (rawgDetail.developers && rawgDetail.developers.length > 0) {
+              parsedDevelopers = rawgDetail.developers;
+            }
+            if (rawgDetail.publishers && rawgDetail.publishers.length > 0) {
+              parsedPublishers = rawgDetail.publishers;
+            }
+            let updatedDescription = dbGame.description;
+            if (
+              rawgDetail.description &&
+              (!dbGame.description ||
+                dbGame.description.includes("Obra de referencia aclamada"))
+            ) {
+              updatedDescription = rawgDetail.description.slice(0, 1000);
+            }
+            await prisma.game.update({
+              where: { id: dbGame.id },
+              data: {
+                developers: JSON.stringify(parsedDevelopers),
+                publishers: JSON.stringify(parsedPublishers),
+                description: updatedDescription,
+              },
+            });
+            dbGame.description = updatedDescription;
+          }
+        } catch (healError) {
+          console.warn("Auto-healing developers/publishers failed:", healError);
+        }
+      }
+
       // Obtener todas las valoraciones y reseñas de la comunidad para este videojuego
       const allCommunityUserGames = await prisma.userGame.findMany({
         where: {
