@@ -224,6 +224,14 @@ export default function GameReviewModal({
     0,
   );
 
+  const handleTotalHoursChange = (val: string) => {
+    setHours(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && platformProgressList.length === 1) {
+      updatePlatformHours(platformProgressList[0].platform, num);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -426,29 +434,50 @@ export default function GameReviewModal({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
-                Totales
+                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas Totales
               </label>
-              {platformProgressList.length > 0 && (
-                <span className="text-[11px] font-mono text-cyan-300">
-                  {calculatedTotalHours}h sumadas entre plataformas
+              {platformProgressList.length > 1 && (
+                <span className="text-[11px] font-mono text-cyan-300 bg-cyan-950/50 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+                  Suma automática ({calculatedTotalHours}h)
                 </span>
               )}
             </div>
-            <div className="relative max-w-xs">
-              <input
-                type="number"
-                step="0.5"
-                min="0"
-                max="9999"
-                value={calculatedTotalHours > 0 ? calculatedTotalHours : hours}
-                onChange={(e) => setHours(e.target.value)}
-                placeholder="ej. 127"
-                className="w-full px-3.5 py-2.5 bg-cine-900 border border-cine-700 rounded-xl text-sm text-white font-mono placeholder-cine-500 focus:outline-none focus:border-cyan-400"
-              />
-              <span className="absolute right-3.5 top-2.5 text-xs text-cine-500 font-mono">
-                horas
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="relative w-36 sm:w-40">
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="9999"
+                  readOnly={platformProgressList.length > 1}
+                  value={
+                    platformProgressList.length > 1
+                      ? calculatedTotalHours > 0
+                        ? calculatedTotalHours
+                        : ""
+                      : platformProgressList.length === 1
+                        ? platformProgressList[0].hours > 0
+                          ? platformProgressList[0].hours
+                          : hours
+                        : hours
+                  }
+                  onChange={(e) => handleTotalHoursChange(e.target.value)}
+                  placeholder="0"
+                  className={`w-full pl-3 pr-14 py-2 bg-cine-900 border rounded-xl text-sm font-mono focus:outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    platformProgressList.length > 1
+                      ? "border-cine-800 text-cyan-300 bg-cine-950/60 cursor-default"
+                      : "border-cine-700 text-white placeholder-cine-600 focus:border-cyan-400"
+                  }`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-cine-500 font-mono pointer-events-none select-none">
+                  horas
+                </span>
+              </div>
+              {platformProgressList.length > 1 && (
+                <span className="text-xs text-cine-400 hidden sm:inline">
+                  Desglosadas por plataforma abajo
+                </span>
+              )}
             </div>
           </div>
 

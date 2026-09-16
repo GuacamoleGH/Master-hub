@@ -261,12 +261,13 @@ export default function GameDetailPage() {
                   </div>
                 )}
 
-                {game.userGame?.hoursPlayed && (
-                  <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold bg-cyan-950/40 px-2.5 py-1 rounded-lg border border-cyan-500/30">
-                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>{game.userGame.hoursPlayed}h jugadas</span>
-                  </div>
-                )}
+                {typeof game.userGame?.hoursPlayed === "number" &&
+                  game.userGame.hoursPlayed > 0 && (
+                    <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold bg-cyan-950/40 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{game.userGame.hoursPlayed}h jugadas</span>
+                    </div>
+                  )}
 
                 {/* Master Hub Score Oficial */}
                 <MasterHubScoreBadge
