@@ -174,7 +174,7 @@ export async function GET() {
           userRating: r.userRating!,
           imdbRating: r.movie.imdbRating!,
           ballKnowledge: r.ballKnowledge!,
-          diff: r.difference ?? (r.userRating! - r.movie.imdbRating!),
+          diff: r.difference ?? r.userRating! - r.movie.imdbRating!,
         }));
 
       const bkSeriesRecords = ratedSeriesList
@@ -189,7 +189,7 @@ export async function GET() {
           userRating: s.userRating!,
           imdbRating: s.series.imdbRating!,
           ballKnowledge: s.ballKnowledge!,
-          diff: s.difference ?? (s.userRating! - s.series.imdbRating!),
+          diff: s.difference ?? s.userRating! - s.series.imdbRating!,
         }));
 
       const bkRecords = [...bkMovieRecords, ...bkSeriesRecords];
