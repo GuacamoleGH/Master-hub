@@ -365,7 +365,13 @@ export async function GET(
 
     // Top 5 Videojuegos
     const topGames = [...userGames]
-      .filter((g) => g.status !== "DROPPED")
+      .filter(
+        (g) =>
+          g.status !== "BACKLOG" &&
+          g.status !== "DROPPED" &&
+          ((typeof g.userRating === "number" && g.userRating > 0) ||
+            g.isFavorite),
+      )
       .sort((a, b) => {
         if (a.isFavorite && !b.isFavorite) return -1;
         if (!a.isFavorite && b.isFavorite) return 1;
@@ -429,6 +435,7 @@ export async function GET(
     ).length;
 
     const gamesCatalog = userGames
+      .filter((ug) => ug.status !== "BACKLOG")
       .map((ug) => ({
         id: ug.id,
         title: ug.game.title,
@@ -533,14 +540,16 @@ export async function GET(
       for (const g of parsedGenres) {
         genreHoursMap[g] = (genreHoursMap[g] || 0) + gameHours;
       }
-      const rawPlatform = ug.platform || "General";
-      const individualPlats = rawPlatform
-        .split(",")
-        .map((p) => p.trim())
-        .filter(Boolean);
-      for (const p of individualPlats) {
-        platformHoursMap[p] = (platformHoursMap[p] || 0) + gameHours;
-        platformGamesCountMap[p] = (platformGamesCountMap[p] || 0) + 1;
+      if (ug.status !== "BACKLOG") {
+        const rawPlatform = ug.platform || "General";
+        const individualPlats = rawPlatform
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+        for (const p of individualPlats) {
+          platformHoursMap[p] = (platformHoursMap[p] || 0) + gameHours;
+          platformGamesCountMap[p] = (platformGamesCountMap[p] || 0) + 1;
+        }
       }
 
       if (
@@ -827,7 +836,9 @@ export async function GET(
         topPlatform: hoursByPlatform[0]?.platform || null,
         topGames,
         gamesCatalog,
-        recentGames: userGames.slice(0, 12),
+        recentGames: userGames
+          .filter((g) => g.status !== "BACKLOG")
+          .slice(0, 12),
         longestGame,
         highestRatedGame,
         lowestRatedGame,
