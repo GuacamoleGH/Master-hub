@@ -64,9 +64,9 @@ export default function CinephileLevelBar({
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
         {/* Nivel y Rango */}
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div
-            className="w-13 h-13 rounded-2xl flex items-center justify-center text-2xl border shadow-inner shrink-0"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border shadow-inner shrink-0"
             style={{
               backgroundColor: `${rankColor}20`,
               borderColor: `${rankColor}50`,
@@ -75,7 +75,7 @@ export default function CinephileLevelBar({
             <span>{rankIcon}</span>
           </div>
 
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span
                 className={`text-xs uppercase font-extrabold tracking-widest font-mono ${
@@ -85,7 +85,7 @@ export default function CinephileLevelBar({
                 {label}
               </span>
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border shrink-0 ${
                   isSeries
                     ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
                     : "bg-amber-500/20 text-amber-300 border-amber-500/30"
@@ -95,8 +95,9 @@ export default function CinephileLevelBar({
               </span>
             </div>
             <h3
-              className="text-lg sm:text-xl font-black tracking-tight"
+              className="text-base sm:text-lg font-black tracking-tight truncate"
               style={{ color: rankColor }}
+              title={rankTitle}
             >
               {rankTitle}
             </h3>
