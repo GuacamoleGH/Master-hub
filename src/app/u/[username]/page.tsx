@@ -1024,71 +1024,79 @@ function PublicProfileContent() {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Récord: Partida Legendaria */}
             <div className="glass-panel p-5 rounded-3xl border border-purple-500/20 bg-cine-950 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-2">
                 <Clock className="w-4 h-4 text-purple-400" />
                 <span>Partida Legendaria (Más Horas)</span>
               </div>
 
               {gaming.longestGame ? (
-                <div className="flex items-center gap-3.5">
-                  {gaming.longestGame.cover && (
-                    <img
-                      src={gaming.longestGame.cover}
-                      alt={gaming.longestGame.title}
-                      className="w-14 h-14 rounded-xl object-cover border border-purple-500/30 shadow-md shrink-0"
-                    />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-white truncate">
-                      {gaming.longestGame.title}
-                    </p>
-                    <p className="text-xl font-black text-purple-400 font-mono mt-0.5">
-                      {gaming.longestGame.hours}{" "}
-                      <span className="text-xs text-cine-400 font-normal">
-                        horas jugadas
-                      </span>
-                    </p>
+                <div className="flex-1 flex items-center p-3 rounded-2xl bg-cine-900/60 border border-purple-500/20">
+                  <div className="flex items-center gap-3.5 w-full">
+                    {gaming.longestGame.cover && (
+                      <img
+                        src={gaming.longestGame.cover}
+                        alt={gaming.longestGame.title}
+                        className="w-16 h-16 rounded-xl object-cover border border-purple-500/30 shadow-md shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-white truncate">
+                        {gaming.longestGame.title}
+                      </p>
+                      <p className="text-xl font-black text-purple-400 font-mono mt-0.5">
+                        {gaming.longestGame.hours}{" "}
+                        <span className="text-xs text-cine-400 font-normal">
+                          horas jugadas
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-cine-500 italic py-3">
-                  Sin registros de tiempo prolongado todavía.
-                </p>
+                <div className="flex-1 flex items-center justify-center p-3 rounded-2xl bg-cine-900/40 border border-cine-800">
+                  <p className="text-xs text-cine-500 italic text-center">
+                    Sin registros de tiempo prolongado todavía.
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Récord: Obra Maestra */}
             <div className="glass-panel p-5 rounded-3xl border border-amber-500/20 bg-cine-950 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
                 <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                 <span>Obra Maestra Personal</span>
               </div>
 
               {gaming.highestRatedGame ? (
-                <div className="flex items-center gap-3.5">
-                  {gaming.highestRatedGame.cover && (
-                    <img
-                      src={gaming.highestRatedGame.cover}
-                      alt={gaming.highestRatedGame.title}
-                      className="w-14 h-14 rounded-xl object-cover border border-amber-500/30 shadow-md shrink-0"
-                    />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-white truncate">
-                      {gaming.highestRatedGame.title}
-                    </p>
-                    <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
-                      ★ {gaming.highestRatedGame.rating}{" "}
-                      <span className="text-xs text-cine-400 font-normal">
-                        / 10
-                      </span>
-                    </p>
+                <div className="flex-1 flex items-center p-3 rounded-2xl bg-cine-900/60 border border-amber-500/20">
+                  <div className="flex items-center gap-3.5 w-full">
+                    {gaming.highestRatedGame.cover && (
+                      <img
+                        src={gaming.highestRatedGame.cover}
+                        alt={gaming.highestRatedGame.title}
+                        className="w-16 h-16 rounded-xl object-cover border border-amber-500/30 shadow-md shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-white truncate">
+                        {gaming.highestRatedGame.title}
+                      </p>
+                      <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
+                        ★ {gaming.highestRatedGame.rating}{" "}
+                        <span className="text-xs text-cine-400 font-normal">
+                          / 10
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-cine-500 italic py-3">
-                  Sin videojuegos puntuados como obra maestra.
-                </p>
+                <div className="flex-1 flex items-center justify-center p-3 rounded-2xl bg-cine-900/40 border border-cine-800">
+                  <p className="text-xs text-cine-500 italic text-center">
+                    Sin videojuegos puntuados como obra maestra.
+                  </p>
+                </div>
               )}
             </div>
 

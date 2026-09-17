@@ -32,19 +32,40 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
 
   // Tomamos los juegos calificados más recientes
   const chartData = data.slice(0, 10).map((d) => ({
-    name: d.title.length > 16 ? `${d.title.substring(0, 15)}…` : d.title,
+    name: d.title.length > 22 ? `${d.title.substring(0, 20)}…` : d.title,
     fullName: d.title,
     "Tu Nota": d.userRating,
     "Metacritic (Crítica)": d.criticRating,
     gk: d.gameKnowledge,
   }));
 
+  const renderCustomTick = (props: any) => {
+    const { x, y, payload } = props;
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={12}
+          dx={-4}
+          textAnchor="end"
+          fill="#94a3b8"
+          fontSize={11}
+          fontWeight={500}
+          transform="rotate(-28)"
+        >
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div className="w-full h-80 pt-2">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 15, right: 15, left: -15, bottom: 65 }}
+          margin={{ top: 15, right: 15, left: -15, bottom: 70 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -54,13 +75,10 @@ export default function CriticVsYouChart({ data }: CriticVsYouChartProps) {
           <XAxis
             dataKey="name"
             stroke="#71717a"
-            fontSize={11}
             tickLine={false}
             interval={0}
-            angle={-32}
-            textAnchor="end"
-            height={65}
-            tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 500 }}
+            height={70}
+            tick={renderCustomTick}
           />
           <YAxis
             domain={[0, 10]}

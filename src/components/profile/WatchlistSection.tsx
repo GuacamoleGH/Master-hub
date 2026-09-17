@@ -324,10 +324,18 @@ export default function WatchlistSection({
                     key={item.id}
                     href={item.link}
                     onClick={() => sounds.playClick()}
-                    className="group relative flex flex-col bg-cine-900/60 border border-cine-800/80 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl flex-shrink-0"
+                    className={`group relative flex flex-col bg-cine-900/60 border border-cine-800/80 ${
+                      isCinema
+                        ? "hover:border-amber-500/50"
+                        : "hover:border-purple-500/50"
+                    } rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl flex-shrink-0`}
                   >
                     {/* Imagen / Póster */}
-                    <div className="relative aspect-[2/3] w-full bg-cine-950 overflow-hidden">
+                    <div
+                      className={`relative w-full bg-cine-950 overflow-hidden ${
+                        isCinema ? "aspect-[2/3]" : "aspect-[16/10]"
+                      }`}
+                    >
                       {item.posterPath ? (
                         <img
                           src={item.posterPath}
