@@ -452,71 +452,79 @@ export default function GamerProfilePage() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Récord: Mayor Vicio */}
         <div className="glass-panel p-5 rounded-3xl border border-purple-500/20 bg-cine-950 flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-3">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-2">
             <Clock className="w-4 h-4 text-purple-400" />
             <span>Mayor Vicio Personal</span>
           </div>
 
           {stats.longestGame ? (
-            <div className="flex items-center gap-3.5">
-              {stats.longestGame.cover && (
-                <img
-                  src={stats.longestGame.cover}
-                  alt={stats.longestGame.title}
-                  className="w-14 h-14 rounded-xl object-cover border border-purple-500/30 shadow-md shrink-0"
-                />
-              )}
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-white truncate">
-                  {stats.longestGame.title}
-                </p>
-                <p className="text-xl font-black text-purple-400 font-mono mt-0.5">
-                  {stats.longestGame.hours}{" "}
-                  <span className="text-xs text-cine-400 font-normal">
-                    horas jugadas
-                  </span>
-                </p>
+            <div className="flex-1 flex items-center p-3 rounded-2xl bg-cine-900/60 border border-purple-500/20">
+              <div className="flex items-center gap-3.5 w-full">
+                {stats.longestGame.cover && (
+                  <img
+                    src={stats.longestGame.cover}
+                    alt={stats.longestGame.title}
+                    className="w-16 h-16 rounded-xl object-cover border border-purple-500/30 shadow-md shrink-0"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white truncate">
+                    {stats.longestGame.title}
+                  </p>
+                  <p className="text-xl font-black text-purple-400 font-mono mt-0.5">
+                    {stats.longestGame.hours}{" "}
+                    <span className="text-xs text-cine-400 font-normal">
+                      horas jugadas
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
-            <p className="text-xs text-cine-500 italic py-3">
-              Registra horas en tus títulos para descubrir tu récord.
-            </p>
+            <div className="flex-1 flex items-center justify-center p-3 rounded-2xl bg-cine-900/40 border border-cine-800">
+              <p className="text-xs text-cine-500 italic text-center">
+                Registra horas en tus títulos para descubrir tu récord.
+              </p>
+            </div>
           )}
         </div>
 
         {/* Récord: Obra Maestra */}
         <div className="glass-panel p-5 rounded-3xl border border-amber-500/20 bg-cine-950 flex flex-col justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             <span>Obra Maestra Personal</span>
           </div>
 
           {stats.highestRatedGame ? (
-            <div className="flex items-center gap-3.5">
-              {stats.highestRatedGame.cover && (
-                <img
-                  src={stats.highestRatedGame.cover}
-                  alt={stats.highestRatedGame.title}
-                  className="w-14 h-14 rounded-xl object-cover border border-amber-500/30 shadow-md shrink-0"
-                />
-              )}
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-white truncate">
-                  {stats.highestRatedGame.title}
-                </p>
-                <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
-                  ★ {stats.highestRatedGame.rating}{" "}
-                  <span className="text-xs text-cine-400 font-normal">
-                    / 10
-                  </span>
-                </p>
+            <div className="flex-1 flex items-center p-3 rounded-2xl bg-cine-900/60 border border-amber-500/20">
+              <div className="flex items-center gap-3.5 w-full">
+                {stats.highestRatedGame.cover && (
+                  <img
+                    src={stats.highestRatedGame.cover}
+                    alt={stats.highestRatedGame.title}
+                    className="w-16 h-16 rounded-xl object-cover border border-amber-500/30 shadow-md shrink-0"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white truncate">
+                    {stats.highestRatedGame.title}
+                  </p>
+                  <p className="text-xl font-black text-amber-400 font-mono mt-0.5">
+                    ★ {stats.highestRatedGame.rating}{" "}
+                    <span className="text-xs text-cine-400 font-normal">
+                      / 10
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
-            <p className="text-xs text-cine-500 italic py-3">
-              Puntúa tus títulos favoritos para ver tu obra maestra.
-            </p>
+            <div className="flex-1 flex items-center justify-center p-3 rounded-2xl bg-cine-900/40 border border-cine-800">
+              <p className="text-xs text-cine-500 italic text-center">
+                Puntúa tus títulos favoritos para ver tu obra maestra.
+              </p>
+            </div>
           )}
         </div>
 
