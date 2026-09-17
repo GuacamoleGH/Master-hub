@@ -71,10 +71,18 @@ export default function WatchedCatalogSection({
       const completed = items.filter(
         (i) => i.status === "COMPLETED" || i.status === "PLATINUM",
       ).length;
+      const continuous = items.filter((i) => i.status === "CONTINUOUS").length;
       const playing = items.filter((i) => i.status === "PLAYING").length;
       const platinum = items.filter((i) => i.status === "PLATINUM").length;
       const backlog = items.filter((i) => i.status === "BACKLOG").length;
-      return { all: items.length, completed, playing, platinum, backlog };
+      return {
+        all: items.length,
+        completed,
+        continuous,
+        playing,
+        platinum,
+        backlog,
+      };
     }
   }, [items, isCinema]);
 
@@ -103,6 +111,8 @@ export default function WatchedCatalogSection({
         result = result.filter(
           (i) => i.status === "COMPLETED" || i.status === "PLATINUM",
         );
+      } else if (filterType === "continuous") {
+        result = result.filter((i) => i.status === "CONTINUOUS");
       } else if (filterType === "playing") {
         result = result.filter((i) => i.status === "PLAYING");
       } else if (filterType === "platinum") {
@@ -304,6 +314,20 @@ export default function WatchedCatalogSection({
               type="button"
               onClick={() => {
                 sounds.click();
+                setFilterType("continuous");
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                filterType === "continuous"
+                  ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm"
+                  : "bg-cine-900/80 text-cine-400 hover:text-white border border-cine-800"
+              }`}
+            >
+              Continuos ({counts.continuous})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                sounds.click();
                 setFilterType("platinum");
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -444,7 +468,17 @@ export default function WatchedCatalogSection({
                         </span>
                       ) : (
                         <span className="text-[9px] uppercase tracking-wider text-cyan-400">
-                          {item.status || "—"}
+                          {item.status === "CONTINUOUS"
+                            ? "Continuo"
+                            : item.status === "COMPLETED"
+                              ? "Completado"
+                              : item.status === "PLATINUM"
+                                ? "Platino"
+                                : item.status === "PLAYING"
+                                  ? "Jugando"
+                                  : item.status === "BACKLOG"
+                                    ? "Backlog"
+                                    : item.status || "—"}
                         </span>
                       )}
                     </div>

@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
           }
           if (item.userGame.status === "COMPLETED") totalXp += 150;
           else if (item.userGame.status === "PLATINUM") totalXp += 250;
+          else if (item.userGame.status === "CONTINUOUS") totalXp += 120;
           else if (item.userGame.status === "PLAYING") totalXp += 35;
           else if (item.userGame.status === "BACKLOG") totalXp += 15;
 

@@ -22,6 +22,7 @@ import { useToast } from "@/components/shared/ToastContext";
 const STATUS_OPTIONS = [
   { value: "BACKLOG", label: "📥 Backlog (Pendiente)" },
   { value: "PLAYING", label: "🕹️ Jugando Ahora" },
+  { value: "CONTINUOUS", label: "♾️ Continuo / Sin fin" },
   { value: "COMPLETED", label: "🏆 Completado" },
   { value: "PLATINUM", label: "👑 100% Platino" },
   { value: "DROPPED", label: "💀 Abandonado" },
@@ -47,7 +48,13 @@ interface GameReviewModalProps {
     metacritic?: number | null;
     platforms?: string[];
   };
-  initialStatus?: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+  initialStatus?:
+    | "BACKLOG"
+    | "PLAYING"
+    | "COMPLETED"
+    | "PLATINUM"
+    | "DROPPED"
+    | "CONTINUOUS";
   initialRating?: number | null;
   initialHours?: number | null;
   initialPlatform?: string | null; // e.g. "PC (Steam), Xbox 360"
@@ -201,7 +208,13 @@ export default function GameReviewModal({
 
   const updatePlatformStatus = (
     platformName: string,
-    st: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED",
+    st:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS",
   ) => {
     setPlatformProgressList((prev) =>
       prev.map((p) => (p.platform === platformName ? { ...p, status: st } : p)),
@@ -261,7 +274,8 @@ export default function GameReviewModal({
         (status === "COMPLETED" ||
           status === "PLATINUM" ||
           status === "DROPPED" ||
-          status === "PLAYING")
+          status === "PLAYING" ||
+          status === "CONTINUOUS")
       ) {
         payload.userRating = Number(rating.toFixed(1));
       } else {
@@ -428,6 +442,14 @@ export default function GameReviewModal({
                 </button>
               ))}
             </div>
+            {status === "CONTINUOUS" && (
+              <p className="text-[11px] text-sky-300 font-mono bg-sky-950/40 border border-sky-500/30 p-2.5 rounded-xl mt-1.5 flex items-start gap-1.5 animate-fade-in">
+                <span>♾️</span>
+                <span>
+                  <strong>Juego Continuo / Sin fin:</strong> Ideal para títulos multijugador, competitivos o infinitos tipo Counter-Strike, LoL, Valorant, Rocket League o FIFA que no tienen una campaña que terminar.
+                </span>
+              </p>
+            )}
           </div>
 
           {/* Horas Jugadas Totales */}

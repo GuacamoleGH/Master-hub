@@ -500,10 +500,22 @@ export default function GameDetailPage() {
               </span>
               <div className="pt-1 flex flex-col gap-1">
                 <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 w-fit">
-                  {game.userGame.status}
+                  {game.userGame.status === "COMPLETED"
+                    ? "🏆 Completado"
+                    : game.userGame.status === "PLATINUM"
+                      ? "👑 Platino"
+                      : game.userGame.status === "PLAYING"
+                        ? "🕹️ Jugando"
+                        : game.userGame.status === "CONTINUOUS"
+                          ? "♾️ Continuo / Sin fin"
+                          : "💀 Abandonado"}
                 </span>
                 <span className="text-[11px] text-cine-400">
-                  {game.userGame.completedDate ? (
+                  {game.userGame.status === "CONTINUOUS" ? (
+                    <span className="text-sky-300/90 font-mono">
+                      ♾️ Juego Continuo
+                    </span>
+                  ) : game.userGame.completedDate ? (
                     formatSpanishDate(game.userGame.completedDate)
                   ) : (
                     <span className="text-cyan-300/90 font-mono">
@@ -568,9 +580,11 @@ export default function GameDetailPage() {
                               ? "👑 100% Platino"
                               : item.status === "PLAYING"
                                 ? "🕹️ Jugando Ahora"
-                                : item.status === "BACKLOG"
-                                  ? "📥 Backlog"
-                                  : "💀 Abandonado"}
+                                : item.status === "CONTINUOUS"
+                                  ? "♾️ Continuo / Sin fin"
+                                  : item.status === "BACKLOG"
+                                    ? "📥 Backlog"
+                                    : "💀 Abandonado"}
                         </span>
                       </div>
                     </div>

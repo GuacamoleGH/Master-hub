@@ -12,7 +12,13 @@ export interface SeedGame {
   description: string;
   screenshots: string[];
   userGame?: {
-    status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+    status:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS";
     userRating?: number | null;
     hoursPlayed?: number | null;
     platform?: string | null;

@@ -504,9 +504,12 @@ export async function GET(
     const statusBreakdown = {
       completed: completedGames.length,
       playing: userGames.filter((ug) => ug.status === "PLAYING").length,
+      continuous: userGames.filter((ug) => ug.status === "CONTINUOUS").length,
       backlog: backlogGames.length,
       platinum: userGames.filter((ug) => ug.status === "PLATINUM").length,
-      abandoned: userGames.filter((ug) => ug.status === "ABANDONED").length,
+      abandoned: userGames.filter(
+        (ug) => ug.status === "ABANDONED" || ug.status === "DROPPED",
+      ).length,
     };
 
     const platformHoursMap: Record<string, number> = {};

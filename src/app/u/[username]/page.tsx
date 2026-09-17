@@ -123,6 +123,7 @@ interface PublicUnifiedProfileData {
     statusBreakdown?: {
       completed: number;
       playing: number;
+      continuous?: number;
       backlog: number;
       platinum: number;
       abandoned: number;
@@ -1098,13 +1099,31 @@ function PublicProfileContent() {
                 <span>Ritmo y Biblioteca</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                 <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
                   <span className="text-cine-400 block text-[10px]">
                     Jugando
                   </span>
                   <span className="text-base font-black text-white font-mono">
                     {gaming.statusBreakdown?.playing ?? 0}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+                  <span className="text-cine-400 block text-[10px]">
+                    Continuos
+                  </span>
+                  <span className="text-base font-black text-sky-400 font-mono">
+                    {gaming.statusBreakdown?.continuous ?? 0}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+                  <span className="text-cine-400 block text-[10px]">
+                    Completados
+                  </span>
+                  <span className="text-base font-black text-purple-400 font-mono">
+                    {gaming.statusBreakdown?.completed ??
+                      gaming.totalCompleted ??
+                      0}
                   </span>
                 </div>
                 <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
@@ -1117,22 +1136,22 @@ function PublicProfileContent() {
                 </div>
                 <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
                   <span className="text-cine-400 block text-[10px]">
-                    Media / Título
-                  </span>
-                  <span className="text-base font-black text-cyan-300 font-mono">
-                    {gaming.averageCompletionHours
-                      ? `${gaming.averageCompletionHours}h`
-                      : "—"}
-                  </span>
-                </div>
-                <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
-                  <span className="text-cine-400 block text-[10px]">
                     Platinados
                   </span>
                   <span className="text-base font-black text-amber-400 font-mono">
                     {gaming.statusBreakdown?.platinum ??
                       gaming.totalPlatinum ??
                       0}
+                  </span>
+                </div>
+                <div className="p-2 rounded-xl bg-cine-900/80 border border-cine-800">
+                  <span className="text-cine-400 block text-[10px]">
+                    Media / Título
+                  </span>
+                  <span className="text-base font-black text-cyan-300 font-mono">
+                    {gaming.averageCompletionHours
+                      ? `${gaming.averageCompletionHours}h`
+                      : "—"}
                   </span>
                 </div>
               </div>

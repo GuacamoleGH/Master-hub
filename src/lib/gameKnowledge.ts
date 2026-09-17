@@ -83,6 +83,8 @@ export function calculateGameXp(
     xp = 15;
   } else if (status === "PLAYING") {
     xp = 35;
+  } else if (status === "CONTINUOUS") {
+    xp = 120;
   } else if (status === "COMPLETED") {
     xp = 150;
   } else if (status === "PLATINUM") {
