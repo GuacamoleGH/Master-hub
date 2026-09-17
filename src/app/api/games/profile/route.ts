@@ -72,6 +72,7 @@ export async function GET() {
     let totalPlatinum = 0;
     let totalBacklog = 0;
     let totalPlaying = 0;
+    let totalContinuous = 0;
     let totalReviews = 0;
 
     let totalUserRatingSum = 0;
@@ -111,7 +112,8 @@ export async function GET() {
       else if (ug.status === "PLATINUM") {
         totalCompleted++;
         totalPlatinum++;
-      } else if (ug.status === "BACKLOG") totalBacklog++;
+      } else if (ug.status === "CONTINUOUS") totalContinuous++;
+      else if (ug.status === "BACKLOG") totalBacklog++;
       else if (ug.status === "PLAYING") totalPlaying++;
 
       if (ug.review && ug.review.trim().length > 0) totalReviews++;
@@ -259,9 +261,12 @@ export async function GET() {
     const statusBreakdown = {
       completed: totalCompleted,
       playing: totalPlaying,
+      continuous: totalContinuous,
       backlog: totalBacklog,
       platinum: totalPlatinum,
-      abandoned: userGames.filter((ug) => ug.status === "ABANDONED").length,
+      abandoned: userGames.filter(
+        (ug) => ug.status === "ABANDONED" || ug.status === "DROPPED",
+      ).length,
     };
 
     let gamerXp = 0;

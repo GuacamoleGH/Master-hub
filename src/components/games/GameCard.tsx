@@ -22,7 +22,13 @@ interface GameCardProps {
     platforms?: string[];
   };
   userGame?: {
-    status?: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+    status?:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS";
     userRating?: number | null;
     hoursPlayed?: number | null;
     platform?: string | null;
@@ -47,6 +53,10 @@ export default function GameCard({ game, userGame, onUpdate }: GameCardProps) {
     PLAYING: {
       label: "🕹️ Jugando",
       class: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+    },
+    CONTINUOUS: {
+      label: "♾️ Continuo",
+      class: "bg-sky-500/20 text-sky-300 border-sky-500/40",
     },
     COMPLETED: {
       label: "🏆 Completado",

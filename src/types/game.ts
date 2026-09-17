@@ -13,7 +13,13 @@ export interface GameSearchResult {
 export interface PlatformProgress {
   platform: string;
   hours: number;
-  status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+  status:
+    | "BACKLOG"
+    | "PLAYING"
+    | "COMPLETED"
+    | "PLATINUM"
+    | "DROPPED"
+    | "CONTINUOUS";
 }
 
 export interface GameDetail {
@@ -38,7 +44,13 @@ export interface GameDetail {
   communityReviews?: any[];
   userGame?: {
     id: string;
-    status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+    status:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS";
     userRating: number | null;
     hoursPlayed: number | null;
     platform: string | null;
@@ -53,7 +65,13 @@ export interface GameDetail {
 export interface UserGameItem {
   id: string;
   gameId: string;
-  status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+  status:
+    | "BACKLOG"
+    | "PLAYING"
+    | "COMPLETED"
+    | "PLATINUM"
+    | "DROPPED"
+    | "CONTINUOUS";
   userRating: number | null;
   hoursPlayed: number | null;
   platform: string | null;
@@ -154,5 +172,6 @@ export interface GamerStats {
     backlog: number;
     platinum: number;
     abandoned: number;
+    continuous?: number;
   };
 }
