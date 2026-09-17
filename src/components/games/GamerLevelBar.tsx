@@ -32,9 +32,9 @@ export default function GamerLevelBar({
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Nivel y Rango */}
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div
-            className="w-13 h-13 rounded-2xl flex items-center justify-center text-2xl border shadow-inner"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border shadow-inner shrink-0"
             style={{
               backgroundColor: `${rankColor}20`,
               borderColor: `${rankColor}50`,
@@ -43,18 +43,19 @@ export default function GamerLevelBar({
             <span>{rankIcon}</span>
           </div>
 
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="text-xs uppercase font-extrabold tracking-widest text-purple-400 font-mono">
                 Rango Gamer
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0">
                 Nvl. {level}
               </span>
             </div>
             <h3
-              className="text-lg sm:text-xl font-black tracking-tight"
+              className="text-base sm:text-lg font-black tracking-tight truncate"
               style={{ color: rankColor }}
+              title={rankTitle}
             >
               {rankTitle}
             </h3>
@@ -62,7 +63,7 @@ export default function GamerLevelBar({
         </div>
 
         {/* XP acumulada */}
-        <div className="sm:text-right">
+        <div className="sm:text-right shrink-0">
           <div className="text-xs text-cine-400 flex items-center sm:justify-end gap-1 font-medium">
             <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />{" "}
             Experiencia Total

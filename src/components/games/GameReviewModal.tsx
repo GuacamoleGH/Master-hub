@@ -218,9 +218,7 @@ export default function GameReviewModal({
     const isAnyCompleted =
       newStatus === "COMPLETED" ||
       newStatus === "PLATINUM" ||
-      nextList.some(
-        (p) => p.status === "COMPLETED" || p.status === "PLATINUM",
-      );
+      nextList.some((p) => p.status === "COMPLETED" || p.status === "PLATINUM");
 
     setHasRating(isAnyCompleted);
   };

@@ -324,7 +324,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Barra de Nivel Cinéfilo */}
-          <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
+          <div className="w-full lg:w-[350px] xl:w-[380px] shrink-0">
             <CinephileLevelBar
               totalXp={stats.totalXp}
               variant="cinema"

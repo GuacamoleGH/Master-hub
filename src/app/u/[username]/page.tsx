@@ -447,9 +447,9 @@ function PublicProfileContent() {
               </div>
 
               {/* Datos de Identidad */}
-              <div className="space-y-1.5 min-w-0">
+              <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     {user.name || user.username}
                   </h1>
                   <span className="text-xs font-mono px-2 py-0.5 rounded-lg border text-amber-300 bg-amber-950/60 border-amber-500/30">
@@ -527,7 +527,7 @@ function PublicProfileContent() {
             </div>
 
             {/* Barra de Nivel Cinéfilo en Cabecera */}
-            <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
+            <div className="w-full lg:w-[350px] xl:w-[380px] shrink-0">
               <CinephileLevelBar
                 totalXp={cinema.totalXp ?? user.totalXp ?? 0}
                 variant="cinema"
@@ -559,9 +559,9 @@ function PublicProfileContent() {
               </div>
 
               {/* Datos de Identidad */}
-              <div className="space-y-1.5 min-w-0">
+              <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     {user.name || user.username}
                   </h1>
                   <span className="text-xs font-mono px-2 py-0.5 rounded-lg border text-purple-300 bg-purple-950/60 border-purple-500/30">
@@ -639,7 +639,7 @@ function PublicProfileContent() {
             </div>
 
             {/* Barra de Nivel Gamer en Cabecera */}
-            <div className="w-full lg:w-auto lg:min-w-[320px] shrink-0">
+            <div className="w-full lg:w-[350px] xl:w-[380px] shrink-0">
               <GamerLevelBar
                 totalXp={gaming.totalXp ?? user.totalXp ?? 0}
                 className="h-full lg:h-[166px]"
