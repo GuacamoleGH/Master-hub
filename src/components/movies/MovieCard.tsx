@@ -129,38 +129,41 @@ export default function MovieCard({
           <div className="absolute inset-0 bg-gradient-to-t from-cine-950 via-transparent to-black/50 opacity-70 group-hover:opacity-50 transition-opacity pointer-events-none" />
 
           {/* Calificaciones superpuestas arriba */}
-          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10">
+          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 z-10">
             {movie.imdbRating ? (
               <a
                 href={getImdbUrl(movie.imdbId, movie.title)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 bg-black/75 hover:bg-[#f5c518] hover:text-black transition-all backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/20 hover:border-amber-400 shadow group/imdb"
+                className="flex items-center gap-1.5 bg-black/80 hover:bg-[#f5c518] hover:text-black transition-all backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400 border border-amber-500/25 hover:border-amber-400 shadow group/imdb shrink-0"
                 title={`Ver en IMDb (Nota: ${movie.imdbRating.toFixed(1)} / 10)`}
               >
-                <Star className="w-3 h-3 fill-amber-400 group-hover/imdb:fill-black group-hover/imdb:text-black transition-colors" />
-                <span>{movie.imdbRating.toFixed(1)}</span>
+                <span className="font-mono font-black text-[9px] px-1 py-0.2 rounded bg-[#f5c518] text-black leading-tight group-hover/imdb:bg-black group-hover/imdb:text-[#f5c518] transition-colors">
+                  IMDb
+                </span>
+                <div className="flex items-center gap-0.5">
+                  <Star className="w-3 h-3 fill-amber-400 group-hover/imdb:fill-black group-hover/imdb:text-black transition-colors" />
+                  <span>{movie.imdbRating.toFixed(1)}</span>
+                </div>
                 <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover/imdb:opacity-100" />
               </a>
             ) : (
-              <div />
-            )}
-
-            {/* Acciones rápidas flotantes */}
-            <div className="flex items-center gap-1">
               <a
                 href={getImdbUrl(movie.imdbId, movie.title)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 title="Abrir ficha oficial en IMDb"
-                className="px-1.5 py-1 rounded-lg backdrop-blur-md border border-amber-500/40 bg-black/70 hover:bg-[#f5c518] text-[#f5c518] hover:text-black font-black text-[10px] tracking-tight transition-all flex items-center gap-0.5 shadow"
+                className="px-1.5 py-0.5 rounded-lg backdrop-blur-md border border-amber-500/40 bg-black/80 hover:bg-[#f5c518] text-[#f5c518] hover:text-black font-black text-[10px] tracking-tight transition-all flex items-center gap-0.5 shadow shrink-0"
               >
                 <span>IMDb</span>
                 <ExternalLink className="w-2.5 h-2.5" />
               </a>
+            )}
 
+            {/* Acciones rápidas flotantes */}
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdating}
@@ -172,7 +175,7 @@ export default function MovieCard({
                 className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
                   isWatchlist
                     ? "bg-sky-500 text-cine-950 border-sky-400 font-bold shadow-[0_0_12px_rgba(14,165,233,0.4)]"
-                    : "bg-black/60 text-cine-300 hover:text-white border-white/10 hover:bg-black/80"
+                    : "bg-black/70 text-cine-300 hover:text-white border-white/10 hover:bg-black/90"
                 }`}
               >
                 <Bookmark
@@ -190,7 +193,7 @@ export default function MovieCard({
                 className={`p-1.5 rounded-lg backdrop-blur-md border transition-all ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 border-emerald-400 font-bold shadow"
-                    : "bg-black/60 text-cine-300 hover:text-white border-white/10 hover:bg-black/80"
+                    : "bg-black/70 text-cine-300 hover:text-white border-white/10 hover:bg-black/90"
                 }`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
