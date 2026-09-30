@@ -11,6 +11,8 @@ import {
   Award,
   Check,
   Plus,
+  History,
+  Zap,
 } from "lucide-react";
 import { ALL_PLATFORMS, PlatformOption } from "@/lib/platforms";
 import { PlatformProgress } from "@/types/game";
@@ -20,6 +22,7 @@ import { useToast } from "@/components/shared/ToastContext";
 const STATUS_OPTIONS = [
   { value: "BACKLOG", label: "📥 Backlog (Pendiente)" },
   { value: "PLAYING", label: "🕹️ Jugando Ahora" },
+  { value: "CONTINUOUS", label: "♾️ Continuo / Sin fin" },
   { value: "COMPLETED", label: "🏆 Completado" },
   { value: "PLATINUM", label: "👑 100% Platino" },
   { value: "DROPPED", label: "💀 Abandonado" },
@@ -45,7 +48,13 @@ interface GameReviewModalProps {
     metacritic?: number | null;
     platforms?: string[];
   };
-  initialStatus?: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+  initialStatus?:
+    | "BACKLOG"
+    | "PLAYING"
+    | "COMPLETED"
+    | "PLATINUM"
+    | "DROPPED"
+    | "CONTINUOUS";
   initialRating?: number | null;
   initialHours?: number | null;
   initialPlatform?: string | null; // e.g. "PC (Steam), Xbox 360"
@@ -65,11 +74,19 @@ export default function GameReviewModal({
   initialPlatformDetails,
   initialReview,
 }: GameReviewModalProps) {
+  const getInitialGameRating = () => {
+    if (initialRating !== null && initialRating !== undefined) {
+      return initialRating;
+    }
+    if (typeof game.metacritic === "number" && game.metacritic > 0) {
+      return Number((game.metacritic / 10).toFixed(1));
+    }
+    return 8.0;
+  };
+
   const [status, setStatus] = useState(initialStatus);
-  const [rating, setRating] = useState<number>(initialRating ?? 8.5);
-  const [hasRating, setHasRating] = useState<boolean>(
-    initialRating !== null && initialRating !== undefined,
-  );
+  const [rating, setRating] = useState<number>(getInitialGameRating);
+  const [hasRating, setHasRating] = useState<boolean>(true);
   const [hours, setHours] = useState<string>(
     initialHours ? String(initialHours) : "",
   );
@@ -101,9 +118,15 @@ export default function GameReviewModal({
   useEffect(() => {
     if (isOpen) {
       setStatus(initialStatus);
-      setRating(initialRating ?? 8.5);
-      setHasRating(initialRating !== null && initialRating !== undefined);
-
+      const fallbackGameRating =
+        typeof game.metacritic === "number" && game.metacritic > 0
+          ? Number((game.metacritic / 10).toFixed(1))
+          : 8.0;
+      setRating(
+        initialRating !== null && initialRating !== undefined
+          ? initialRating
+          : fallbackGameRating,
+      );
       // Cargar desglose de plataformas
       let loadedList: PlatformProgress[] = [];
       if (initialPlatformDetails) {
@@ -127,24 +150,25 @@ export default function GameReviewModal({
             hours: idx === 0 ? initialHours || 0 : 0,
             status: initialStatus,
           }));
-        } else if (game.platforms && game.platforms.length > 0) {
-          loadedList = [
-            {
-              platform: game.platforms[0],
-              hours: initialHours || 0,
-              status: initialStatus,
-            },
-          ];
-        } else {
-          loadedList = [
-            {
-              platform: "PC (Steam)",
-              hours: initialHours || 0,
-              status: initialStatus,
-            },
-          ];
         }
       }
+
+      // Si solo hay una plataforma seleccionada, cuadrar el estado general con esa plataforma
+      let resolvedStatus = initialStatus;
+      if (loadedList.length === 1 && loadedList[0].status) {
+        resolvedStatus = loadedList[0].status;
+      }
+      setStatus(resolvedStatus);
+
+      // Si no está seleccionado el estado completado ni en el general ni en ninguna plataforma, desmarcar por defecto la casilla de nota
+      const isAnyCompleted =
+        resolvedStatus === "COMPLETED" ||
+        resolvedStatus === "PLATINUM" ||
+        loadedList.some(
+          (p) => p.status === "COMPLETED" || p.status === "PLATINUM",
+        );
+
+      setHasRating(isAnyCompleted);
 
       setPlatformProgressList(loadedList);
       const totalH = loadedList.reduce(
@@ -171,6 +195,34 @@ export default function GameReviewModal({
 
   const selectedPlatformNames = platformProgressList.map((p) => p.platform);
 
+  const handleStatusChange = (
+    newStatus:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS",
+  ) => {
+    setStatus(newStatus);
+
+    let nextList = platformProgressList;
+    if (platformProgressList.length === 1) {
+      nextList = platformProgressList.map((p) => ({
+        ...p,
+        status: newStatus,
+      }));
+      setPlatformProgressList(nextList);
+    }
+
+    const isAnyCompleted =
+      newStatus === "COMPLETED" ||
+      newStatus === "PLATINUM" ||
+      nextList.some((p) => p.status === "COMPLETED" || p.status === "PLATINUM");
+
+    setHasRating(isAnyCompleted);
+  };
+
   const togglePlatform = (name: string) => {
     setPlatformProgressList((prev) => {
       const exists = prev.some((p) => p.platform === name);
@@ -179,6 +231,9 @@ export default function GameReviewModal({
         next = prev.filter((p) => p.platform !== name);
       } else {
         next = [...prev, { platform: name, hours: 0, status: status }];
+      }
+      if (next.length === 1) {
+        next[0].status = status;
       }
       const totalH = next.reduce((acc, p) => acc + (Number(p.hours) || 0), 0);
       setHours(totalH > 0 ? String(totalH) : "");
@@ -199,20 +254,45 @@ export default function GameReviewModal({
 
   const updatePlatformStatus = (
     platformName: string,
-    st: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED",
+    st:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS",
   ) => {
-    setPlatformProgressList((prev) =>
-      prev.map((p) => (p.platform === platformName ? { ...p, status: st } : p)),
-    );
+    setPlatformProgressList((prev) => {
+      const next = prev.map((p) =>
+        p.platform === platformName ? { ...p, status: st } : p,
+      );
+
+      let currentStatus = status;
+      if (next.length === 1) {
+        currentStatus = st;
+        setStatus(st);
+      }
+
+      const isAnyCompleted =
+        currentStatus === "COMPLETED" ||
+        currentStatus === "PLATINUM" ||
+        next.some((p) => p.status === "COMPLETED" || p.status === "PLATINUM");
+
+      setHasRating(isAnyCompleted);
+      return next;
+    });
   };
 
   const addCustomPlatform = () => {
     const trimmed = customPlatform.trim();
     if (trimmed && !selectedPlatformNames.includes(trimmed)) {
-      setPlatformProgressList((prev) => [
-        ...prev,
-        { platform: trimmed, hours: 0, status },
-      ]);
+      setPlatformProgressList((prev) => {
+        const next = [...prev, { platform: trimmed, hours: 0, status }];
+        if (next.length === 1) {
+          next[0].status = status;
+        }
+        return next;
+      });
       setCustomPlatform("");
     }
   };
@@ -221,6 +301,14 @@ export default function GameReviewModal({
     (acc, p) => acc + (Number(p.hours) || 0),
     0,
   );
+
+  const handleTotalHoursChange = (val: string) => {
+    setHours(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && platformProgressList.length === 1) {
+      updatePlatformHours(platformProgressList[0].platform, num);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,7 +339,8 @@ export default function GameReviewModal({
         (status === "COMPLETED" ||
           status === "PLATINUM" ||
           status === "DROPPED" ||
-          status === "PLAYING")
+          status === "PLAYING" ||
+          status === "CONTINUOUS")
       ) {
         payload.userRating = Number(rating.toFixed(1));
       } else {
@@ -270,12 +359,61 @@ export default function GameReviewModal({
       }
 
       if (res.ok) {
-        sounds.playSuccess();
+        if (status === "PLATINUM") {
+          sounds.achievement();
+        } else {
+          sounds.playSuccess();
+        }
         toast.success(
           "¡Juego registrado!",
           status === "COMPLETED" || status === "PLATINUM"
             ? `Marcado como ${status === "PLATINUM" ? "100% Platino 👑" : "Completado 🏆"} (+15 XP)`
             : "Añadido a tu colección gamer",
+        );
+        onSaved();
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error al guardar juego:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleQuickPlayedLongAgo = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/user-games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rawgId: game.rawgId,
+          status: "COMPLETED",
+          userRating: null,
+          hoursPlayed: null,
+          platform:
+            platformProgressList.length > 0
+              ? platformProgressList.map((p) => p.platform).join(", ")
+              : null,
+          platformDetails:
+            platformProgressList.length > 0
+              ? JSON.stringify(platformProgressList)
+              : null,
+          review: null,
+          completedDate: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar videojuegos en tu catálogo");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Juego guardado!",
+          "Marcado como completado en su día 🕹️ (+15 XP)",
         );
         onSaved();
         onClose();
@@ -322,6 +460,32 @@ export default function GameReviewModal({
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6">
+          {/* Acción rápida: Jugado en su día */}
+          <div className="p-3.5 bg-purple-950/40 border border-purple-500/30 rounded-2xl flex items-center justify-between gap-3 shadow-inner">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-purple-900/50 border border-purple-500/40 flex items-center justify-center text-cyan-300 shrink-0">
+                <History className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-white truncate">
+                  ¿Lo jugaste en su día?
+                </div>
+                <div className="text-[11px] text-purple-300/80 truncate">
+                  Guardar como completado sin nota ni horas
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleQuickPlayedLongAgo}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white transition-all shrink-0 shadow-sm flex items-center gap-1.5 active:scale-95"
+            >
+              <Zap className="w-3.5 h-3.5 fill-white text-white shrink-0" />
+              <span>Guardar rápido</span>
+            </button>
+          </div>
+
           {/* Selector de Estado */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-cine-300 block">
@@ -332,7 +496,7 @@ export default function GameReviewModal({
                 <button
                   type="button"
                   key={opt.value}
-                  onClick={() => setStatus(opt.value as any)}
+                  onClick={() => handleStatusChange(opt.value as any)}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all text-left truncate ${
                     status === opt.value
                       ? "bg-purple-600/30 border-purple-400 text-white shadow-[0_0_12px_rgba(139,92,246,0.3)]"
@@ -343,6 +507,17 @@ export default function GameReviewModal({
                 </button>
               ))}
             </div>
+            {status === "CONTINUOUS" && (
+              <p className="text-[11px] text-sky-300 font-mono bg-sky-950/40 border border-sky-500/30 p-2.5 rounded-xl mt-1.5 flex items-start gap-1.5 animate-fade-in">
+                <span>♾️</span>
+                <span>
+                  <strong>Juego Continuo / Sin fin:</strong> Ideal para títulos
+                  multijugador, competitivos o infinitos tipo Counter-Strike,
+                  LoL, Valorant, Rocket League o FIFA que no tienen una campaña
+                  que terminar.
+                </span>
+              </p>
+            )}
           </div>
 
           {/* Horas Jugadas Totales */}
@@ -352,26 +527,48 @@ export default function GameReviewModal({
                 <Clock className="w-3.5 h-3.5 text-cyan-400" /> Horas Jugadas
                 Totales
               </label>
-              {platformProgressList.length > 0 && (
-                <span className="text-[11px] font-mono text-cyan-300">
-                  {calculatedTotalHours}h sumadas entre plataformas
+              {platformProgressList.length > 1 && (
+                <span className="text-[11px] font-mono text-cyan-300 bg-cyan-950/50 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+                  Suma automática ({calculatedTotalHours}h)
                 </span>
               )}
             </div>
-            <div className="relative max-w-xs">
-              <input
-                type="number"
-                step="0.5"
-                min="0"
-                max="9999"
-                value={calculatedTotalHours > 0 ? calculatedTotalHours : hours}
-                onChange={(e) => setHours(e.target.value)}
-                placeholder="ej. 127"
-                className="w-full px-3.5 py-2.5 bg-cine-900 border border-cine-700 rounded-xl text-sm text-white font-mono placeholder-cine-500 focus:outline-none focus:border-cyan-400"
-              />
-              <span className="absolute right-3.5 top-2.5 text-xs text-cine-500 font-mono">
-                horas
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="relative w-36 sm:w-40">
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="9999"
+                  readOnly={platformProgressList.length > 1}
+                  value={
+                    platformProgressList.length > 1
+                      ? calculatedTotalHours > 0
+                        ? calculatedTotalHours
+                        : ""
+                      : platformProgressList.length === 1
+                        ? platformProgressList[0].hours > 0
+                          ? platformProgressList[0].hours
+                          : hours
+                        : hours
+                  }
+                  onChange={(e) => handleTotalHoursChange(e.target.value)}
+                  placeholder="0"
+                  className={`w-full pl-3 pr-14 py-2 bg-cine-900 border rounded-xl text-sm font-mono focus:outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    platformProgressList.length > 1
+                      ? "border-cine-800 text-cyan-300 bg-cine-950/60 cursor-default"
+                      : "border-cine-700 text-white placeholder-cine-600 focus:border-cyan-400"
+                  }`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-cine-500 font-mono pointer-events-none select-none">
+                  horas
+                </span>
+              </div>
+              {platformProgressList.length > 1 && (
+                <span className="text-xs text-cine-400 hidden sm:inline">
+                  Desglosadas por plataforma abajo
+                </span>
+              )}
             </div>
           </div>
 

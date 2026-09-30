@@ -16,6 +16,7 @@ import {
   User as UserIcon,
   Tv,
   ExternalLink,
+  History,
 } from "lucide-react";
 import { MovieDetail } from "@/types/movie";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
@@ -25,6 +26,8 @@ import StreamingBadge from "@/components/StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
 import MasterHubScoreBadge from "@/components/shared/MasterHubScoreBadge";
 import CommunityReviewsSection from "@/components/shared/CommunityReviewsSection";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function MovieDetailPage() {
   const params = useParams();
@@ -35,6 +38,8 @@ export default function MovieDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isUpdatingWatchlist, setIsUpdatingWatchlist] = useState(false);
+  const [isUpdatingSeenLongAgo, setIsUpdatingSeenLongAgo] = useState(false);
+  const toast = useToast();
 
   const fetchMovie = async () => {
     try {
@@ -60,22 +65,29 @@ export default function MovieDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-        <p className="text-sm text-cine-400 font-medium">
-          Cargando detalles cinematográficos...
-        </p>
+        <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+        <p className="text-cine-400 text-sm">Cargando película...</p>
       </div>
     );
   }
 
   if (!movie) {
     return (
-      <div className="min-h-[50vh] flex flex-col items-center justify-center text-center gap-4">
-        <Film className="w-12 h-12 text-cine-600" />
-        <h2 className="text-xl font-bold text-white">Película no encontrada</h2>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-cine-900 border border-cine-800 flex items-center justify-center text-cine-500">
+          <Film className="w-8 h-8" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold text-white">
+            Película no encontrada
+          </h2>
+          <p className="text-sm text-cine-400">
+            No se pudo encontrar la película solicitada en el catálogo.
+          </p>
+        </div>
         <button
           onClick={() => router.back()}
-          className="px-4 py-2 bg-cine-800 hover:bg-cine-700 text-sm rounded-xl transition-colors"
+          className="px-4 py-2 rounded-xl bg-cine-800 hover:bg-cine-700 text-sm font-semibold text-white transition-colors"
         >
           Volver atrás
         </button>
@@ -108,6 +120,41 @@ export default function MovieDetailPage() {
       console.error(err);
     } finally {
       setIsUpdatingWatchlist(false);
+    }
+  };
+
+  const handleMarkSeenLongAgo = async () => {
+    setIsUpdatingSeenLongAgo(true);
+    try {
+      const res = await fetch("/api/user-movies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tmdbId: movie.tmdbId,
+          status: "WATCHED",
+          userRating: null,
+          watchedDate: null,
+          review: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar películas en tu historial");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Película registrada!",
+          "Marcada como vista hace tiempo 📼 (+10 XP)",
+        );
+        await fetchMovie();
+      }
+    } catch (err) {
+      console.error("Error al registrar como visto hace tiempo:", err);
+    } finally {
+      setIsUpdatingSeenLongAgo(false);
     }
   };
 
@@ -155,118 +202,130 @@ export default function MovieDetailPage() {
         )}
 
         {/* Contenido Principal de Cabecera */}
-        <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-5 sm:gap-6 items-stretch">
           {/* Póster Oficial */}
-          <div className="w-48 sm:w-60 flex-shrink-0 mx-auto md:mx-0 shadow-2xl rounded-2xl overflow-hidden border border-white/10 glass-card">
+          <div className="relative w-64 sm:w-80 md:w-[340px] lg:w-[360px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 glass-card aspect-[2/3] md:aspect-auto md:min-h-[480px]">
             <MoviePoster
               src={movie.posterPath}
               alt={movie.title}
-              className="w-full h-auto object-cover"
+              className="w-full h-full object-cover md:absolute md:inset-0"
+              fallbackClassName="w-full h-full md:absolute md:inset-0 flex flex-col items-center justify-center text-cine-500 bg-cine-900/80 p-3 text-center"
             />
           </div>
 
           {/* Información y Títulos */}
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 flex flex-col justify-between min-h-[480px] gap-6">
+            {/* 1. Categoría Arriba */}
             <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                {movie.title}
-              </h1>
-              {movie.originalTitle && movie.originalTitle !== movie.title && (
-                <p className="text-base text-cine-400 italic mt-0.5">
-                  Título original: {movie.originalTitle}
-                </p>
-              )}
-            </div>
-
-            {/* Metadatos rápidos: Año, Duración, Géneros, IMDb */}
-            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-              {movie.year && (
-                <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Calendar className="w-4 h-4 text-cine-500" />
-                  <span>{movie.year}</span>
-                </div>
-              )}
-
-              {movie.runtime && (
-                <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Clock className="w-4 h-4 text-cine-500" />
-                  <span>{formatRuntime(movie.runtime)}</span>
-                </div>
-              )}
-
-              {movie.imdbRating && (
-                <a
-                  href={imdbUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer"
-                  title="Ver ficha oficial en IMDb"
-                >
-                  <Star className="w-4 h-4 fill-amber-400" />
-                  <span>IMDb {movie.imdbRating.toFixed(1)} / 10</span>
-                  <ExternalLink className="w-3 h-3 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
-                </a>
-              )}
-            </div>
-
-            {/* Master Hub Score Oficial */}
-            <MasterHubScoreBadge
-              score={movie.masterHubScore || null}
-              totalVotes={movie.masterHubVotes || 0}
-              distribution={movie.masterHubDistribution}
-              themeColor="amber"
-            />
-
-            {/* Pills de Géneros */}
-            {movie.genres && movie.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-cine-800/80 border border-cine-700 text-cine-200"
-                  >
-                    {genre}
-                  </span>
-                ))}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-sm font-semibold w-fit tracking-wide shadow-sm">
+                <Film className="w-4 h-4 text-amber-400" />
+                <span>Película</span>
               </div>
-            )}
+            </div>
 
-            {/* Plataformas de Streaming Disponibles */}
-            {movie.streamingPlatforms &&
-              movie.streamingPlatforms.length > 0 && (
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-cine-400 flex items-center gap-1.5">
-                    <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
-                    streaming:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {movie.streamingPlatforms.map((plat) => (
-                      <StreamingBadge key={plat} platform={plat} size="sm" />
-                    ))}
+            {/* 2. Bloque Central: Títulos, Metadatos, Géneros y Streaming */}
+            <div className="space-y-3.5">
+              <div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                  {movie.title}
+                </h1>
+                {movie.originalTitle && movie.originalTitle !== movie.title && (
+                  <p className="text-sm sm:text-base text-cine-400 italic mt-0.5 font-medium">
+                    Título original: {movie.originalTitle}
+                  </p>
+                )}
+              </div>
+
+              {/* Metadatos rápidos: Año, Duración, Géneros, IMDb, Master Hub */}
+              <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs sm:text-sm font-medium">
+                {movie.year && (
+                  <div className="flex items-center gap-1.5 text-cine-200">
+                    <Calendar className="w-4 h-4 text-cine-400" />
+                    <span>{movie.year}</span>
                   </div>
+                )}
+
+                {movie.runtime && (
+                  <div className="flex items-center gap-1.5 text-cine-200">
+                    <Clock className="w-4 h-4 text-cine-400" />
+                    <span>{formatRuntime(movie.runtime)}</span>
+                  </div>
+                )}
+
+                {movie.imdbRating && (
+                  <a
+                    href={imdbUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer text-xs sm:text-sm shadow-sm"
+                    title="Ver ficha oficial en IMDb"
+                  >
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <span>IMDb {movie.imdbRating.toFixed(1)} / 10</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
+                  </a>
+                )}
+
+                {/* Master Hub Score Oficial */}
+                <MasterHubScoreBadge
+                  score={movie.masterHubScore || null}
+                  totalVotes={movie.masterHubVotes || 0}
+                  distribution={movie.masterHubDistribution}
+                  themeColor="amber"
+                />
+              </div>
+
+              {/* Pills de Géneros */}
+              {movie.genres && movie.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
+                  {movie.genres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cine-800/80 border border-cine-700/80 text-cine-200 shadow-sm"
+                    >
+                      {genre}
+                    </span>
+                  ))}
                 </div>
               )}
 
-            {/* Botones de acción principales */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+              {/* Plataformas de Streaming Disponibles */}
+              {movie.streamingPlatforms &&
+                movie.streamingPlatforms.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                      <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
+                      streaming:
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {movie.streamingPlatforms.map((plat) => (
+                        <StreamingBadge key={plat} platform={plat} size="sm" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+
+            {/* 3. Botones de acción principales Abajo */}
+            <div className="w-full flex flex-wrap md:flex-nowrap items-center gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdatingWatchlist}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`flex-1 min-w-[160px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isWatchlist
-                    ? "bg-amber-500 text-cine-950 font-bold shadow-gold-glow"
+                    ? "bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold shadow-[0_0_20px_rgba(14,165,233,0.35)]"
                     : "glass-card border border-cine-700 text-cine-200 hover:text-white hover:bg-cine-800"
                 }`}
               >
                 <Bookmark
-                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-amber-400"}`}
+                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-sky-400"}`}
                 />
                 {isWatchlist ? "En tu Watchlist" : "+ Añadir a Watchlist"}
               </button>
 
               <button
                 onClick={() => setIsReviewModalOpen(true)}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`flex-1 min-w-[155px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-amber-500 hover:bg-amber-400 text-cine-950 font-bold shadow-gold-glow"
@@ -276,21 +335,36 @@ export default function MovieDetailPage() {
                 {isWatched ? "Editar valoración" : "Marcar como vista"}
               </button>
 
+              {!isWatched ? (
+                <button
+                  onClick={handleMarkSeenLongAgo}
+                  disabled={isUpdatingSeenLongAgo}
+                  className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap glass-card border border-amber-500/30 text-amber-200 hover:text-white hover:bg-amber-950/40 active:scale-95 shadow"
+                  title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
+                >
+                  <History className="w-4 h-4 text-amber-400" />
+                  <span>Visto hace tiempo</span>
+                </button>
+              ) : movie.userMovie?.watchedDate === null ? (
+                <div className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl text-sm font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <History className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Visto en el pasado</span>
+                </div>
+              ) : null}
+
               {imdbUrl && (
                 <a
                   href={imdbUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-lg group active:scale-95"
+                  className="flex-1 min-w-[140px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group"
                   title="Abrir ficha oficial en IMDb"
                 >
-                  <span className="font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
+                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
                     IMDb
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm">
-                    Ver en IMDb
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-black/75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <span className="font-semibold text-sm">Ver en IMDb</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-black/70 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </a>
               )}
             </div>
@@ -326,7 +400,12 @@ export default function MovieDetailPage() {
                 <span className="text-3xl font-extrabold text-amber-400 font-mono">
                   {movie.userMovie.userRating?.toFixed(1) ?? "—"}
                 </span>
-                <span className="text-sm text-cine-500">/ 10</span>
+                <span className="text-sm text-cine-500">
+                  {movie.userMovie.userRating !== null &&
+                  movie.userMovie.userRating !== undefined
+                    ? "/ 10"
+                    : "(Sin puntuar)"}
+                </span>
                 {movie.imdbRating && (
                   <span className="text-xs text-cine-400 ml-2">
                     (IMDb:{" "}
@@ -396,8 +475,13 @@ export default function MovieDetailPage() {
                 Fecha de Visionado
               </span>
               <div className="text-sm font-semibold text-cine-200">
-                {formatSpanishDate(movie.userMovie.watchedDate) ||
-                  "No especificada"}
+                {movie.userMovie.watchedDate ? (
+                  formatSpanishDate(movie.userMovie.watchedDate)
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-amber-300 font-mono text-xs">
+                    <span>📼</span> Visto en el pasado (sin fecha fija)
+                  </span>
+                )}
               </div>
             </div>
           </div>

@@ -10,6 +10,8 @@ import {
   Loader2,
   Sparkles,
   Tv,
+  History,
+  Zap,
 } from "lucide-react";
 import MoviePoster from "./MoviePoster";
 import { sounds } from "@/lib/sounds";
@@ -56,16 +58,33 @@ export default function ReviewModal({
   apiEndpoint = "/api/user-movies",
   mediaLabel = "película",
 }: ReviewModalProps) {
+  const getInitialRating = () => {
+    if (initialRating !== null && initialRating !== undefined) {
+      return initialRating;
+    }
+    if (typeof movie.imdbRating === "number" && movie.imdbRating > 0) {
+      return Number(movie.imdbRating.toFixed(1));
+    }
+    return 8.0;
+  };
+
   const [hasRating, setHasRating] = useState<boolean>(
     initialRating !== null && initialRating !== undefined ? true : true,
   );
-  const [rating, setRating] = useState<number>(initialRating ?? 8.0);
+  const [rating, setRating] = useState<number>(getInitialRating);
   const [review, setReview] = useState<string>(initialReview ?? "");
   const [platform, setPlatform] = useState<string>(
     initialPlatform ||
       (movie.streamingPlatforms && movie.streamingPlatforms.length > 0
         ? movie.streamingPlatforms[0]
         : "Pirata / Stremio"),
+  );
+  const [hasWatchedDate, setHasWatchedDate] = useState<boolean>(
+    initialDate !== null && initialDate !== undefined
+      ? true
+      : initialDate === null
+        ? false
+        : true,
   );
   const [watchedDate, setWatchedDate] = useState<string>(
     initialDate
@@ -93,31 +112,93 @@ export default function ReviewModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (initialRating !== undefined) {
-      setHasRating(initialRating !== null);
-      if (initialRating !== null) {
-        setRating(initialRating);
+    if (isOpen) {
+      const fallbackRating =
+        typeof movie.imdbRating === "number" && movie.imdbRating > 0
+          ? Number(movie.imdbRating.toFixed(1))
+          : 8.0;
+
+      if (initialRating !== undefined) {
+        setHasRating(initialRating !== null);
+        if (initialRating !== null) {
+          setRating(initialRating);
+        } else {
+          setRating(fallbackRating);
+        }
+      } else {
+        setHasRating(true);
+        setRating(fallbackRating);
       }
-    } else {
-      setHasRating(true);
+      if (initialReview) {
+        setReview(initialReview);
+      }
+      if (initialDate !== undefined) {
+        setHasWatchedDate(initialDate !== null);
+        if (initialDate !== null) {
+          setWatchedDate(new Date(initialDate).toISOString().split("T")[0]);
+        }
+      }
+      if (initialPlatform) {
+        setPlatform(initialPlatform);
+      } else if (
+        movie.streamingPlatforms &&
+        movie.streamingPlatforms.length > 0
+      ) {
+        setPlatform(movie.streamingPlatforms[0]);
+      }
     }
-    if (initialReview) {
-      setReview(initialReview);
-    }
-    if (initialDate) {
-      setWatchedDate(new Date(initialDate).toISOString().split("T")[0]);
-    }
-    if (initialPlatform) {
-      setPlatform(initialPlatform);
-    } else if (
-      movie.streamingPlatforms &&
-      movie.streamingPlatforms.length > 0
-    ) {
-      setPlatform(movie.streamingPlatforms[0]);
-    }
-  }, [initialRating, initialReview, initialDate, initialPlatform, isOpen]);
+  }, [
+    initialRating,
+    initialReview,
+    initialDate,
+    initialPlatform,
+    isOpen,
+    movie.imdbRating,
+  ]);
 
   if (!isOpen || !mounted) return null;
+
+  const handleQuickSeenLongAgo = async () => {
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tmdbId: movie.tmdbId,
+          status: "WATCHED",
+          userRating: null,
+          review: null,
+          platform: platform || null,
+          watchedDate: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt(`guardar esta ${mediaLabel} en tu historial`);
+        setErrorMsg("Inicia sesión para guardar tus valoraciones.");
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("No se pudo guardar la reseña");
+      }
+
+      sounds.playSuccess();
+      toast.success(
+        `¡${mediaLabel === "serie" ? "Serie guardada" : "Película registrada"}!`,
+        "Marcada como vista hace tiempo 📼 (+10 XP)",
+      );
+      onSaved();
+      onClose();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Error al guardar");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +215,9 @@ export default function ReviewModal({
           userRating: hasRating ? Number(rating.toFixed(1)) : null,
           review: review.trim() || null,
           platform: platform || null,
-          watchedDate: new Date(watchedDate).toISOString(),
+          watchedDate: hasWatchedDate
+            ? new Date(watchedDate).toISOString()
+            : null,
         }),
       });
 
@@ -150,7 +233,7 @@ export default function ReviewModal({
 
       sounds.playSuccess();
       toast.success(
-        "¡Película registrada!",
+        `¡${mediaLabel === "serie" ? "Serie" : "Película"} registrada!`,
         hasRating
           ? `Valorada con ${rating.toFixed(1)} ⭐ (+10 XP)`
           : "Añadida a vistas (+10 XP)",
@@ -198,6 +281,32 @@ export default function ReviewModal({
               {errorMsg}
             </div>
           )}
+
+          {/* Acción rápida: Visto hace tiempo */}
+          <div className="p-3.5 bg-cine-950/80 border border-cine-700/60 rounded-xl flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-cine-800 border border-cine-700 flex items-center justify-center text-amber-400 shrink-0">
+                <History className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-white truncate">
+                  ¿La viste hace tiempo?
+                </div>
+                <div className="text-[11px] text-cine-400 truncate">
+                  Guardar al instante sin nota ni fecha
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleQuickSeenLongAgo}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-cine-950 transition-all shrink-0 shadow-sm flex items-center gap-1.5 active:scale-95"
+            >
+              <Zap className="w-3.5 h-3.5 fill-cine-950 text-cine-950 shrink-0" />
+              <span>Guardar rápido</span>
+            </button>
+          </div>
 
           {/* Calificación y Checkbox Asignar nota */}
           <div className="space-y-3">
@@ -297,7 +406,14 @@ export default function ReviewModal({
                   <button
                     key={plat}
                     type="button"
-                    onClick={() => setPlatform(plat)}
+                    onClick={() => {
+                      if (isPirate) {
+                        sounds.pirate();
+                      } else {
+                        sounds.click();
+                      }
+                      setPlatform(plat);
+                    }}
                     className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-all text-center truncate ${
                       isSelected
                         ? isPirate
@@ -314,17 +430,45 @@ export default function ReviewModal({
           </div>
 
           {/* Fecha en que se vio */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-cine-400" /> Fecha de
-              visionado
-            </label>
-            <input
-              type="date"
-              value={watchedDate}
-              onChange={(e) => setWatchedDate(e.target.value)}
-              className="w-full px-3.5 py-2 bg-cine-950 border border-cine-800 rounded-xl text-sm text-cine-200 focus:outline-none focus:border-amber-500/60"
-            />
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-cine-400" /> Fecha de
+                visionado
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="enableWatchedDate"
+                  checked={hasWatchedDate}
+                  onChange={(e) => setHasWatchedDate(e.target.checked)}
+                  className="w-4 h-4 rounded border-cine-700 bg-cine-900 text-amber-500 focus:ring-0 cursor-pointer"
+                />
+                <label
+                  htmlFor="enableWatchedDate"
+                  className="text-xs text-cine-300 font-medium cursor-pointer select-none hover:text-white transition-colors"
+                >
+                  Sé la fecha
+                </label>
+              </div>
+            </div>
+
+            {hasWatchedDate ? (
+              <input
+                type="date"
+                value={watchedDate}
+                onChange={(e) => setWatchedDate(e.target.value)}
+                className="w-full px-3.5 py-2 bg-cine-950 border border-cine-800 rounded-xl text-sm text-cine-200 focus:outline-none focus:border-amber-500/60"
+              />
+            ) : (
+              <div className="p-3 rounded-xl bg-cine-950/40 border border-cine-800/80 text-xs text-cine-400 italic text-center flex items-center justify-center gap-2">
+                <span>📼</span>
+                <span>
+                  Se guardará como visto en el pasado (sin fecha fija en el
+                  diario).
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Reseña personal */}

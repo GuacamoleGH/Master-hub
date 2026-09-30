@@ -14,6 +14,8 @@ export interface MovieSearchResult {
   backdropPath: string | null;
   overview: string;
   voteAverage: number;
+  popularity?: number;
+  voteCount?: number;
 }
 
 export interface MovieDetail {
@@ -127,7 +129,12 @@ export interface ProfileStats {
     ballKnowledge: number;
     diff: number;
   } | null;
-  ratingDistribution: { rating: number; count: number }[];
+  ratingDistribution: {
+    rating: number;
+    count: number;
+    movies?: number;
+    series?: number;
+  }[];
   genreCounts: { genre: string; count: number; avgRating: number }[];
   watchesByMonth: { month: string; count: number }[];
   decadesCount: { decade: string; count: number }[];

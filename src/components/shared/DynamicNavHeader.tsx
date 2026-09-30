@@ -15,20 +15,25 @@ import {
   Trophy,
   MessageSquare,
   Share2,
+  Users,
+  Menu,
+  X,
 } from "lucide-react";
 import MovieHeader from "../movies/MovieHeader";
 import GameHeader from "../games/GameHeader";
+import SoundToggle from "./SoundToggle";
 
 export default function DynamicNavHeader() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Páginas de Autenticación
   if (pathname === "/login" || pathname === "/register") {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link
             href="/"
             className="flex items-center gap-2 text-xs font-semibold text-cine-400 hover:text-white transition-colors bg-cine-900/80 px-3 py-1.5 rounded-xl border border-cine-800"
@@ -52,12 +57,15 @@ export default function DynamicNavHeader() {
     return <GameHeader />;
   }
 
-  // Launcher Principal (Centro de Mando)
-  if (pathname === "/") {
+  // Launcher Principal (Centro de Mando) y Perfil Público Unificado
+  if (pathname === "/" || pathname.startsWith("/u/")) {
     return (
       <header className="sticky top-0 z-40 w-full border-b border-cine-800/80 bg-cine-950/90 backdrop-blur-xl shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group shrink-0 z-10"
+          >
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/20 via-purple-500/20 to-cyan-500/20 border border-purple-500/30 flex items-center justify-center">
               <span className="text-sm font-black text-white">MH</span>
             </div>
@@ -71,10 +79,10 @@ export default function DynamicNavHeader() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <nav className="hidden md:flex items-center justify-center gap-1.5 xl:gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-auto">
             <Link
               href="/movies"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Film className="w-3.5 h-3.5 text-amber-400" />
               <span>Cine & Series</span>
@@ -82,15 +90,23 @@ export default function DynamicNavHeader() {
 
             <Link
               href="/games"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Gamepad2 className="w-3.5 h-3.5 text-purple-400" />
               <span>Videojuegos</span>
             </Link>
 
             <Link
+              href="/friends"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+            >
+              <Users className="w-3.5 h-3.5 text-sky-400" />
+              <span>Amigos</span>
+            </Link>
+
+            <Link
               href="/leaderboard"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
               <span>Ranking</span>
@@ -98,28 +114,30 @@ export default function DynamicNavHeader() {
 
             <Link
               href="/reviews"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900 transition-colors"
             >
               <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
               <span>Reseñas</span>
             </Link>
+          </nav>
 
-            <div className="w-px h-5 bg-cine-800 hidden sm:block" />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-10">
+            <SoundToggle />
 
             {session?.user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cine-900 hover:bg-cine-800 border border-cine-700/80 transition-colors"
+                  className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-cine-900 hover:bg-cine-800 border border-cine-700/80 transition-colors"
                 >
                   {session.user.image ? (
                     <img
                       src={session.user.image}
                       alt={session.user.name || "Usuario"}
-                      className="w-5 h-5 rounded-full object-cover"
+                      className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shadow-sm shrink-0"
                     />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold flex items-center justify-center shrink-0">
                       {(session.user.name ||
                         session.user.username ||
                         "U")[0].toUpperCase()}
@@ -133,16 +151,31 @@ export default function DynamicNavHeader() {
 
                 {isMenuOpen && (
                   <div
-                    className="absolute right-0 mt-2 w-48 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
+                    className="absolute right-0 mt-2 w-52 bg-cine-900 border border-cine-800 rounded-xl shadow-2xl py-1 z-50 animate-fade-in"
                     onMouseLeave={() => setIsMenuOpen(false)}
                   >
-                    <div className="px-3 py-2 border-b border-cine-800">
-                      <p className="text-xs font-bold text-white truncate">
-                        {session.user.name || session.user.username}
-                      </p>
-                      <p className="text-[10px] text-cine-400 truncate font-mono">
-                        {session.user.email}
-                      </p>
+                    <div className="px-3 py-2.5 border-b border-cine-800 flex items-center gap-2.5">
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name || "Usuario"}
+                          className="w-8 h-8 rounded-full object-cover border border-purple-500/40 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold flex items-center justify-center shrink-0">
+                          {(session.user.name ||
+                            session.user.username ||
+                            "U")[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-white truncate">
+                          {session.user.name || session.user.username}
+                        </p>
+                        <p className="text-[10px] text-cine-400 truncate font-mono">
+                          {session.user.email}
+                        </p>
+                      </div>
                     </div>
                     <Link
                       href={`/u/${session.user.username || session.user.id}`}
@@ -195,8 +228,67 @@ export default function DynamicNavHeader() {
                 </Link>
               </div>
             )}
+
+            {/* Botón hamburguesa móvil */}
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="p-2 rounded-xl text-cine-400 hover:text-white hover:bg-cine-900 border border-cine-800 md:hidden"
+              aria-label="Abrir menú"
+            >
+              {isMobileNavOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Menú desplegable móvil */}
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-cine-800 bg-cine-950/95 px-4 py-3 space-y-1.5 backdrop-blur-xl animate-fade-in">
+            <Link
+              href="/movies"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Film className="w-4 h-4 text-amber-400" />
+              <span>Cine & Series</span>
+            </Link>
+            <Link
+              href="/games"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Gamepad2 className="w-4 h-4 text-purple-400" />
+              <span>Videojuegos</span>
+            </Link>
+            <Link
+              href="/friends"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Users className="w-4 h-4 text-sky-400" />
+              <span>Amigos</span>
+            </Link>
+            <Link
+              href="/leaderboard"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <Trophy className="w-4 h-4 text-amber-400" />
+              <span>Ranking</span>
+            </Link>
+            <Link
+              href="/reviews"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-cine-300 hover:text-white hover:bg-cine-900"
+            >
+              <MessageSquare className="w-4 h-4 text-pink-400" />
+              <span>Reseñas</span>
+            </Link>
+          </div>
+        )}
       </header>
     );
   }

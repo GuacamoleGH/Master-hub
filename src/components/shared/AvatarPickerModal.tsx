@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Sparkles, Film, Gamepad2, Check } from "lucide-react";
 import { PRESET_AVATARS, PresetAvatar } from "@/lib/avatars";
 import { sounds } from "@/lib/sounds";
@@ -19,8 +20,24 @@ export default function AvatarPickerModal({
   onSelect,
 }: AvatarPickerModalProps) {
   const [filter, setFilter] = useState<"all" | "cinema" | "gaming">("all");
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   const filteredAvatars = PRESET_AVATARS.filter((av) => {
     if (filter === "all") return true;
@@ -33,8 +50,8 @@ export default function AvatarPickerModal({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+  return createPortal(
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div className="w-full max-w-xl bg-cine-900 border border-cine-700/70 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
         {/* Modal Header */}
         <div className="p-5 border-b border-cine-800 flex items-center justify-between bg-cine-950/60">
@@ -160,6 +177,7 @@ export default function AvatarPickerModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

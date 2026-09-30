@@ -3,9 +3,10 @@ import { authOptions } from "@/lib/auth";
 import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { calculateLevelAndRank } from "@/lib/ballKnowledge";
+import { calculateLevelAndRank, calculateMovieXp } from "@/lib/ballKnowledge";
 import MovieCard from "@/components/MovieCard";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
+import CinephileLevelBar from "@/components/movies/CinephileLevelBar";
 import ExploreMoviesSection from "@/components/movies/ExploreMoviesSection";
 import {
   Film,
@@ -24,29 +25,44 @@ export default async function MoviesHomePage() {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
 
-  // 1. Obtener perfil del usuario o invitado
-  let profile = {
-    id: "guest",
-    displayName: "Invitado",
-    avatarUrl: null as string | null,
-    bio: "Inicia sesión para guardar tus valoraciones y calcular tu Sofa Knowledge.",
-    totalXp: 0,
-    updatedAt: new Date(),
-  };
+  // 1. Obtener usuario y registros para calcular Cinema XP aislado
+  const [user, allWatchedMovies, allWatchedSeries] = userId
+    ? await Promise.all([
+        prisma.user.findUnique({ where: { id: userId } }),
+        prisma.userMovie.findMany({
+          where: { userId, status: "WATCHED" },
+          select: { review: true, ballKnowledge: true },
+        }),
+        prisma.userSeries.findMany({
+          where: { userId, status: "WATCHED" },
+          select: { review: true, ballKnowledge: true },
+        }),
+      ])
+    : [null, [], []];
 
-  if (userId) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (user) {
-      profile = {
-        id: user.id,
-        displayName: user.name || user.username || "Cinéfilo",
-        avatarUrl: user.image,
-        bio: user.bio || "Explorador cinematográfico",
-        totalXp: user.totalXp,
-        updatedAt: user.updatedAt,
-      };
-    }
+  let cinemaXp = 0;
+  for (const um of allWatchedMovies) {
+    const hasReview = Boolean(um.review && um.review.trim().length > 0);
+    cinemaXp += calculateMovieXp(true, hasReview, um.ballKnowledge);
   }
+  for (const us of allWatchedSeries) {
+    const hasReview = Boolean(us.review && us.review.trim().length > 0);
+    cinemaXp += calculateMovieXp(true, hasReview, us.ballKnowledge);
+  }
+
+  const profile = {
+    id: user?.id || "guest",
+    displayName:
+      user?.name || user?.username || (userId ? "Cinéfilo" : "Invitado"),
+    avatarUrl: user?.image || null,
+    bio:
+      user?.bio ||
+      (userId
+        ? "Explorador cinematográfico"
+        : "Inicia sesión para guardar tus valoraciones y calcular tu Sofa Knowledge."),
+    totalXp: cinemaXp,
+    updatedAt: user?.updatedAt || new Date(),
+  };
 
   const levelInfo = calculateLevelAndRank(profile.totalXp);
 
@@ -197,44 +213,9 @@ export default async function MoviesHomePage() {
             </div>
           </div>
 
-          {/* Tarjeta de Resumen Rápido Sofa Knowledge & Nivel */}
-          <div className="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col gap-4 min-w-[260px] bg-cine-900/90 shadow-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold text-cine-400 tracking-wider">
-                Tu Criterio
-              </span>
-              <span className="text-xs font-bold text-amber-400">
-                IMDb Benchmark
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl">
-                {levelInfo.rankIcon}
-              </div>
-              <div>
-                <div className="text-xs text-cine-400 font-medium">
-                  Rango Cinéfilo
-                </div>
-                <div className="font-bold text-white text-base">
-                  {levelInfo.rankTitle}{" "}
-                  <span className="text-amber-400">Lvl.{levelInfo.level}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-cine-800 flex items-center justify-between">
-              <div className="text-xs text-cine-400">Sofa Knowledge Global</div>
-              {avgBk ? (
-                <BallKnowledgeBadge
-                  score={parseFloat(avgBk)}
-                  size="sm"
-                  showLabel={false}
-                />
-              ) : (
-                <span className="text-xs text-cine-500">Sin datos</span>
-              )}
-            </div>
+          {/* Tarjeta de Nivel y Progreso Cinéfilo */}
+          <div className="w-full md:w-auto md:min-w-[320px]">
+            <CinephileLevelBar totalXp={profile.totalXp} variant="cinema" />
           </div>
         </div>
       </section>

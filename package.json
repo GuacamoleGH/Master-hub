@@ -11,6 +11,7 @@
     "db:seed": "node prisma/seed.js",
     "db:seed:games": "node prisma/seedGames.js",
     "db:seed:all": "node prisma/seed.js && node prisma/seedGames.js",
+    "db:secure": "node scripts/fix-supabase-security.js",
     "git:fix": "node -e \"const fs=require('fs'); if(fs.existsSync('.git/index') && fs.statSync('.git/index').size===0){ fs.unlinkSync('.git/index'); }\" && git reset",
     "postinstall": "prisma generate"
   },

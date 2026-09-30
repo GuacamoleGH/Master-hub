@@ -16,6 +16,7 @@ import {
   Layers,
   Film,
   ExternalLink,
+  History,
 } from "lucide-react";
 import { SeriesDetail } from "@/types/series";
 import BallKnowledgeBadge from "@/components/BallKnowledgeBadge";
@@ -23,6 +24,8 @@ import ReviewModal from "@/components/ReviewModal";
 import MoviePoster from "@/components/MoviePoster";
 import StreamingBadge from "@/components/StreamingBadge";
 import { getImdbUrl } from "@/lib/externalLinks";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function SeriesDetailPage() {
   const params = useParams();
@@ -33,6 +36,8 @@ export default function SeriesDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isUpdatingWatchlist, setIsUpdatingWatchlist] = useState(false);
+  const [isUpdatingSeenLongAgo, setIsUpdatingSeenLongAgo] = useState(false);
+  const toast = useToast();
 
   const fetchSeries = async () => {
     try {
@@ -109,6 +114,41 @@ export default function SeriesDetailPage() {
     }
   };
 
+  const handleMarkSeenLongAgo = async () => {
+    setIsUpdatingSeenLongAgo(true);
+    try {
+      const res = await fetch("/api/user-series", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tmdbId: series.tmdbId,
+          status: "WATCHED",
+          userRating: null,
+          watchedDate: null,
+          review: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar series en tu historial");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Serie registrada!",
+          "Marcada como vista hace tiempo 📼 (+10 XP)",
+        );
+        await fetchSeries();
+      }
+    } catch (err) {
+      console.error("Error al registrar serie como vista hace tiempo:", err);
+    } finally {
+      setIsUpdatingSeenLongAgo(false);
+    }
+  };
+
   const formatSpanishDate = (isoStr: string | null) => {
     if (!isoStr) return null;
     const date = new Date(isoStr);
@@ -153,151 +193,174 @@ export default function SeriesDetailPage() {
         )}
 
         {/* Contenido de la cabecera */}
-        <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-5 sm:gap-6 items-stretch">
           {/* Póster Grande */}
-          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[2/3] rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900">
+          <div className="relative w-64 sm:w-80 md:w-[340px] lg:w-[360px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-poster border border-purple-500/20 bg-cine-900 aspect-[2/3] md:aspect-auto md:min-h-[480px]">
             <MoviePoster
               src={series.posterPath}
               alt={series.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover md:absolute md:inset-0"
+              fallbackClassName="w-full h-full md:absolute md:inset-0 flex flex-col items-center justify-center text-cine-500 bg-cine-900/80 p-3 text-center"
             />
           </div>
 
           {/* Ficha técnica y Acciones */}
-          <div className="flex-1 space-y-5">
+          <div className="flex-1 flex flex-col justify-between min-h-[480px] gap-6">
+            {/* 1. Categoría / Estado Arriba */}
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold mb-2">
-                <Tv className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-sm font-semibold w-fit tracking-wide shadow-sm">
+                <Tv className="w-4 h-4 text-purple-400" />
                 <span>Serie de Televisión</span>
                 {series.seriesStatus && (
                   <>
-                    <span>•</span>
+                    <span className="text-purple-400/60">•</span>
                     <span>{series.seriesStatus}</span>
                   </>
                 )}
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                {series.name}
-              </h1>
-              {series.originalName && series.originalName !== series.name && (
-                <p className="text-base text-cine-400 italic mt-0.5">
-                  Título original: {series.originalName}
-                </p>
-              )}
             </div>
 
-            {/* Metadatos rápidos: Años, Temporadas, Episodios, IMDb */}
-            <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-              {yearRange && (
-                <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Calendar className="w-4 h-4 text-cine-500" />
-                  <span>{yearRange}</span>
-                </div>
-              )}
-
-              {series.numberOfSeasons && (
-                <div className="flex items-center gap-1 text-cine-300 font-medium">
-                  <Layers className="w-4 h-4 text-cine-500" />
-                  <span>
-                    {series.numberOfSeasons}{" "}
-                    {series.numberOfSeasons === 1 ? "Temporada" : "Temporadas"}
-                    {series.numberOfEpisodes &&
-                      ` (${series.numberOfEpisodes} eps)`}
-                  </span>
-                </div>
-              )}
-
-              {series.imdbRating && (
-                <a
-                  href={imdbUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer"
-                  title="Ver ficha oficial en IMDb"
-                >
-                  <Star className="w-4 h-4 fill-amber-400" />
-                  <span>IMDb {series.imdbRating.toFixed(1)} / 10</span>
-                  <ExternalLink className="w-3 h-3 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
-                </a>
-              )}
-            </div>
-
-            {/* Pills de Géneros */}
-            {series.genres && series.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {series.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-cine-800/80 border border-cine-700 text-cine-200"
-                  >
-                    {genre}
-                  </span>
-                ))}
+            {/* 2. Bloque Central: Título, Metadatos, Géneros y Streaming */}
+            <div className="space-y-3.5">
+              <div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                  {series.name}
+                </h1>
+                {series.originalName && series.originalName !== series.name && (
+                  <p className="text-sm sm:text-base text-cine-400 italic mt-0.5 font-medium">
+                    Título original: {series.originalName}
+                  </p>
+                )}
               </div>
-            )}
 
-            {/* Plataformas de Streaming Disponibles */}
-            {series.streamingPlatforms &&
-              series.streamingPlatforms.length > 0 && (
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-cine-400 flex items-center gap-1.5">
-                    <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
-                    streaming:
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {series.streamingPlatforms.map((plat) => (
-                      <StreamingBadge key={plat} platform={plat} size="sm" />
-                    ))}
+              {/* Metadatos rápidos: Años, Temporadas, Episodios, IMDb */}
+              <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs sm:text-sm font-medium">
+                {yearRange && (
+                  <div className="flex items-center gap-1.5 text-cine-200">
+                    <Calendar className="w-4 h-4 text-cine-400" />
+                    <span>{yearRange}</span>
                   </div>
+                )}
+
+                {series.numberOfSeasons && (
+                  <div className="flex items-center gap-1.5 text-cine-200">
+                    <Layers className="w-4 h-4 text-cine-400" />
+                    <span>
+                      {series.numberOfSeasons}{" "}
+                      {series.numberOfSeasons === 1
+                        ? "Temporada"
+                        : "Temporadas"}
+                      {series.numberOfEpisodes &&
+                        ` (${series.numberOfEpisodes} eps)`}
+                    </span>
+                  </div>
+                )}
+
+                {series.imdbRating && (
+                  <a
+                    href={imdbUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 px-3 py-1 rounded-xl text-amber-400 font-bold transition-all group cursor-pointer text-xs sm:text-sm shadow-sm"
+                    title="Ver ficha oficial en IMDb"
+                  >
+                    <Star className="w-4 h-4 fill-amber-400" />
+                    <span>IMDb {series.imdbRating.toFixed(1)} / 10</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400/60 group-hover:text-amber-300 ml-0.5" />
+                  </a>
+                )}
+              </div>
+
+              {/* Pills de Géneros */}
+              {series.genres && series.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
+                  {series.genres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cine-800/80 border border-cine-700/80 text-cine-200 shadow-sm"
+                    >
+                      {genre}
+                    </span>
+                  ))}
                 </div>
               )}
 
-            {/* Botones de acción principales */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+              {/* Plataformas de Streaming Disponibles */}
+              {series.streamingPlatforms &&
+                series.streamingPlatforms.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-semibold text-cine-300 flex items-center gap-1.5">
+                      <Tv className="w-3.5 h-3.5 text-cine-400" /> Dónde ver en
+                      streaming:
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {series.streamingPlatforms.map((plat) => (
+                        <StreamingBadge key={plat} platform={plat} size="sm" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+
+            {/* 3. Botones de acción principales Abajo */}
+            <div className="w-full flex flex-wrap md:flex-nowrap items-center gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={handleToggleWatchlist}
                 disabled={isUpdatingWatchlist}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`flex-1 min-w-[160px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isWatchlist
-                    ? "bg-amber-500 text-cine-950 font-bold shadow-gold-glow"
+                    ? "bg-sky-500 hover:bg-sky-400 text-cine-950 font-bold shadow-[0_0_20px_rgba(14,165,233,0.35)]"
                     : "glass-card border border-cine-700 text-cine-200 hover:text-white hover:bg-cine-800"
                 }`}
               >
                 <Bookmark
-                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-amber-400"}`}
+                  className={`w-4 h-4 ${isWatchlist ? "fill-cine-950" : "text-sky-400"}`}
                 />
                 {isWatchlist ? "En tu Watchlist" : "+ Añadir a Watchlist"}
               </button>
 
               <button
                 onClick={() => setIsReviewModalOpen(true)}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`flex-1 min-w-[155px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isWatched
                     ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_20px_rgba(168,85,247,0.3)]"
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {isWatched
-                  ? "Editar valoración de serie"
-                  : "Marcar serie como vista"}
+                {isWatched ? "Editar valoración" : "Marcar como vista"}
               </button>
+
+              {!isWatched ? (
+                <button
+                  onClick={handleMarkSeenLongAgo}
+                  disabled={isUpdatingSeenLongAgo}
+                  className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap glass-card border border-purple-500/30 text-purple-200 hover:text-white hover:bg-purple-950/40 active:scale-95 shadow"
+                  title="Marcar como vista hace tiempo sin nota ni fecha exacta (+10 XP)"
+                >
+                  <History className="w-4 h-4 text-purple-400" />
+                  <span>Vista hace tiempo</span>
+                </button>
+              ) : series.userSeries?.watchedDate === null ? (
+                <div className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl text-sm font-semibold bg-purple-500/15 border border-purple-500/30 text-purple-300 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <History className="w-4 h-4 text-purple-400" />
+                  <span>Vista en el pasado</span>
+                </div>
+              ) : null}
 
               {imdbUrl && (
                 <a
                   href={imdbUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-lg group active:scale-95"
+                  className="flex-1 min-w-[140px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#f5c518] hover:bg-[#e2b616] text-black shadow-md hover:shadow-amber-500/20 active:scale-95 group"
                   title="Abrir ficha oficial en IMDb"
                 >
-                  <span className="font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
+                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-black text-[#f5c518] leading-none tracking-tight">
                     IMDb
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm">
-                    Ver en IMDb
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-black/75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <span className="font-semibold text-sm">Ver en IMDb</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-black/70 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </a>
               )}
             </div>
@@ -333,7 +396,12 @@ export default function SeriesDetailPage() {
                 <span className="text-3xl font-extrabold text-purple-400 font-mono">
                   {series.userSeries.userRating?.toFixed(1) ?? "—"}
                 </span>
-                <span className="text-sm text-cine-500">/ 10</span>
+                <span className="text-sm text-cine-500">
+                  {series.userSeries.userRating !== null &&
+                  series.userSeries.userRating !== undefined
+                    ? "/ 10"
+                    : "(Sin puntuar)"}
+                </span>
                 {series.imdbRating && (
                   <span className="text-xs text-cine-400 ml-2">
                     (IMDb:{" "}
@@ -403,8 +471,13 @@ export default function SeriesDetailPage() {
                 Fecha de Registro
               </span>
               <div className="text-sm font-semibold text-cine-200">
-                {formatSpanishDate(series.userSeries.watchedDate) ||
-                  "No especificada"}
+                {series.userSeries.watchedDate ? (
+                  formatSpanishDate(series.userSeries.watchedDate)
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-purple-300 font-mono text-xs">
+                    <span>📼</span> Vista en el pasado (sin fecha fija)
+                  </span>
+                )}
               </div>
             </div>
           </div>

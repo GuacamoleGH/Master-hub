@@ -101,9 +101,7 @@ export default async function MasterHubPage() {
       <div className="text-center space-y-4 max-w-2xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cine-900 border border-cine-700/80 text-xs font-mono text-cine-300 shadow-inner">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>Centro de Mando Personal</span>
-          <span className="text-cine-600">•</span>
-          <span className="text-cine-400">v2.0 Multi-Universo</span>
+          <span>MasterHub • v4.0</span>
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
@@ -121,35 +119,39 @@ export default async function MasterHubPage() {
       </div>
 
       {/* Grid de Universos Activos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
         {/* Tarjeta 1: Cinephile Hub */}
         <div className="group relative rounded-3xl overflow-hidden glass-panel border border-amber-500/20 hover:border-amber-500/60 p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-2xl bg-gradient-to-br from-amber-500/10 via-cine-950 to-cine-950">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-all duration-500" />
 
-          <div className="relative z-10 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl shadow-gold-glow">
-                <Film className="w-7 h-7 text-amber-400" />
+          <div className="relative z-10 flex flex-col flex-1">
+            {/* Header: Icon + Title + Badge */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-2xl shadow-gold-glow shrink-0">
+                  <Film className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-amber-300 transition-colors truncate">
+                    Cinephile<span className="text-amber-400">Hub</span>
+                  </h2>
+                </div>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
                 Cine & Series
               </span>
             </div>
 
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-amber-300 transition-colors">
-                Cinephile<span className="text-amber-400">Hub</span>
-              </h2>
-              <p className="text-sm text-cine-300 mt-2 leading-relaxed">
-                Tu Letterboxd cinematográfico. Registra películas, escribe
-                reseñas, sigue plataformas de streaming (con opción 🏴‍☠️ Pirata) y
-                calcula tu precisión frente a IMDb con el índice{" "}
-                <strong>Sofa Knowledge</strong>.
-              </p>
-            </div>
+            {/* Descripción */}
+            <p className="text-sm text-cine-300 mt-4 leading-relaxed min-h-[4.5rem]">
+              Tu Letterboxd cinematográfico. Registra películas, escribe
+              reseñas, sigue plataformas de streaming (con opción 🏴‍☠️ Pirata) y
+              calcula tu precisión frente a IMDb con el índice{" "}
+              <strong className="text-cine-200">Sofa Knowledge</strong>.
+            </p>
 
             {/* Métricas rápidas */}
-            <div className="grid grid-cols-3 gap-3 pt-2 border-t border-cine-800/80">
+            <div className="my-6 py-5 border-y border-cine-800/80 grid grid-cols-3 gap-3">
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
                 <div className="text-[10px] uppercase font-bold text-cine-400">
                   Pelis vistas
@@ -177,23 +179,24 @@ export default async function MasterHubPage() {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="relative z-10 pt-6 mt-6 border-t border-cine-800/80 grid grid-cols-2 gap-3">
-            <Link
-              href="/movies"
-              className="py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-cine-950 font-black text-xs sm:text-sm transition-all shadow-gold-glow flex items-center justify-center gap-1.5"
-            >
-              <Film className="w-4 h-4" />
-              <span>Películas</span>
-            </Link>
-            <Link
-              href="/series"
-              className="py-3 px-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs sm:text-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] flex items-center justify-center gap-1.5"
-            >
-              <Tv className="w-4 h-4" />
-              <span>Series</span>
-            </Link>
+            {/* Botones de acción alineados al fondo */}
+            <div className="mt-auto grid grid-cols-2 gap-3 h-12">
+              <Link
+                href="/movies"
+                className="h-full px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-cine-950 font-black text-xs sm:text-sm transition-all shadow-gold-glow flex items-center justify-center gap-1.5"
+              >
+                <Film className="w-4 h-4" />
+                <span>Películas</span>
+              </Link>
+              <Link
+                href="/series"
+                className="h-full px-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs sm:text-sm transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] flex items-center justify-center gap-1.5"
+              >
+                <Tv className="w-4 h-4" />
+                <span>Series</span>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -201,30 +204,35 @@ export default async function MasterHubPage() {
         <div className="group relative rounded-3xl overflow-hidden glass-panel border border-purple-500/30 hover:border-purple-500/70 p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-2xl bg-gradient-to-br from-purple-500/10 via-cine-950 to-cine-950">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-500/20 transition-all duration-500" />
 
-          <div className="relative z-10 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                <Gamepad2 className="w-7 h-7 text-purple-400" />
+          <div className="relative z-10 flex flex-col flex-1">
+            {/* Header: Icon + Title + Badge */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-2xl shadow-[0_0_15px_rgba(139,92,246,0.3)] shrink-0">
+                  <Gamepad2 className="w-6 h-6 sm:w-7 sm:h-7 text-purple-400" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-purple-300 transition-colors truncate">
+                    Gamer<span className="text-purple-400">Hub</span>
+                  </h2>
+                </div>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 shrink-0">
                 Videojuegos
               </span>
             </div>
 
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight group-hover:text-purple-300 transition-colors">
-                Gamer<span className="text-purple-400">Hub</span>
-              </h2>
-              <p className="text-sm text-cine-300 mt-2 leading-relaxed">
-                Tu Letterboxd de videojuegos. Registra horas jugadas, gestiona
-                tu backlog, descubre trailers y capturas, y compara tu criterio
-                frente a Metacritic con <strong>Game Knowledge</strong> y tus{" "}
-                <strong>Hot Takes</strong>.
-              </p>
-            </div>
+            {/* Descripción */}
+            <p className="text-sm text-cine-300 mt-4 leading-relaxed min-h-[4.5rem]">
+              Tu Letterboxd de videojuegos. Registra horas jugadas, gestiona tu
+              backlog, descubre trailers y capturas, y compara tu criterio
+              frente a Metacritic con{" "}
+              <strong className="text-cine-200">Game Knowledge</strong> y tus{" "}
+              <strong className="text-cine-200">Hot Takes</strong>.
+            </p>
 
             {/* Métricas rápidas */}
-            <div className="grid grid-cols-3 gap-3 pt-2 border-t border-cine-800/80">
+            <div className="my-6 py-5 border-y border-cine-800/80 grid grid-cols-3 gap-3">
               <div className="bg-cine-900/60 p-3 rounded-xl border border-cine-800 text-center">
                 <div className="text-[10px] uppercase font-bold text-cine-400">
                   Horas
@@ -252,16 +260,17 @@ export default async function MasterHubPage() {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="relative z-10 pt-6 mt-6 border-t border-cine-800/80">
-            <Link
-              href="/games"
-              className="w-full py-3.5 px-6 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm transition-all shadow-[0_0_20px_rgba(139,92,246,0.4)] flex items-center justify-center gap-2 group-hover:gap-3"
-            >
-              <span>Entrar a Gamer Hub</span>
-              <ArrowRight className="w-4 h-4 transition-transform" />
-            </Link>
+            {/* Botón de acción alineado al fondo */}
+            <div className="mt-auto h-12">
+              <Link
+                href="/games"
+                className="w-full h-full px-6 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-black text-sm transition-all shadow-[0_0_20px_rgba(139,92,246,0.4)] flex items-center justify-center gap-2 group-hover:gap-3"
+              >
+                <span>Entrar a Gamer Hub</span>
+                <ArrowRight className="w-4 h-4 transition-transform" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

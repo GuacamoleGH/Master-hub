@@ -11,6 +11,9 @@ import {
   Check,
   Film,
   Sparkles,
+  Bookmark,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { PRESET_AVATARS } from "@/lib/avatars";
 import { sounds } from "@/lib/sounds";
@@ -23,6 +26,7 @@ interface EditCinephileProfileModalProps {
   initialName: string;
   initialBio: string | null;
   initialAvatar: string | null;
+  initialIsWatchlistPublic?: boolean;
 }
 
 export default function EditCinephileProfileModal({
@@ -32,11 +36,15 @@ export default function EditCinephileProfileModal({
   initialName,
   initialBio,
   initialAvatar,
+  initialIsWatchlistPublic = true,
 }: EditCinephileProfileModalProps) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [displayName, setDisplayName] = useState(initialName);
   const [bio, setBio] = useState(initialBio || "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatar || "");
+  const [isWatchlistPublic, setIsWatchlistPublic] = useState(
+    initialIsWatchlistPublic,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -49,6 +57,7 @@ export default function EditCinephileProfileModal({
       setDisplayName(initialName);
       setBio(initialBio || "");
       setAvatarUrl(initialAvatar || "");
+      setIsWatchlistPublic(initialIsWatchlistPublic);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -56,7 +65,13 @@ export default function EditCinephileProfileModal({
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, initialName, initialBio, initialAvatar]);
+  }, [
+    isOpen,
+    initialName,
+    initialBio,
+    initialAvatar,
+    initialIsWatchlistPublic,
+  ]);
 
   if (!isOpen || !mounted || !session?.user) return null;
 
@@ -72,10 +87,17 @@ export default function EditCinephileProfileModal({
           displayName: displayName.trim(),
           bio: bio.trim() || null,
           avatarUrl: avatarUrl.trim() || null,
+          isWatchlistPublic,
         }),
       });
 
       if (res.ok) {
+        if (update) {
+          await update({
+            name: displayName.trim(),
+            image: avatarUrl.trim() || null,
+          });
+        }
         sounds.playSuccess();
         onSaved();
         onClose();
@@ -212,6 +234,47 @@ export default function EditCinephileProfileModal({
               placeholder="Explorador y crítico del séptimo arte..."
               className="w-full px-3.5 py-2 bg-cine-900 border border-cine-700 rounded-xl text-xs text-white placeholder-cine-500 focus:outline-none focus:border-amber-400 resize-none"
             />
+          </div>
+
+          {/* Visibilidad de Watchlist */}
+          <div className="p-3.5 rounded-2xl bg-cine-900/90 border border-cine-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bookmark className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-bold text-white">
+                  Visibilidad de Watchlist
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.switch();
+                  setIsWatchlistPublic(!isWatchlistPublic);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border transition-all ${
+                  isWatchlistPublic
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/40"
+                    : "bg-rose-500/10 text-rose-400 border-rose-500/40"
+                }`}
+              >
+                {isWatchlistPublic ? (
+                  <>
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>Pública</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Privada</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-[11px] text-cine-400 leading-tight">
+              {isWatchlistPublic
+                ? "Tus amigos y visitantes pueden ver los títulos que tienes pendientes en tu perfil público."
+                : "Tu watchlist es privada. Solo tú puedes ver tus títulos pendientes."}
+            </p>
           </div>
 
           {/* Botones de acción */}

@@ -18,6 +18,8 @@ import {
   TrendingUp,
   Brain,
   Award,
+  ArrowRight,
+  Share2,
 } from "lucide-react";
 import { ProfileStats } from "@/types/movie";
 import CinephileLevelBar from "@/components/CinephileLevelBar";
@@ -27,10 +29,18 @@ import GenreChart from "@/components/charts/GenreChart";
 import WatchesTimelineChart from "@/components/charts/WatchesTimelineChart";
 import AvatarPickerModal from "@/components/shared/AvatarPickerModal";
 import EditCinephileProfileModal from "@/components/movies/EditCinephileProfileModal";
+import SocialWrappedModal from "@/components/profile/SocialWrappedModal";
+import TopFiveCard, { TopFiveItem } from "@/components/profile/TopFiveCard";
+import WatchedCatalogSection, {
+  WatchedCatalogItem,
+} from "@/components/profile/WatchedCatalogSection";
+import WatchlistSection from "@/components/profile/WatchlistSection";
+import { WipeoutDangerZone } from "@/components/profile/WipeoutDangerZone";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { sounds } from "@/lib/sounds";
 import { useToast } from "@/components/shared/ToastContext";
+import { Camera } from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -38,18 +48,32 @@ export default function ProfilePage() {
 
   const [profileData, setProfileData] = useState<{
     displayName: string;
+    username?: string | null;
     avatarUrl: string | null;
     bio: string | null;
+    isWatchlistPublic?: boolean;
   }>({
     displayName: "Invitado",
+    username: null,
     avatarUrl: null,
     bio: "",
+    isWatchlistPublic: true,
   });
 
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [topCine, setTopCine] = useState<TopFiveItem[]>([]);
+  const [watchedCatalog, setWatchedCatalog] = useState<WatchedCatalogItem[]>(
+    [],
+  );
+  const [watchlistCatalog, setWatchlistCatalog] = useState<
+    WatchedCatalogItem[]
+  >([]);
+  const [copied, setCopied] = useState(false);
   const toast = useToast();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isWrappedOpen, setIsWrappedOpen] = useState(false);
 
   // Modal de edición de perfil cinéfilo
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -67,19 +91,69 @@ export default function ProfilePage() {
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
+  const handleShare = async () => {
+    try {
+      const targetUser =
+        profileData.username || session?.user?.username || session?.user?.name;
+      if (!targetUser) {
+        toast.error("Inicia sesión para compartir tu perfil.");
+        return;
+      }
+      const shareUrl = `${window.location.origin}/u/${encodeURIComponent(targetUser)}`;
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+      sounds.playSuccess();
+      setCopied(true);
+      toast.success(
+        "¡Enlace de perfil copiado!",
+        "Compártelo con tus amigos para que visiten tu vitrina cinéfila.",
+      );
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast.error("No se pudo copiar el enlace automáticamente.");
+    }
+  };
+
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/profile");
-      if (res.ok) {
-        const data = await res.json();
+      const resProfile = await fetch("/api/profile");
+
+      if (resProfile.ok) {
+        const data = await resProfile.json();
         setProfileData(data.profile);
         setStats(data.stats);
+        setTopCine(data.topCine || []);
+        setWatchedCatalog(data.watchedCatalog || []);
+        setWatchlistCatalog(data.watchlistCatalog || []);
       }
     } catch (err) {
       console.error("Error al cargar perfil:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleToggleWatchlistPrivacy = async (newVal: boolean) => {
+    setProfileData((prev) => ({ ...prev, isWatchlistPublic: newVal }));
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isWatchlistPublic: newVal }),
+      });
+      if (!res.ok) throw new Error("Error al guardar preferencia");
+      toast.success(
+        newVal ? "Watchlist ahora es pública" : "Watchlist ahora es privada",
+        newVal
+          ? "Tus amigos y visitantes pueden ver los títulos que tienes pendientes."
+          : "Solo tú puedes ver tus títulos pendientes.",
+      );
+    } catch {
+      toast.error("No se pudo actualizar la privacidad de tu watchlist.");
+      setProfileData((prev) => ({ ...prev, isWatchlistPublic: !newVal }));
     }
   };
 
@@ -129,13 +203,15 @@ export default function ProfilePage() {
   if (!stats) return null;
 
   return (
-    <div className="space-y-12 pb-20">
-      {/* 1. Cabecera del Perfil */}
-      <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-cine-800 bg-gradient-to-r from-cine-900 via-cine-950 to-cine-900 shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-5">
+    <div className="space-y-10 pb-16 animate-fade-in">
+      {/* 1. Cabecera del Perfil Cinéfilo */}
+      <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-950/30 via-cine-900 to-cine-950 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 flex-1 min-w-0">
             {/* Avatar con botón de cambio */}
-            <div className="relative group/avatar w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow flex-shrink-0 bg-cine-900 flex items-center justify-center">
+            <div className="relative group/avatar w-28 h-28 sm:w-36 sm:h-36 lg:w-[166px] lg:h-[166px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-gold-glow shrink-0 bg-cine-900 flex items-center justify-center">
               {profileData.avatarUrl ? (
                 <img
                   src={profileData.avatarUrl}
@@ -143,7 +219,7 @@ export default function ProfilePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User className="w-10 h-10 text-cine-500" />
+                <User className="w-12 h-12 text-cine-500" />
               )}
               <button
                 type="button"
@@ -155,14 +231,14 @@ export default function ProfilePage() {
               >
                 {session?.user ? (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
-                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <Sparkles className="w-6 h-6 text-amber-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Cambiar
                     </span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center gap-1.5 text-amber-300">
-                    <LogIn className="w-5 h-5 text-amber-400" />
+                    <LogIn className="w-6 h-6 text-amber-400" />
                     <span className="text-[11px] font-bold tracking-wide leading-none text-center">
                       Entrar
                     </span>
@@ -171,220 +247,177 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            {/* Datos Personales */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  {profileData.displayName}
-                </h1>
-                <button
-                  onClick={handleOpenEdit}
-                  className="px-3 py-1 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                  title={
-                    session?.user
-                      ? "Editar perfil cinéfilo"
-                      : "Inicia sesión para editar tu perfil"
-                  }
-                >
-                  {session?.user ? (
-                    <>
-                      <Edit2 className="w-3.5 h-3.5" />
-                      <span>Editar Perfil</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="w-3.5 h-3.5" />
-                      <span>Iniciar Sesión</span>
-                    </>
-                  )}
-                </button>
+            {/* Bloque de Textos Tipográfico */}
+            <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
+                  Perfil Cinéfilo
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  {stats.rankTitle}
+                </span>
               </div>
 
-              <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                {profileData.displayName}
+              </h1>
+
+              <p className="text-xs sm:text-sm text-cine-300 max-w-lg leading-relaxed pt-0.5">
                 {profileData.bio || "Explorador y crítico del séptimo arte."}
               </p>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-cine-400">
-                <span className="font-semibold text-white">
-                  {stats.totalWatched}
-                </span>{" "}
-                películas vistas ·{" "}
-                <span className="font-semibold text-white">
-                  {stats.totalReviews}
-                </span>{" "}
-                reseñas escritas ·{" "}
-                <span className="font-semibold text-white">
-                  {stats.totalWatchlist}
-                </span>{" "}
-                en Watchlist
-              </div>
-            </div>
-          </div>
-
-          {/* Sello Gigante de Sofa Knowledge Global */}
-          <div className="glass-card p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-cine-950/80 flex flex-col items-center text-center gap-1 shadow-gold-glow w-full sm:w-auto">
-            <span className="text-[11px] uppercase font-bold tracking-widest text-amber-400 flex items-center gap-1">
-              🛋️ SOFA KNOWLEDGE SCORE
-            </span>
-            <div className="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">
-              {stats.globalBallKnowledge !== null
-                ? `${stats.globalBallKnowledge}%`
-                : "—"}
-            </div>
-            <p className="text-[11px] text-cine-400 max-w-[200px] leading-tight">
-              {stats.globalBallKnowledge !== null
-                ? `Tu criterio coincide un ${stats.globalBallKnowledge}% con la valoración media de IMDb.`
-                : "Puntúa tus primeras películas para calcular tu índice."}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Mi Carrera Cinematográfica (Niveles y Gamificación) */}
-      <CinephileLevelBar
-        level={stats.level}
-        totalXp={stats.totalXp}
-        rankTitle={stats.rankTitle}
-        rankIcon={stats.rankIcon}
-        rankColor={stats.rankColor}
-        xpProgressPercent={stats.xpProgressPercent}
-        currentLevelBaseXp={stats.currentLevelBaseXp}
-        nextLevelXp={stats.nextLevelXp}
-      />
-
-      {/* 3. Estadísticas Divertidas Automáticas */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <h2 className="text-xl font-bold text-white tracking-wide">
-            Highlights Cinéfilos
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🎬
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Volumen de visionados
-              </div>
-              <div className="text-sm font-bold text-white">
-                Has visto{" "}
-                <span className="text-amber-400 font-mono">
-                  {stats.totalWatched}
-                </span>{" "}
-                películas
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              ⭐
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Criterio cuantitativo
-              </div>
-              <div className="text-sm font-bold text-white">
-                Tu nota media es{" "}
-                <span className="text-amber-400 font-mono">
-                  {stats.averageRating ? `${stats.averageRating} / 10` : "—"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🛋️
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Precisión comunitaria
-              </div>
-              <div className="text-sm font-bold text-white">
-                Sofa Knowledge global:{" "}
-                <span className="text-emerald-400 font-mono">
-                  {stats.globalBallKnowledge !== null
-                    ? `${stats.globalBallKnowledge}%`
-                    : "—"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🔥
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Tu género predilecto
-              </div>
-              <div className="text-sm font-bold text-white">
-                {stats.topGenre ? stats.topGenre : "Aún por definir"}
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              💀
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Tu peor valoración
-              </div>
-              <div className="text-sm font-bold text-white">
-                {stats.lowestRatedMovie ? (
+            {/* Columna de Botones de Acción */}
+            <div className="flex flex-row sm:flex-col gap-2.5 sm:gap-3 shrink-0 self-start sm:self-center sm:ml-auto">
+              <button
+                onClick={handleOpenEdit}
+                className="justify-center px-3.5 py-1.5 bg-cine-800/80 hover:bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title={
+                  session?.user
+                    ? "Editar perfil cinéfilo"
+                    : "Inicia sesión para editar tu perfil"
+                }
+              >
+                {session?.user ? (
                   <>
-                    <span className="text-red-400 font-mono">
-                      {stats.lowestRatedMovie.userRating.toFixed(1)}/10
-                    </span>{" "}
-                    en{" "}
-                    <span className="text-cine-300 italic">
-                      {stats.lowestRatedMovie.title}
-                    </span>
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Editar Perfil</span>
                   </>
                 ) : (
-                  "—"
+                  <>
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Iniciar Sesión</span>
+                  </>
                 )}
-              </div>
+              </button>
+
+              <button
+                onClick={handleShare}
+                className="justify-center px-3.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white border border-amber-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                title="Copiar enlace a tu perfil público para compartir con amigos"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-300">¡Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Compartir Perfil</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  sounds.shutter();
+                  setIsWrappedOpen(true);
+                }}
+                className="justify-center px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-cine-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow-gold-glow transition-all cursor-pointer"
+                title="Generar tarjeta de resumen para redes sociales"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Cinephile Hub Wrapped</span>
+              </button>
             </div>
           </div>
 
-          <div className="glass-panel p-4 rounded-2xl border border-cine-800 flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-xl flex-shrink-0">
-              🧠
-            </div>
-            <div>
-              <div className="text-xs text-cine-400 font-medium">
-                Mayor coincidencia
-              </div>
-              <div className="text-sm font-bold text-white truncate">
-                {stats.biggestW ? (
-                  <>
-                    <span className="text-purple-300 font-mono">
-                      {stats.biggestW.ballKnowledge}%
-                    </span>{" "}
-                    en{" "}
-                    <span className="text-cine-300 italic">
-                      {stats.biggestW.title}
-                    </span>
-                  </>
-                ) : (
-                  "—"
-                )}
-              </div>
-            </div>
+          {/* Barra de Nivel Cinéfilo */}
+          <div className="w-full lg:w-[350px] xl:w-[380px] shrink-0">
+            <CinephileLevelBar
+              totalXp={stats.totalXp}
+              variant="cinema"
+              className="h-full lg:h-[166px]"
+            />
           </div>
         </div>
       </section>
 
-      {/* 4. Rankings Personales: Biggest W vs Biggest L */}
+      {/* Highlights Rápidos */}
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {/* Películas Vistas */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Film className="w-4 h-4 text-amber-400" /> Películas Vistas
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.totalWatched}
+            <span className="text-xs font-normal text-cine-400"> títulos</span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            {stats.totalReviews} reseñas escritas
+          </div>
+        </div>
+
+        {/* En Watchlist */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Trophy className="w-4 h-4 text-amber-400" /> En Watchlist
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.totalWatchlist}
+            <span className="text-xs font-normal text-cine-400">
+              {" "}
+              pendientes
+            </span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Por ver en streaming / cine
+          </div>
+        </div>
+
+        {/* Global Sofa Knowledge */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Brain className="w-4 h-4 text-amber-400" /> Sofa Knowledge
+          </div>
+          <div className="text-3xl font-black text-amber-400 font-mono">
+            {stats.globalBallKnowledge !== null
+              ? `${stats.globalBallKnowledge}%`
+              : "—"}
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Frente al consenso de IMDb
+          </div>
+        </div>
+
+        {/* Tu Nota Media */}
+        <div className="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-cine-900/60">
+          <div className="flex items-center gap-2 text-xs font-semibold text-cine-400 mb-1">
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" /> Tu Nota
+            Media
+          </div>
+          <div className="text-3xl font-black text-white font-mono">
+            {stats.averageRating || "—"}
+            <span className="text-xs font-normal text-cine-400"> / 10</span>
+          </div>
+          <div className="text-[11px] text-cine-500 mt-1">
+            Género top:{" "}
+            <strong className="text-amber-400">{stats.topGenre || "—"}</strong>
+          </div>
+        </div>
+      </section>
+
+      {/* Vitrina de Top 5 Cinéfilo (Películas & Series) */}
+      <section>
+        <TopFiveCard type="cinema" title="Top 5 Cinéfilo" items={topCine} />
+      </section>
+
+      {/* Catálogo Completo de Películas y Series Vistas */}
+      <WatchedCatalogSection type="cinema" items={watchedCatalog} />
+
+      {/* Watchlist de Cine & Series */}
+      <WatchlistSection
+        type="cinema"
+        items={watchlistCatalog}
+        isOwner={true}
+        isPublic={profileData.isWatchlistPublic !== false}
+        username={profileData.username}
+        onTogglePrivacy={handleToggleWatchlistPrivacy}
+      />
+
+      {/* 2. Rankings Personales: Biggest W vs Biggest L */}
       {(stats.biggestW || stats.biggestL) && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
@@ -424,7 +457,9 @@ export default function ProfilePage() {
                       {stats.biggestW.title}
                     </h4>
                     <p className="text-xs text-cine-300">
-                      Coincidencia casi idéntica con el consenso de IMDb.
+                      {Math.abs(stats.biggestW.diff || 0) < 0.05
+                        ? "Coincidencia idéntica con el consenso de IMDb."
+                        : "Coincidencia casi idéntica con el consenso de IMDb."}
                     </p>
                     <div className="flex items-center gap-3 text-xs font-mono pt-1">
                       <span className="text-amber-400 font-bold">
@@ -548,6 +583,9 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      {/* Zona de Peligro / Wipeout de Datos */}
+      <WipeoutDangerZone onDataWiped={fetchProfile} universe="CINE" />
+
       {/* Modal Moderno de Edición de Perfil Cinéfilo */}
       <EditCinephileProfileModal
         isOpen={isEditProfileOpen}
@@ -556,6 +594,29 @@ export default function ProfilePage() {
         initialName={profileData.displayName}
         initialBio={profileData.bio}
         initialAvatar={profileData.avatarUrl}
+        initialIsWatchlistPublic={profileData.isWatchlistPublic}
+      />
+
+      {/* Modal de Social Wrapped */}
+      <SocialWrappedModal
+        isOpen={isWrappedOpen}
+        onClose={() => setIsWrappedOpen(false)}
+        universe="CINE"
+        user={{
+          displayName: profileData.displayName,
+          username: session?.user?.username,
+          avatarUrl: profileData.avatarUrl,
+        }}
+        stats={{
+          totalMovies: (stats as any).totalMovies ?? stats.totalWatched,
+          totalSeries: (stats as any).totalSeries ?? 0,
+          totalHours: 0,
+          totalCompletedGames: 0,
+          averageRating: stats.averageRating,
+          ballKnowledge: stats.globalBallKnowledge,
+          gameKnowledge: null,
+        }}
+        topItems={topCine.slice(0, 3)}
       />
     </div>
   );

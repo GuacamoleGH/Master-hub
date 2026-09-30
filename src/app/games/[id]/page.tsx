@@ -18,6 +18,7 @@ import {
   Play,
   Layers,
   ExternalLink,
+  History,
 } from "lucide-react";
 import { GameDetail } from "@/types/game";
 import GameKnowledgeBadge from "@/components/games/GameKnowledgeBadge";
@@ -27,6 +28,8 @@ import PlatformBadge from "@/components/games/PlatformBadge";
 import { getRawgUrl } from "@/lib/externalLinks";
 import MasterHubScoreBadge from "@/components/shared/MasterHubScoreBadge";
 import CommunityReviewsSection from "@/components/shared/CommunityReviewsSection";
+import { sounds } from "@/lib/sounds";
+import { useToast } from "@/components/shared/ToastContext";
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -37,6 +40,8 @@ export default function GameDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isUpdatingBacklog, setIsUpdatingBacklog] = useState(false);
+  const [isUpdatingPlayedLongAgo, setIsUpdatingPlayedLongAgo] = useState(false);
+  const toast = useToast();
 
   const fetchGame = async () => {
     try {
@@ -97,23 +102,85 @@ export default function GameDetailPage() {
     try {
       if (isBacklog) {
         await fetch(`/api/user-games?gameId=${game.id}`, { method: "DELETE" });
+        toast.toast({
+          type: "info",
+          title: "Eliminado del Backlog",
+          description: "Juego retirado de tu lista",
+        });
       } else {
-        await fetch("/api/user-games", {
+        const res = await fetch("/api/user-games", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             rawgId: game.rawgId,
             status: "BACKLOG",
-            platform: game.platforms?.[0] || "PC",
           }),
         });
+        if (res.status === 401) {
+          toast.guestPrompt("guardar videojuegos en tu backlog");
+          return;
+        }
+        if (res.ok) {
+          sounds.playSuccess();
+          toast.success(
+            "Añadido al Backlog",
+            "Guardado en tus juegos pendientes 📌",
+          );
+        }
       }
       await fetchGame();
     } catch (err) {
       console.error(err);
+      toast.error("Error al actualizar tu backlog");
     } finally {
       setIsUpdatingBacklog(false);
     }
+  };
+
+  const handleMarkPlayedLongAgo = async () => {
+    setIsUpdatingPlayedLongAgo(true);
+    try {
+      const res = await fetch("/api/user-games", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rawgId: game.rawgId,
+          status: "COMPLETED",
+          userRating: null,
+          hoursPlayed: null,
+          review: null,
+          completedDate: null,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.guestPrompt("guardar videojuegos en tu catálogo");
+        return;
+      }
+
+      if (res.ok) {
+        sounds.playSuccess();
+        toast.success(
+          "¡Juego registrado!",
+          "Marcado como completado en su día 🕹️ (+15 XP)",
+        );
+        await fetchGame();
+      }
+    } catch (err) {
+      console.error("Error al registrar juego como jugado en su día:", err);
+    } finally {
+      setIsUpdatingPlayedLongAgo(false);
+    }
+  };
+
+  const formatSpanishDate = (isoStr: string | null) => {
+    if (!isoStr) return null;
+    const date = new Date(isoStr);
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   const criticScore = game.metacritic
@@ -148,116 +215,125 @@ export default function GameDetailPage() {
         )}
 
         {/* Contenido del Hero */}
-        <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row gap-5 sm:gap-6 items-stretch">
           {/* Portada Principal */}
-          <div className="w-48 sm:w-60 flex-shrink-0 aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900">
+          <div className="relative w-64 sm:w-80 md:w-[340px] lg:w-[360px] flex-shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-cine-900 aspect-[3/4] md:aspect-auto md:min-h-[480px]">
             <GamePoster
               src={game.backgroundImage}
               alt={game.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover md:absolute md:inset-0"
             />
           </div>
 
           {/* Datos y Ficha */}
-          <div className="flex-1 space-y-5">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                {game.metacritic && (
-                  <a
-                    href={rawgUrl || undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black bg-purple-600 hover:bg-purple-500 text-white border border-purple-400 shadow inline-flex items-center gap-1 transition-colors group cursor-pointer"
-                    title="Ver ficha en RAWG"
-                  >
-                    <span>Metacritic {game.metacritic}</span>
-                    <ExternalLink className="w-2.5 h-2.5 opacity-70 group-hover:opacity-100" />
-                  </a>
-                )}
-                {criticScore && (
-                  <span className="text-xs text-cine-400 font-mono">
-                    (Crítica:{" "}
-                    <strong className="text-cyan-300">{criticScore}/10</strong>)
-                  </span>
+          <div className="flex-1 flex flex-col justify-between min-h-[480px] gap-6">
+            {/* 1. Categoría y Metacritic Arriba */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-sm font-semibold w-fit tracking-wide shadow-sm">
+                <Gamepad2 className="w-4 h-4 text-purple-400" />
+                <span>Videojuego</span>
+              </div>
+              {game.metacritic && (
+                <a
+                  href={rawgUrl || undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-mono font-black bg-purple-600 hover:bg-purple-500 text-white border border-purple-400 shadow inline-flex items-center gap-1.5 transition-colors group cursor-pointer"
+                  title="Ver ficha en RAWG"
+                >
+                  <span>Metacritic {game.metacritic}</span>
+                  <ExternalLink className="w-3 h-3 opacity-70 group-hover:opacity-100" />
+                </a>
+              )}
+              {criticScore && (
+                <span className="text-xs sm:text-sm text-cine-400 font-mono">
+                  (Crítica:{" "}
+                  <strong className="text-cyan-300">{criticScore}/10</strong>)
+                </span>
+              )}
+            </div>
+
+            {/* 2. Bloque Central: Título, Desarrollador, Metadatos, Plataformas y Géneros */}
+            <div className="space-y-3.5">
+              <div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                  {game.title}
+                </h1>
+
+                {game.developers && game.developers.length > 0 && (
+                  <p className="text-xs sm:text-sm text-purple-300 mt-0.5 flex items-center gap-1.5 font-medium">
+                    <Building className="w-4 h-4 text-purple-400" />
+                    {game.developers.join(", ")}
+                  </p>
                 )}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                {game.title}
-              </h1>
+              {/* Metadatos Rápidos */}
+              <div className="flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs sm:text-sm text-cine-200 font-medium">
+                {game.released && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-cine-400" />
+                    <span>{game.released}</span>
+                  </div>
+                )}
 
-              {game.developers && game.developers.length > 0 && (
-                <p className="text-sm text-purple-300 mt-1 flex items-center gap-1.5">
-                  <Building className="w-3.5 h-3.5 text-purple-400" />
-                  {game.developers.join(", ")}
-                </p>
-              )}
-            </div>
+                {typeof game.userGame?.hoursPlayed === "number" &&
+                  game.userGame.hoursPlayed > 0 && (
+                    <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold bg-cyan-950/40 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{game.userGame.hoursPlayed}h jugadas</span>
+                    </div>
+                  )}
 
-            {/* Metadatos Rápidos */}
-            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-cine-300">
-              {game.released && (
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Calendar className="w-4 h-4 text-cine-500" />
-                  <span>{game.released}</span>
+                {/* Master Hub Score Oficial */}
+                <MasterHubScoreBadge
+                  score={game.masterHubScore || null}
+                  totalVotes={game.masterHubVotes || 0}
+                  distribution={game.masterHubDistribution}
+                  themeColor="purple"
+                />
+              </div>
+
+              {/* Plataformas */}
+              {game.platforms && game.platforms.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-xs font-semibold text-cine-300 block">
+                    Plataformas disponibles:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    {game.platforms.map((plat) => (
+                      <span
+                        key={plat}
+                        className="px-3 py-1 rounded-lg text-xs font-mono font-medium bg-cine-900 border border-cine-700/80 text-cine-300 shadow-sm"
+                      >
+                        {plat}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {game.userGame?.hoursPlayed && (
-                <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold bg-cyan-950/40 px-2.5 py-1 rounded-xl border border-cyan-500/30">
-                  <Clock className="w-4 h-4 text-cyan-400" />
-                  <span>{game.userGame.hoursPlayed}h jugadas</span>
-                </div>
-              )}
-            </div>
-
-            {/* Plataformas */}
-            {game.platforms && game.platforms.length > 0 && (
-              <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-cine-400 block">
-                  Plataformas disponibles:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {game.platforms.map((plat) => (
+              {/* Géneros */}
+              {game.genres && game.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2 sm:gap-2.5">
+                  {game.genres.map((genre) => (
                     <span
-                      key={plat}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-cine-900 border border-cine-700/80 text-cine-300"
+                      key={genre}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-purple-950/40 border border-purple-500/30 text-purple-300 shadow-sm"
                     >
-                      {plat}
+                      {genre}
                     </span>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* Géneros */}
-            {game.genres && game.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {game.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-purple-950/40 border border-purple-500/30 text-purple-300"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Master Hub Score Oficial */}
-            <MasterHubScoreBadge
-              score={game.masterHubScore || null}
-              totalVotes={game.masterHubVotes || 0}
-              distribution={game.masterHubDistribution}
-              themeColor="purple"
-            />
-
-            {/* Botones de Acción */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            {/* 3. Botones de Acción Abajo */}
+            <div className="w-full flex flex-wrap md:flex-nowrap items-center gap-2.5 sm:gap-3 pt-2">
               <button
                 onClick={handleToggleBacklog}
                 disabled={isUpdatingBacklog}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`flex-1 min-w-[160px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isBacklog
                     ? "bg-cyan-500 text-cine-950 font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                     : "glass-card border border-purple-500/30 text-cine-200 hover:text-white hover:bg-purple-950/40"
@@ -271,33 +347,48 @@ export default function GameDetailPage() {
 
               <button
                 onClick={() => setIsReviewOpen(true)}
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+                className={`flex-1 min-w-[155px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                   isFinished
-                    ? "bg-purple-600 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                    ? "bg-emerald-500 text-cine-950 font-bold shadow"
                     : "bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)]"
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                {game.userGame
-                  ? "Modificar veredicto gamer"
+                {game.userGame && game.userGame.status !== "BACKLOG"
+                  ? "Modificar veredicto"
                   : "Registrar partida"}
               </button>
+
+              {!isFinished ? (
+                <button
+                  onClick={handleMarkPlayedLongAgo}
+                  disabled={isUpdatingPlayedLongAgo}
+                  className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap glass-card border border-cyan-500/30 text-cyan-200 hover:text-white hover:bg-cyan-950/40 active:scale-95 shadow"
+                  title="Marcar como jugado en su día sin nota exacta ni horas (+15 XP)"
+                >
+                  <History className="w-4 h-4 text-cyan-400" />
+                  <span>Jugado en su día</span>
+                </button>
+              ) : game.userGame?.completedDate === null ? (
+                <div className="flex-1 min-w-[150px] px-3.5 sm:px-4 py-3 rounded-xl text-sm font-semibold bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <History className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Jugado en el pasado</span>
+                </div>
+              ) : null}
 
               {rawgUrl && (
                 <a
                   href={rawgUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95"
+                  className="flex-1 min-w-[140px] px-3.5 sm:px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700 hover:border-purple-500/60 text-white shadow-md hover:shadow-purple-500/20 group active:scale-95"
                   title="Abrir ficha oficial en RAWG"
                 >
-                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-white text-black leading-none tracking-tight">
+                  <span className="font-mono font-black text-xs px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-200 leading-none tracking-tight">
                     RAWG
                   </span>
-                  <span className="font-semibold text-xs sm:text-sm">
-                    Ver en RAWG
-                  </span>
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <span className="font-semibold text-sm">Ver en RAWG</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
               )}
             </div>
@@ -305,8 +396,8 @@ export default function GameDetailPage() {
         </div>
       </div>
 
-      {/* Sección: Tu Veredicto Gamer (Si está registrado) */}
-      {game.userGame && (
+      {/* Sección: Tu Veredicto Gamer (Si está registrado y no es solo backlog) */}
+      {game.userGame && game.userGame.status !== "BACKLOG" && (
         <section className="glass-panel p-6 sm:p-8 rounded-3xl border border-purple-500/40 bg-gradient-to-r from-purple-950/30 via-cine-900 to-cine-950 shadow-xl space-y-4">
           <div className="flex items-center justify-between border-b border-cine-800 pb-4">
             <div className="flex items-center gap-2">
@@ -333,7 +424,12 @@ export default function GameDetailPage() {
                 <span className="text-3xl font-black text-purple-400 font-mono">
                   {game.userGame.userRating?.toFixed(1) ?? "—"}
                 </span>
-                <span className="text-sm text-cine-500 font-mono">/ 10</span>
+                <span className="text-sm text-cine-500 font-mono">
+                  {game.userGame.userRating !== null &&
+                  game.userGame.userRating !== undefined
+                    ? "/ 10"
+                    : "(Sin puntuar)"}
+                </span>
                 {criticScore && (
                   <span className="text-xs text-cine-400 ml-1">
                     (MC: <strong className="text-white">{criticScore}</strong>)
@@ -397,12 +493,35 @@ export default function GameDetailPage() {
               </div>
             </div>
 
-            {/* Estado */}
+            {/* Estado y Fecha */}
             <div className="space-y-1">
-              <span className="text-xs text-cine-400 font-medium">Estado</span>
-              <div className="pt-1">
-                <span className="px-3 py-1 rounded-xl text-xs font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  {game.userGame.status}
+              <span className="text-xs text-cine-400 font-medium">
+                Estado & Fecha
+              </span>
+              <div className="pt-1 flex flex-col gap-1">
+                <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 w-fit">
+                  {game.userGame.status === "COMPLETED"
+                    ? "🏆 Completado"
+                    : game.userGame.status === "PLATINUM"
+                      ? "👑 Platino"
+                      : game.userGame.status === "PLAYING"
+                        ? "🕹️ Jugando"
+                        : game.userGame.status === "CONTINUOUS"
+                          ? "♾️ Continuo / Sin fin"
+                          : "💀 Abandonado"}
+                </span>
+                <span className="text-[11px] text-cine-400">
+                  {game.userGame.status === "CONTINUOUS" ? (
+                    <span className="text-sky-300/90 font-mono">
+                      ♾️ Juego Continuo
+                    </span>
+                  ) : game.userGame.completedDate ? (
+                    formatSpanishDate(game.userGame.completedDate)
+                  ) : (
+                    <span className="text-cyan-300/90 font-mono">
+                      🕹️ Jugado en su día
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -461,9 +580,11 @@ export default function GameDetailPage() {
                               ? "👑 100% Platino"
                               : item.status === "PLAYING"
                                 ? "🕹️ Jugando Ahora"
-                                : item.status === "BACKLOG"
-                                  ? "📥 Backlog"
-                                  : "💀 Abandonado"}
+                                : item.status === "CONTINUOUS"
+                                  ? "♾️ Continuo / Sin fin"
+                                  : item.status === "BACKLOG"
+                                    ? "📥 Backlog"
+                                    : "💀 Abandonado"}
                         </span>
                       </div>
                     </div>
@@ -567,7 +688,11 @@ export default function GameDetailPage() {
           metacritic: game.metacritic,
           platforms: game.platforms,
         }}
-        initialStatus={game.userGame?.status || "COMPLETED"}
+        initialStatus={
+          game.userGame?.status && game.userGame.status !== "BACKLOG"
+            ? game.userGame.status
+            : "COMPLETED"
+        }
         initialRating={game.userGame?.userRating}
         initialHours={game.userGame?.hoursPlayed}
         initialPlatform={game.userGame?.platform}

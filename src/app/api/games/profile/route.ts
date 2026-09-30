@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   calculateGamerLevelAndRank,
+  calculateGameXp,
   classifyHotTake,
 } from "@/lib/gameKnowledge";
 import { GamerStats, HotTake } from "@/types/game";
@@ -17,9 +18,14 @@ export async function GET() {
         profile: {
           id: "guest",
           displayName: "Invitado",
+          username: null,
           avatarUrl: null,
           bio: "Inicia sesión para guardar tu progreso de videojuegos y subir de nivel.",
+          isBacklogPublic: true,
         },
+        topGames: [],
+        gamesCatalog: [],
+        backlogCatalog: [],
         stats: {
           totalHours: 0,
           totalCompleted: 0,
@@ -66,6 +72,7 @@ export async function GET() {
     let totalPlatinum = 0;
     let totalBacklog = 0;
     let totalPlaying = 0;
+    let totalContinuous = 0;
     let totalReviews = 0;
 
     let totalUserRatingSum = 0;
@@ -105,7 +112,8 @@ export async function GET() {
       else if (ug.status === "PLATINUM") {
         totalCompleted++;
         totalPlatinum++;
-      } else if (ug.status === "BACKLOG") totalBacklog++;
+      } else if (ug.status === "CONTINUOUS") totalContinuous++;
+      else if (ug.status === "BACKLOG") totalBacklog++;
       else if (ug.status === "PLAYING") totalPlaying++;
 
       if (ug.review && ug.review.trim().length > 0) totalReviews++;
@@ -134,29 +142,31 @@ export async function GET() {
         } catch {}
       }
 
-      if (
-        parsedProgress &&
-        Array.isArray(parsedProgress) &&
-        parsedProgress.length > 0
-      ) {
-        for (const prog of parsedProgress) {
-          const platName = prog.platform || "General";
-          const progHours = Number(prog.hours) || 0;
-          platformHoursMap[platName] =
-            (platformHoursMap[platName] || 0) + progHours;
-          platformGamesCountMap[platName] =
-            (platformGamesCountMap[platName] || 0) + 1;
-        }
-      } else {
-        const rawPlatform = ug.platform || "General";
-        const individualPlats = rawPlatform
-          .split(",")
-          .map((p) => p.trim())
-          .filter(Boolean);
+      if (ug.status !== "BACKLOG") {
+        if (
+          parsedProgress &&
+          Array.isArray(parsedProgress) &&
+          parsedProgress.length > 0
+        ) {
+          for (const prog of parsedProgress) {
+            const platName = prog.platform || "General";
+            const progHours = Number(prog.hours) || 0;
+            platformHoursMap[platName] =
+              (platformHoursMap[platName] || 0) + progHours;
+            platformGamesCountMap[platName] =
+              (platformGamesCountMap[platName] || 0) + 1;
+          }
+        } else {
+          const rawPlatform = ug.platform || "General";
+          const individualPlats = rawPlatform
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean);
 
-        for (const p of individualPlats) {
-          platformHoursMap[p] = (platformHoursMap[p] || 0) + gameHours;
-          platformGamesCountMap[p] = (platformGamesCountMap[p] || 0) + 1;
+          for (const p of individualPlats) {
+            platformHoursMap[p] = (platformHoursMap[p] || 0) + gameHours;
+            platformGamesCountMap[p] = (platformGamesCountMap[p] || 0) + 1;
+          }
         }
       }
 
@@ -200,12 +210,80 @@ export async function GET() {
 
     hotTakes.sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference));
 
-    const totalXp = user?.totalXp || 0;
-    const levelInfo = calculateGamerLevelAndRank(totalXp);
+    // Hallmarks y Récords Personales
+    const gamesWithHours = userGames
+      .filter((g) => (g.hoursPlayed || 0) > 0)
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+    const longestGame =
+      gamesWithHours.length > 0
+        ? {
+            title: gamesWithHours[0].game.title,
+            cover: gamesWithHours[0].game.backgroundImage,
+            hours: gamesWithHours[0].hoursPlayed || 0,
+          }
+        : null;
+
+    const ratedGames = userGames
+      .filter((g) => typeof g.userRating === "number")
+      .sort((a, b) => (b.userRating || 0) - (a.userRating || 0));
+    const highestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[0].game.title,
+            cover: ratedGames[0].game.backgroundImage,
+            rating: ratedGames[0].userRating || 0,
+          }
+        : null;
+    const lowestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[ratedGames.length - 1].game.title,
+            cover: ratedGames[ratedGames.length - 1].game.backgroundImage,
+            rating: ratedGames[ratedGames.length - 1].userRating || 0,
+          }
+        : null;
+
+    const completedWithHours = userGames.filter(
+      (ug) =>
+        (ug.status === "COMPLETED" || ug.status === "PLATINUM") &&
+        (ug.hoursPlayed || 0) > 0,
+    );
+    const averageCompletionHours =
+      completedWithHours.length > 0
+        ? Math.round(
+            completedWithHours.reduce(
+              (acc, g) => acc + (g.hoursPlayed || 0),
+              0,
+            ) / completedWithHours.length,
+          )
+        : null;
+
+    const statusBreakdown = {
+      completed: totalCompleted,
+      playing: totalPlaying,
+      continuous: totalContinuous,
+      backlog: totalBacklog,
+      platinum: totalPlatinum,
+      abandoned: userGames.filter(
+        (ug) => ug.status === "ABANDONED" || ug.status === "DROPPED",
+      ).length,
+    };
+
+    let gamerXp = 0;
+    for (const ug of userGames) {
+      const hasReview = Boolean(ug.review && ug.review.trim().length > 0);
+      gamerXp += calculateGameXp(
+        ug.status,
+        hasReview,
+        ug.hoursPlayed,
+        ug.gameKnowledge,
+      );
+    }
+    const levelInfo = calculateGamerLevelAndRank(gamerXp);
 
     const totalPlatformAggregatedHours = Object.values(platformHoursMap).reduce(
       (a, b) => a + b,
-      0
+      0,
     );
     const hoursByPlatform = Object.entries(platformHoursMap)
       .map(([platform, hours]) => ({
@@ -224,7 +302,7 @@ export async function GET() {
       .sort((a, b) => b.hours - a.hours);
 
     const ratingDistributionList = Object.entries(ratingDistribution).map(
-      ([rating, count]) => ({ rating: Number(rating), count })
+      ([rating, count]) => ({ rating: Number(rating), count }),
     );
 
     const stats: GamerStats = {
@@ -244,7 +322,7 @@ export async function GET() {
           : null,
       globalGameKnowledge:
         gkCount > 0 ? Number((totalGkSum / gkCount).toFixed(1)) : null,
-      totalXp,
+      totalXp: gamerXp,
       level: levelInfo.level,
       rankTitle: levelInfo.rankTitle,
       rankIcon: levelInfo.rankIcon,
@@ -260,22 +338,98 @@ export async function GET() {
       hoursByPlatform,
       hoursByGenre,
       ratingDistribution: ratingDistributionList,
+      longestGame,
+      highestRatedGame,
+      lowestRatedGame,
+      averageCompletionHours,
+      statusBreakdown,
     };
+
+    const topGames = [...userGames]
+      .filter(
+        (g) =>
+          g.status !== "BACKLOG" &&
+          g.status !== "DROPPED" &&
+          ((typeof g.userRating === "number" && g.userRating > 0) ||
+            g.isFavorite),
+      )
+      .sort((a, b) => {
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
+        return (b.userRating || 0) - (a.userRating || 0);
+      })
+      .slice(0, 5)
+      .map((g) => ({
+        id: g.id,
+        title: g.game.title,
+        image: g.game.backgroundImage,
+        year: g.game.released ? g.game.released.split("-")[0] : null,
+        rating: g.userRating,
+        isFavorite: Boolean(g.isFavorite),
+        link: `/games/${g.game.rawgId}`,
+        mediaType: "game" as const,
+      }));
+
+    const gamesCatalog = userGames
+      .filter((ug) => ug.status !== "BACKLOG")
+      .map((ug) => ({
+        id: ug.id,
+        title: ug.game.title,
+        posterPath: ug.game.backgroundImage,
+        year: ug.game.released ? ug.game.released.split("-")[0] : null,
+        userRating: ug.userRating,
+        metacritic: ug.game.metacritic,
+        gameKnowledge: ug.gameKnowledge,
+        hoursPlayed: ug.hoursPlayed,
+        status: ug.status,
+        platform: ug.platform,
+        review: ug.review,
+        isFavorite: Boolean(ug.isFavorite),
+        link: `/games/${ug.game.rawgId}`,
+        mediaType: "game" as const,
+      }))
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+
+    const backlogGames = userGames.filter((g) => g.status === "BACKLOG");
+    const backlogCatalog = backlogGames
+      .map((ug) => ({
+        id: ug.id,
+        title: ug.game.title,
+        posterPath: ug.game.backgroundImage,
+        year: ug.game.released ? ug.game.released.split("-")[0] : null,
+        userRating: ug.userRating,
+        metacritic: ug.game.metacritic,
+        genres: ug.game.genres,
+        platform: ug.platform,
+        status: ug.status,
+        mediaType: "game" as const,
+        link: `/games/${ug.game.rawgId}`,
+        addedDate: ug.createdAt,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+      );
 
     return NextResponse.json({
       profile: {
         id: user?.id || "gamer-default",
         displayName: user?.name || user?.username || "Gamer",
+        username: user?.username || null,
         avatarUrl: user?.image || null,
         bio: user?.bio || null,
+        isBacklogPublic: user?.isBacklogPublic ?? true,
       },
+      topGames,
+      gamesCatalog,
+      backlogCatalog,
       stats,
     });
   } catch (error) {
     console.error("Error en /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al calcular estadísticas gamer" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -288,7 +442,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { displayName, bio, avatarUrl } = body;
+    const { displayName, bio, avatarUrl, isBacklogPublic } = body;
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
@@ -296,6 +450,8 @@ export async function PATCH(request: NextRequest) {
         name: displayName ? displayName.trim() : undefined,
         bio: bio !== undefined ? bio.trim() : undefined,
         image: avatarUrl !== undefined ? avatarUrl.trim() || null : undefined,
+        isBacklogPublic:
+          typeof isBacklogPublic === "boolean" ? isBacklogPublic : undefined,
       },
     });
 
@@ -306,13 +462,14 @@ export async function PATCH(request: NextRequest) {
         displayName: updated.name || updated.username,
         bio: updated.bio,
         avatarUrl: updated.image,
+        isBacklogPublic: updated.isBacklogPublic,
       },
     });
   } catch (error) {
     console.error("Error en PATCH /api/games/profile:", error);
     return NextResponse.json(
       { error: "Error al actualizar perfil gamer" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

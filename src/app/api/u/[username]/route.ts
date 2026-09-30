@@ -3,7 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { calculateLevelAndRank } from "@/lib/ballKnowledge";
-import { calculateGamerLevelAndRank } from "@/lib/gameKnowledge";
+import {
+  calculateGamerLevelAndRank,
+  classifyHotTake,
+} from "@/lib/gameKnowledge";
 
 export async function GET(
   request: NextRequest,
@@ -29,6 +32,8 @@ export async function GET(
         image: true,
         bio: true,
         totalXp: true,
+        isWatchlistPublic: true,
+        isBacklogPublic: true,
         createdAt: true,
       },
     });
@@ -42,49 +47,307 @@ export async function GET(
 
     const userId = targetUser.id;
 
-    // 1. Obtener películas del usuario
-    const userMovies = await prisma.userMovie.findMany({
-      where: { userId },
-      include: {
-        movie: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // 1. Obtener películas y series del usuario
+    const [userMovies, userSeries] = await Promise.all([
+      prisma.userMovie.findMany({
+        where: { userId },
+        include: {
+          movie: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.userSeries.findMany({
+        where: { userId },
+        include: {
+          series: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
     const watchedMovies = userMovies.filter((m) => m.status === "WATCHED");
     const watchlistMovies = userMovies.filter((m) => m.status === "WATCHLIST");
+    const watchedSeries = userSeries.filter((s) => s.status === "WATCHED");
+    const watchlistSeries = userSeries.filter((s) => s.status === "WATCHLIST");
 
-    // Top 4 Cine (favoritas explícitas o mejor valoradas)
-    const topMovies = [...watchedMovies]
+    // Top 5 Cinéfilo (películas y series combinadas)
+    const movieItems = watchedMovies.map((um) => ({
+      id: `movie-${um.id}`,
+      title: um.movie.title,
+      image: um.movie.posterPath,
+      year: um.movie.year,
+      rating: um.userRating,
+      isFavorite: Boolean(um.isFavorite),
+      link: `/movie/${um.movie.tmdbId}`,
+      mediaType: "movie" as const,
+    }));
+
+    const seriesItems = watchedSeries.map((us) => ({
+      id: `series-${us.id}`,
+      title: us.series.name,
+      image: us.series.posterPath,
+      year: us.series.firstAirYear,
+      rating: us.userRating,
+      isFavorite: false,
+      link: `/series/${us.series.tmdbId}`,
+      mediaType: "series" as const,
+    }));
+
+    const topCine = [...movieItems, ...seriesItems]
       .sort((a, b) => {
         if (a.isFavorite && !b.isFavorite) return -1;
         if (!a.isFavorite && b.isFavorite) return 1;
-        return (b.userRating || 0) - (a.userRating || 0);
+        return (b.rating || 0) - (a.rating || 0);
       })
-      .slice(0, 4);
+      .slice(0, 5);
 
-    // Métricas de cine
-    const movieRatings = watchedMovies
-      .map((m) => m.userRating)
-      .filter((r): r is number => r !== null);
+    const watchedCatalog = [
+      ...watchedMovies.map((um) => ({
+        id: `movie-${um.id}`,
+        title: um.movie.title,
+        posterPath: um.movie.posterPath,
+        year: um.movie.year,
+        userRating: um.userRating,
+        imdbRating: um.movie.imdbRating,
+        ballKnowledge: um.ballKnowledge,
+        review: um.review,
+        watchedDate: um.watchedDate,
+        isFavorite: Boolean(um.isFavorite),
+        mediaType: "movie" as const,
+        link: `/movie/${um.movie.tmdbId}`,
+      })),
+      ...watchedSeries.map((us) => ({
+        id: `series-${us.id}`,
+        title: us.series.name,
+        posterPath: us.series.posterPath,
+        year: us.series.firstAirYear,
+        userRating: us.userRating,
+        imdbRating: us.series.imdbRating,
+        ballKnowledge: us.ballKnowledge,
+        review: us.review,
+        watchedDate: us.watchedDate,
+        isFavorite: false,
+        mediaType: "series" as const,
+        link: `/series/${us.series.tmdbId}`,
+      })),
+    ].sort((a, b) => {
+      if (a.watchedDate && b.watchedDate) {
+        return (
+          new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
+        );
+      }
+      return (b.userRating || 0) - (a.userRating || 0);
+    });
+
+    let highestRatedMovie: any = null;
+    let lowestRatedMovie: any = null;
+    let biggestW: any = null;
+    let biggestL: any = null;
+
+    const ratedMovies = watchedMovies.filter(
+      (r) => typeof r.userRating === "number",
+    );
+    const ratedSeries = watchedSeries.filter(
+      (s) => typeof s.userRating === "number",
+    );
+
+    const allRatedCineItems = [
+      ...ratedMovies.map((um) => ({
+        title: um.movie.title,
+        posterPath: um.movie.posterPath,
+        userRating: um.userRating!,
+      })),
+      ...ratedSeries.map((us) => ({
+        title: us.series.name,
+        posterPath: us.series.posterPath,
+        userRating: us.userRating!,
+      })),
+    ];
+
+    if (allRatedCineItems.length > 0) {
+      const sortedByRating = [...allRatedCineItems].sort(
+        (a, b) => (b.userRating || 0) - (a.userRating || 0),
+      );
+      highestRatedMovie = sortedByRating[0];
+      lowestRatedMovie = sortedByRating[sortedByRating.length - 1];
+
+      const bkMovieRecords = ratedMovies
+        .filter(
+          (r) =>
+            typeof r.ballKnowledge === "number" &&
+            typeof r.movie.imdbRating === "number",
+        )
+        .map((r) => ({
+          title: r.movie.title,
+          posterPath: r.movie.posterPath,
+          userRating: r.userRating!,
+          imdbRating: r.movie.imdbRating!,
+          ballKnowledge: r.ballKnowledge!,
+          diff: r.difference ?? r.userRating! - r.movie.imdbRating!,
+        }));
+
+      const bkSeriesRecords = ratedSeries
+        .filter(
+          (s) =>
+            typeof s.ballKnowledge === "number" &&
+            typeof s.series.imdbRating === "number",
+        )
+        .map((s) => ({
+          title: s.series.name,
+          posterPath: s.series.posterPath,
+          userRating: s.userRating!,
+          imdbRating: s.series.imdbRating!,
+          ballKnowledge: s.ballKnowledge!,
+          diff: s.difference ?? s.userRating! - s.series.imdbRating!,
+        }));
+
+      const bkRecords = [...bkMovieRecords, ...bkSeriesRecords];
+      if (bkRecords.length > 0) {
+        const sortedW = [...bkRecords].sort(
+          (a, b) => (b.ballKnowledge || 0) - (a.ballKnowledge || 0),
+        );
+        biggestW = {
+          title: sortedW[0].title,
+          posterPath: sortedW[0].posterPath,
+          userRating: sortedW[0].userRating,
+          imdbRating: sortedW[0].imdbRating,
+          ballKnowledge: sortedW[0].ballKnowledge,
+          diff: sortedW[0].diff,
+        };
+
+        const sortedL = [...bkRecords].sort(
+          (a, b) => (a.ballKnowledge || 0) - (b.ballKnowledge || 0),
+        );
+        biggestL = {
+          title: sortedL[0].title,
+          posterPath: sortedL[0].posterPath,
+          userRating: sortedL[0].userRating,
+          imdbRating: sortedL[0].imdbRating,
+          ballKnowledge: sortedL[0].ballKnowledge,
+          diff: sortedL[0].diff,
+        };
+      }
+    }
+
+    const ratingBuckets: {
+      [key: number]: { count: number; movies: number; series: number };
+    } = {};
+    for (let i = 0; i <= 10; i++) {
+      ratingBuckets[i] = { count: 0, movies: 0, series: 0 };
+    }
+
+    for (const r of ratedMovies) {
+      if (typeof r.userRating === "number") {
+        const bucket = Math.round(r.userRating);
+        if (ratingBuckets[bucket]) {
+          ratingBuckets[bucket].count += 1;
+          ratingBuckets[bucket].movies += 1;
+        }
+      }
+    }
+
+    for (const s of ratedSeries) {
+      if (typeof s.userRating === "number") {
+        const bucket = Math.round(s.userRating);
+        if (ratingBuckets[bucket]) {
+          ratingBuckets[bucket].count += 1;
+          ratingBuckets[bucket].series += 1;
+        }
+      }
+    }
+
+    const movieRatingDistribution = Object.keys(ratingBuckets).map((k) => ({
+      rating: Number(k),
+      count: ratingBuckets[Number(k)].count,
+      movies: ratingBuckets[Number(k)].movies,
+      series: ratingBuckets[Number(k)].series,
+    }));
+
+    const genreMap: { [key: string]: { count: number; totalScore: number } } =
+      {};
+    for (const r of watchedMovies) {
+      let genres: string[] = [];
+      try {
+        genres = JSON.parse(r.movie.genres);
+      } catch {}
+      for (const g of genres) {
+        if (!genreMap[g]) genreMap[g] = { count: 0, totalScore: 0 };
+        genreMap[g].count += 1;
+        if (typeof r.userRating === "number") {
+          genreMap[g].totalScore += r.userRating;
+        }
+      }
+    }
+    for (const s of watchedSeries) {
+      let genres: string[] = [];
+      try {
+        genres = JSON.parse(s.series.genres || "[]");
+      } catch {}
+      for (const g of genres) {
+        if (!genreMap[g]) genreMap[g] = { count: 0, totalScore: 0 };
+        genreMap[g].count += 1;
+        if (typeof s.userRating === "number") {
+          genreMap[g].totalScore += s.userRating;
+        }
+      }
+    }
+
+    const movieGenreCounts = Object.entries(genreMap)
+      .map(([genre, data]) => ({
+        genre,
+        count: data.count,
+        avgRating:
+          data.count > 0
+            ? Number((data.totalScore / data.count).toFixed(1))
+            : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    const monthMap: { [key: string]: number } = {};
+    for (const r of watchedMovies) {
+      if (r.watchedDate) {
+        const key = r.watchedDate.toISOString().substring(0, 7);
+        monthMap[key] = (monthMap[key] || 0) + 1;
+      }
+    }
+    for (const s of watchedSeries) {
+      if (s.watchedDate) {
+        const key = s.watchedDate.toISOString().substring(0, 7);
+        monthMap[key] = (monthMap[key] || 0) + 1;
+      }
+    }
+    const watchesByMonth = Object.keys(monthMap)
+      .sort()
+      .map((month) => ({
+        month,
+        count: monthMap[month],
+      }));
+
+    const allRatedCine = [...watchedMovies, ...watchedSeries].filter(
+      (r) => typeof r.userRating === "number",
+    );
     const avgMovieRating =
-      movieRatings.length > 0
+      allRatedCine.length > 0
         ? Number(
             (
-              movieRatings.reduce((a, b) => a + b, 0) / movieRatings.length
+              allRatedCine.reduce((acc, r) => acc + (r.userRating || 0), 0) /
+              allRatedCine.length
             ).toFixed(1),
           )
         : null;
 
-    const bkScores = watchedMovies
-      .map((m) => m.ballKnowledge)
-      .filter((b): b is number => b !== null);
+    const allBk = [...watchedMovies, ...watchedSeries].filter(
+      (r) => typeof r.ballKnowledge === "number",
+    );
     const globalBallKnowledge =
-      bkScores.length > 0
-        ? Math.round(bkScores.reduce((a, b) => a + b, 0) / bkScores.length)
+      allBk.length > 0
+        ? Math.round(
+            allBk.reduce((acc, r) => acc + (r.ballKnowledge || 0), 0) /
+              allBk.length,
+          )
         : null;
 
-    const movieLevelInfo = calculateLevelAndRank(watchedMovies.length * 10);
+    const movieLevelInfo = calculateLevelAndRank(targetUser.totalXp);
 
     // 2. Obtener videojuegos del usuario
     const userGames = await prisma.userGame.findMany({
@@ -100,15 +363,31 @@ export async function GET(
     );
     const backlogGames = userGames.filter((g) => g.status === "BACKLOG");
 
-    // Top 4 Videojuegos
+    // Top 5 Videojuegos
     const topGames = [...userGames]
-      .filter((g) => g.status !== "DROPPED")
+      .filter(
+        (g) =>
+          g.status !== "BACKLOG" &&
+          g.status !== "DROPPED" &&
+          ((typeof g.userRating === "number" && g.userRating > 0) ||
+            g.isFavorite),
+      )
       .sort((a, b) => {
         if (a.isFavorite && !b.isFavorite) return -1;
         if (!a.isFavorite && b.isFavorite) return 1;
         return (b.userRating || 0) - (a.userRating || 0);
       })
-      .slice(0, 4);
+      .slice(0, 5)
+      .map((g) => ({
+        id: g.id,
+        title: g.game.title,
+        image: g.game.backgroundImage,
+        year: g.game.released ? g.game.released.split("-")[0] : null,
+        rating: g.userRating,
+        isFavorite: Boolean(g.isFavorite),
+        link: `/games/${g.game.rawgId}`,
+        mediaType: "game" as const,
+      }));
 
     // Métricas de gaming
     const totalHours = userGames.reduce(
@@ -134,6 +413,198 @@ export async function GET(
       gkScores.length > 0
         ? Math.round(gkScores.reduce((a, b) => a + b, 0) / gkScores.length)
         : null;
+
+    const gamesWithMetacritic = userGames.filter(
+      (g) => typeof g.game.metacritic === "number",
+    );
+    const averageMetacritic =
+      gamesWithMetacritic.length > 0
+        ? Number(
+            (
+              gamesWithMetacritic.reduce(
+                (acc, g) => acc + (g.game.metacritic || 0),
+                0,
+              ) /
+              gamesWithMetacritic.length /
+              10
+            ).toFixed(1),
+          )
+        : null;
+    const totalPlatinum = userGames.filter(
+      (ug) => ug.status === "PLATINUM",
+    ).length;
+
+    const gamesCatalog = userGames
+      .filter((ug) => ug.status !== "BACKLOG")
+      .map((ug) => ({
+        id: ug.id,
+        title: ug.game.title,
+        posterPath: ug.game.backgroundImage,
+        year: ug.game.released ? ug.game.released.split("-")[0] : null,
+        userRating: ug.userRating,
+        metacritic: ug.game.metacritic,
+        gameKnowledge: ug.gameKnowledge,
+        hoursPlayed: ug.hoursPlayed,
+        status: ug.status,
+        platform: ug.platform,
+        review: ug.review,
+        isFavorite: Boolean(ug.isFavorite),
+        link: `/games/${ug.game.rawgId}`,
+        mediaType: "game" as const,
+      }))
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+
+    const gamesWithHours = userGames
+      .filter((g) => (g.hoursPlayed || 0) > 0)
+      .sort((a, b) => (b.hoursPlayed || 0) - (a.hoursPlayed || 0));
+    const longestGame =
+      gamesWithHours.length > 0
+        ? {
+            title: gamesWithHours[0].game.title,
+            cover: gamesWithHours[0].game.backgroundImage,
+            hours: gamesWithHours[0].hoursPlayed || 0,
+          }
+        : null;
+
+    const ratedGames = userGames
+      .filter((g) => typeof g.userRating === "number")
+      .sort((a, b) => (b.userRating || 0) - (a.userRating || 0));
+    const highestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[0].game.title,
+            cover: ratedGames[0].game.backgroundImage,
+            rating: ratedGames[0].userRating || 0,
+          }
+        : null;
+    const lowestRatedGame =
+      ratedGames.length > 0
+        ? {
+            title: ratedGames[ratedGames.length - 1].game.title,
+            cover: ratedGames[ratedGames.length - 1].game.backgroundImage,
+            rating: ratedGames[ratedGames.length - 1].userRating || 0,
+          }
+        : null;
+
+    const completedWithHours = userGames.filter(
+      (ug) =>
+        (ug.status === "COMPLETED" || ug.status === "PLATINUM") &&
+        (ug.hoursPlayed || 0) > 0,
+    );
+    const averageCompletionHours =
+      completedWithHours.length > 0
+        ? Math.round(
+            completedWithHours.reduce(
+              (acc, g) => acc + (g.hoursPlayed || 0),
+              0,
+            ) / completedWithHours.length,
+          )
+        : null;
+
+    const statusBreakdown = {
+      completed: completedGames.length,
+      playing: userGames.filter((ug) => ug.status === "PLAYING").length,
+      continuous: userGames.filter((ug) => ug.status === "CONTINUOUS").length,
+      backlog: backlogGames.length,
+      platinum: userGames.filter((ug) => ug.status === "PLATINUM").length,
+      abandoned: userGames.filter(
+        (ug) => ug.status === "ABANDONED" || ug.status === "DROPPED",
+      ).length,
+    };
+
+    const platformHoursMap: Record<string, number> = {};
+    const platformGamesCountMap: Record<string, number> = {};
+    const genreHoursMap: Record<string, number> = {};
+    const gameRatingDist: Record<number, number> = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+    };
+    const hotTakes: any[] = [];
+    const criticVsYou: any[] = [];
+
+    for (const ug of userGames) {
+      if (typeof ug.userRating === "number") {
+        const bucket = Math.min(10, Math.max(1, Math.round(ug.userRating)));
+        gameRatingDist[bucket] = (gameRatingDist[bucket] || 0) + 1;
+      }
+      let parsedGenres: string[] = [];
+      try {
+        parsedGenres = JSON.parse(ug.game.genres);
+      } catch {}
+      const gameHours = ug.hoursPlayed || 0;
+      for (const g of parsedGenres) {
+        genreHoursMap[g] = (genreHoursMap[g] || 0) + gameHours;
+      }
+      if (ug.status !== "BACKLOG") {
+        const rawPlatform = ug.platform || "General";
+        const individualPlats = rawPlatform
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean);
+        for (const p of individualPlats) {
+          platformHoursMap[p] = (platformHoursMap[p] || 0) + gameHours;
+          platformGamesCountMap[p] = (platformGamesCountMap[p] || 0) + 1;
+        }
+      }
+
+      if (
+        typeof ug.userRating === "number" &&
+        typeof ug.game.metacritic === "number" &&
+        ug.gameKnowledge !== null &&
+        ug.difference !== null
+      ) {
+        const criticRating = Number((ug.game.metacritic / 10).toFixed(1));
+        const takeType = classifyHotTake(ug.difference);
+        hotTakes.push({
+          title: ug.game.title,
+          cover: ug.game.backgroundImage,
+          userRating: ug.userRating,
+          criticRating,
+          difference: ug.difference,
+          gameKnowledge: ug.gameKnowledge,
+          type: takeType,
+          hoursPlayed: ug.hoursPlayed,
+        });
+        criticVsYou.push({
+          title: ug.game.title,
+          userRating: ug.userRating,
+          criticRating,
+          gameKnowledge: ug.gameKnowledge,
+        });
+      }
+    }
+
+    hotTakes.sort((a, b) => Math.abs(b.difference) - Math.abs(a.difference));
+
+    const totalPlatAgg = Object.values(platformHoursMap).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    const hoursByPlatform = Object.entries(platformHoursMap)
+      .map(([platform, hours]) => ({
+        platform,
+        hours: Math.round(hours),
+        gameCount: platformGamesCountMap[platform] || 1,
+        percentage:
+          totalPlatAgg > 0 ? Math.round((hours / totalPlatAgg) * 100) : 0,
+      }))
+      .sort((a, b) => b.hours - a.hours);
+
+    const hoursByGenre = Object.entries(genreHoursMap)
+      .map(([genre, hours]) => ({ genre, hours: Math.round(hours) }))
+      .sort((a, b) => b.hours - a.hours);
+
+    const gameRatingDistributionList = Object.entries(gameRatingDist).map(
+      ([rating, count]) => ({ rating: Number(rating), count }),
+    );
 
     const gamerLevelInfo = calculateGamerLevelAndRank(targetUser.totalXp);
 
@@ -262,31 +733,125 @@ export async function GET(
       }
     }
 
+    const isOwner = visitorId === userId;
+    const isWatchlistPublic = targetUser.isWatchlistPublic !== false;
+    const canSeeWatchlist = isOwner || isWatchlistPublic;
+    const watchlistCatalog = canSeeWatchlist
+      ? [
+          ...watchlistMovies.map((um) => ({
+            id: `movie-${um.id}`,
+            title: um.movie.title,
+            posterPath: um.movie.posterPath,
+            year: um.movie.year,
+            userRating: um.userRating,
+            imdbRating: um.movie.imdbRating,
+            genres: um.movie.genres,
+            overview: um.movie.overview,
+            mediaType: "movie" as const,
+            link: `/movie/${um.movie.tmdbId}`,
+            addedDate: um.createdAt,
+          })),
+          ...watchlistSeries.map((us) => ({
+            id: `series-${us.id}`,
+            title: us.series.name,
+            posterPath: us.series.posterPath,
+            year: us.series.firstAirYear,
+            userRating: us.userRating,
+            imdbRating: us.series.imdbRating,
+            genres: us.series.genres,
+            overview: us.series.overview,
+            mediaType: "series" as const,
+            link: `/series/${us.series.tmdbId}`,
+            addedDate: us.createdAt,
+          })),
+        ].sort(
+          (a, b) =>
+            new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+        )
+      : [];
+
+    const isBacklogPublic = targetUser.isBacklogPublic !== false;
+    const canSeeBacklog = isOwner || isBacklogPublic;
+    const backlogCatalog = canSeeBacklog
+      ? backlogGames
+          .map((ug) => ({
+            id: ug.id,
+            title: ug.game.title,
+            posterPath: ug.game.backgroundImage,
+            year: ug.game.released ? ug.game.released.split("-")[0] : null,
+            userRating: ug.userRating,
+            metacritic: ug.game.metacritic,
+            genres: ug.game.genres,
+            platform: ug.platform,
+            status: ug.status,
+            mediaType: "game" as const,
+            link: `/games/${ug.game.rawgId}`,
+            addedDate: ug.createdAt,
+          }))
+          .sort(
+            (a, b) =>
+              new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+          )
+      : [];
+
     return NextResponse.json({
       user: targetUser,
-      isOwner: visitorId === userId,
+      isOwner,
       cinema: {
-        totalWatched: watchedMovies.length,
-        totalWatchlist: watchlistMovies.length,
+        totalWatched: watchedMovies.length + watchedSeries.length,
+        totalWatchlist: watchlistMovies.length + watchlistSeries.length,
+        isWatchlistPublic,
+        watchlistCatalog,
+        totalMovies: watchedMovies.length,
+        totalSeries: watchedSeries.length,
+        totalReviews: watchedMovies.filter(
+          (m) => m.review && m.review.trim().length > 0,
+        ).length,
         averageRating: avgMovieRating,
         globalBallKnowledge,
-        level: movieLevelInfo.level,
-        rankTitle: movieLevelInfo.rankTitle,
-        rankIcon: movieLevelInfo.rankIcon,
-        topMovies,
+        ...movieLevelInfo,
+        topGenre: movieGenreCounts[0]?.genre || null,
+        highestRatedMovie,
+        lowestRatedMovie,
+        topCine,
+        topMovies: topCine,
+        watchedCatalog,
         recentMovies: watchedMovies.slice(0, 12),
+        recentSeries: watchedSeries.slice(0, 12),
+        biggestW,
+        biggestL,
+        ratingDistribution: movieRatingDistribution,
+        genreCounts: movieGenreCounts,
+        watchesByMonth,
       },
       gaming: {
         totalCompleted: completedGames.length,
         totalBacklog: backlogGames.length,
+        isBacklogPublic,
+        backlogCatalog,
         totalHours: Math.round(totalHours),
+        totalPlatinum,
         averageRating: avgGameRating,
+        averageMetacritic,
         globalGameKnowledge,
-        level: gamerLevelInfo.level,
-        rankTitle: gamerLevelInfo.rankTitle,
-        rankIcon: gamerLevelInfo.rankIcon,
+        ...gamerLevelInfo,
+        topGenre: hoursByGenre[0]?.genre || null,
+        topPlatform: hoursByPlatform[0]?.platform || null,
         topGames,
-        recentGames: userGames.slice(0, 12),
+        gamesCatalog,
+        recentGames: userGames
+          .filter((g) => g.status !== "BACKLOG")
+          .slice(0, 12),
+        longestGame,
+        highestRatedGame,
+        lowestRatedGame,
+        averageCompletionHours,
+        statusBreakdown,
+        ratingDistribution: gameRatingDistributionList,
+        hoursByPlatform,
+        hoursByGenre,
+        criticVsYou,
+        hotTakes,
       },
       affinity,
     });

@@ -13,6 +13,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   providers: [
     GoogleProvider({
@@ -117,16 +118,35 @@ export const authOptions: NextAuthOptions = {
       }
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name;
-        if (session.image) token.image = session.image;
+        if (session.image !== undefined) token.image = session.image;
         if (session.username) token.username = session.username;
       }
+
+      // Sincronizar siempre la foto de perfil y datos más recientes desde la BD
+      if (token?.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { image: true, username: true, name: true },
+          });
+          if (dbUser) {
+            token.image = dbUser.image;
+            if (dbUser.username) token.username = dbUser.username;
+            if (dbUser.name) token.name = dbUser.name;
+          }
+        } catch (e) {
+          console.error("Error al sincronizar usuario en jwt:", e);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
-        if (token.image) session.user.image = token.image as string;
+        session.user.image = (token.image as string) || null;
+        if (token.name) session.user.name = token.name as string;
       }
       return session;
     },

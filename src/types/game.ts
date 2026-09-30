@@ -13,7 +13,13 @@ export interface GameSearchResult {
 export interface PlatformProgress {
   platform: string;
   hours: number;
-  status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+  status:
+    | "BACKLOG"
+    | "PLAYING"
+    | "COMPLETED"
+    | "PLATINUM"
+    | "DROPPED"
+    | "CONTINUOUS";
 }
 
 export interface GameDetail {
@@ -38,7 +44,13 @@ export interface GameDetail {
   communityReviews?: any[];
   userGame?: {
     id: string;
-    status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+    status:
+      | "BACKLOG"
+      | "PLAYING"
+      | "COMPLETED"
+      | "PLATINUM"
+      | "DROPPED"
+      | "CONTINUOUS";
     userRating: number | null;
     hoursPlayed: number | null;
     platform: string | null;
@@ -53,7 +65,13 @@ export interface GameDetail {
 export interface UserGameItem {
   id: string;
   gameId: string;
-  status: "BACKLOG" | "PLAYING" | "COMPLETED" | "PLATINUM" | "DROPPED";
+  status:
+    | "BACKLOG"
+    | "PLAYING"
+    | "COMPLETED"
+    | "PLATINUM"
+    | "DROPPED"
+    | "CONTINUOUS";
   userRating: number | null;
   hoursPlayed: number | null;
   platform: string | null;
@@ -132,4 +150,28 @@ export interface GamerStats {
   }[];
   hoursByGenre: { genre: string; hours: number }[];
   ratingDistribution: { rating: number; count: number }[];
+  longestGame?: {
+    title: string;
+    cover: string | null;
+    hours: number;
+  } | null;
+  highestRatedGame?: {
+    title: string;
+    cover: string | null;
+    rating: number;
+  } | null;
+  lowestRatedGame?: {
+    title: string;
+    cover: string | null;
+    rating: number;
+  } | null;
+  averageCompletionHours?: number | null;
+  statusBreakdown?: {
+    completed: number;
+    playing: number;
+    backlog: number;
+    platinum: number;
+    abandoned: number;
+    continuous?: number;
+  };
 }

@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     if (genre && genre !== "all") {
       results = results.filter((item) =>
-        item.series.genres.some((g) => g.toLowerCase() === genre.toLowerCase())
+        item.series.genres.some((g) => g.toLowerCase() === genre.toLowerCase()),
       );
     }
 
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
         if (
           item.series.streamingPlatforms &&
           item.series.streamingPlatforms.some((p) =>
-            p.toLowerCase().includes(cleanPlat)
+            p.toLowerCase().includes(cleanPlat),
           )
         ) {
           return true;
@@ -140,17 +140,17 @@ export async function GET(request: NextRequest) {
 
     if (sort === "imdbRatingDesc") {
       results.sort(
-        (a, b) => (b.series.imdbRating || 0) - (a.series.imdbRating || 0)
+        (a, b) => (b.series.imdbRating || 0) - (a.series.imdbRating || 0),
       );
     } else if (sort === "imdbRatingAsc") {
       results.sort(
-        (a, b) => (a.series.imdbRating || 0) - (b.series.imdbRating || 0)
+        (a, b) => (a.series.imdbRating || 0) - (b.series.imdbRating || 0),
       );
     } else if (sort === "title") {
       results.sort((a, b) => a.series.name.localeCompare(b.series.name));
     } else if (sort === "yearDesc") {
       results.sort(
-        (a, b) => (b.series.firstAirYear || 0) - (a.series.firstAirYear || 0)
+        (a, b) => (b.series.firstAirYear || 0) - (a.series.firstAirYear || 0),
       );
     }
 
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
     console.error("Error en GET /api/user-series:", error);
     return NextResponse.json(
       { error: "Error al listar series del usuario" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: "Debes iniciar sesión para guardar series en tu lista." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -177,19 +177,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const {
-      tmdbId,
-      status,
-      userRating,
-      review,
-      platform,
-      watchedDate,
-    } = body;
+    const { tmdbId, status, userRating, review, platform, watchedDate } = body;
 
     if (!tmdbId || !status) {
       return NextResponse.json(
         { error: "Faltan parámetros requeridos (tmdbId, status)" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -202,7 +195,7 @@ export async function POST(request: NextRequest) {
       if (!detail) {
         return NextResponse.json(
           { error: "No se pudo obtener información de la serie desde TMDB" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -226,7 +219,7 @@ export async function POST(request: NextRequest) {
           cast: JSON.stringify(detail.cast),
           imdbRating: detail.imdbRating,
           streamingPlatforms: JSON.stringify(
-            detail.streamingPlatforms || ["Pirata / Stremio"]
+            detail.streamingPlatforms || ["Pirata / Stremio"],
           ),
         },
       });
@@ -245,11 +238,14 @@ export async function POST(request: NextRequest) {
       difference = bkResult.difference;
     }
 
-    const dateToSave = watchedDate
-      ? new Date(watchedDate)
-      : status === "WATCHED"
-      ? new Date()
-      : null;
+    const dateToSave =
+      watchedDate === null
+        ? null
+        : watchedDate
+          ? new Date(watchedDate)
+          : status === "WATCHED"
+            ? new Date()
+            : null;
 
     const userSeries = await prisma.userSeries.upsert({
       where: {
@@ -287,7 +283,7 @@ export async function POST(request: NextRequest) {
     console.error("Error en POST /api/user-series:", error);
     return NextResponse.json(
       { error: "Error al registrar la serie" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -297,7 +293,7 @@ export async function DELETE(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json(
       { error: "Debes iniciar sesión para modificar tu lista de series." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -318,7 +314,7 @@ export async function DELETE(request: NextRequest) {
     } else {
       return NextResponse.json(
         { error: "Falta parámetro id o seriesId" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -328,7 +324,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Error en DELETE /api/user-series:", error);
     return NextResponse.json(
       { error: "Error al eliminar registro de serie" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
