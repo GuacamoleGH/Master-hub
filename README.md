@@ -2,6 +2,16 @@
 
 > Centro de mando unificado de nivel comercial que fusiona un **Launcher Genérico y Modular** con dos universos independientes de entretenimiento: **Cinephile Hub** (Cine, Series, Streaming y Sofa Knowledge 🛋️) y **Gamer Hub** (Videojuegos, Multi-Plataforma, RAWG y Game Knowledge con Metacritic). Con sistema completo de **Autenticación Multi-Usuario, Ranking Global, Muros de Reseñas, Sistema de Amigos Separado y Perfiles Públicos Unificados (v5.0)**. Desplegado en **Vercel** con base de datos en la nube en **Supabase PostgreSQL**.
 
+<div align="center">
+
+[![Live Demo](https://img.shields.io/badge/🌐_Web_Oficial-Visitar_MasterHub-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://master-hub-guacamolegh.vercel.app)
+[![Next.js](https://img.shields.io/badge/Next.js_14-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase_PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+
+**🔗 Acceso en vivo:** [https://master-hub-guacamolegh.vercel.app](https://master-hub-guacamolegh.vercel.app)
+
+</div>
+
 ---
 
 ## 📜 Historial de Versiones (Changelog)
